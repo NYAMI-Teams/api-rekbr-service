@@ -1,6 +1,5 @@
 import userService from "../services/user.service.js";
 import resSuccess from "../utils/response.js";
-import { sendOtpEmail } from '../services/email.service.js';
 
 const register = async (req, res) => {
   await userService.register(req.body);
@@ -19,7 +18,12 @@ const resendVerifyEmail = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   const result = await userService.verifyEmail(req.body);
-  return resSuccess(res, 200, "Berhasil verifikasi email");
+  return resSuccess(res, 200, "Berhasil verifikasi email", result);
+}
+
+const verifyKyc = async (req, res) => {
+  await userService.verifyKyc(req.body);
+  return resSuccess(res, 200, "Berhasil verifikasi KYC");
 }
 
 const getProfile = async (req, res) => {
@@ -33,5 +37,6 @@ export default {
   login,
   resendVerifyEmail,
   verifyEmail,
+  verifyKyc,
   getProfile,
 };

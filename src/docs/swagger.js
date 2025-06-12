@@ -24,7 +24,7 @@ const swaggerOptions = {
         ],
         servers: [
             {
-                url: 'https://t04pzf6r-3000.asse.devtunnels.ms', // sesuai base URL server
+                url: 'https://kvnpp4pb-3000.asse.devtunnels.ms', // sesuai base URL server
             },
             {
                 url: 'http://localhost:3000', // sesuai base URL server
