@@ -1,4 +1,5 @@
 import bankRepo from "../repositories/bank.repository.js";
+import resSuccess from "../utils/response.js";
 import throwError from "../utils/throwError.js";
 
 const listBanks = async () => {
@@ -48,10 +49,7 @@ const saveAccount = async ({
     account_number,
     account_holder_name,
   });
-  return {
-    message: "Akun berhasil disimpan",
-    data: newAccount,
-  };
+  return newAccount
 };
 
 const showAccount = async (user_id) => {
@@ -60,7 +58,8 @@ const showAccount = async (user_id) => {
     return throwError("Tidak ada akun yang ditemukan", 404);
   }
   return accounts;
-};
+}
+
 
 export default {
   listBanks,
