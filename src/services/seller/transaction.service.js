@@ -46,17 +46,30 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
+const generateTransactionCode = () => {
+  const prefix = "TRX";
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `${prefix}-${timestamp}-${random}`;
+};
+
+
+
+
 const generateTransaction = async ({seller_id,
   buyer_id,
   item_name,
   item_price,
-  platform_fee,
-  insurance_fee,
-  total_amount,
   status,
   virtual_account_number,
   payment_deadline,
   withdrawal_bank_account_id}) => {
+
+    // plt fee, insurance fee, dan total amount are hardcoded for simplicity
+    const platform_fee = 25000;
+    const insurance_fee = 5000;
+    const total_amount = item_price + platform_fee + insurance_fee;
+
     const existingTransaction = await transactionRepo.findActiveTransaction({
       seller_id,
       buyer_id,
@@ -64,7 +77,10 @@ const generateTransaction = async ({seller_id,
     if (existingTransaction) {
       throwError(`Transaksi aktif sudah ada untuk seller dan buyer ini dengan ID ${existingTransaction.transactionCode}`, 400);
     }
+    const transaction_code = generateTransactionCode();
+    
     const newTransaction = await transactionRepo.createTransaction({
+      transaction_code,
       seller_id,
       buyer_id,
       item_name,
@@ -84,4 +100,5 @@ const generateTransaction = async ({seller_id,
 export default {
   getTransactionDetailBySeller,
   generateTransaction,
+  generateTransactionCode,
 };

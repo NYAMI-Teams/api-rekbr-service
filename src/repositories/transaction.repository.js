@@ -34,13 +34,6 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   });
 };
 
-const generateTransactionCode = () => {
-  const prefix = "TRX";
-  const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `${prefix}-${timestamp}-${random}`;
-};
-
 const findActiveTransaction = async ({ seller_id, buyer_id }) => {
   const activeTransaction = await prisma.transaction.findFirst({
     where: {
@@ -55,6 +48,7 @@ const findActiveTransaction = async ({ seller_id, buyer_id }) => {
 };
 
 const createTransaction = async ({
+  transaction_code,
   seller_id,
   buyer_id,
   item_name,
@@ -67,10 +61,9 @@ const createTransaction = async ({
   payment_deadline,
   withdrawal_bank_account_id,
 }) => {
-
-  const transaction_code = generateTransactionCode();
   const newTransaction = await prisma.transaction.create({
     data: {
+      transaction_code,
       seller_id,
       buyer_id,
       item_name,
@@ -82,7 +75,6 @@ const createTransaction = async ({
       virtual_account_number,
       payment_deadline,
       withdrawal_bank_account_id,
-      transaction_code,
     },
   });
 

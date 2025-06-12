@@ -1,7 +1,8 @@
 import { Router } from "express";
 import transactionController from "../../controllers/seller/transaction.controller.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
-
+import transactionValidator from "../../validators/seller.validator.js";
+import validateRequest from "../../middlewares/validateRequest.js";
 const router = Router();
 
 router.get(
@@ -11,6 +12,8 @@ router.get(
 
 router.post(
   "/transactions",
+  transactionValidator.createTransactionValidation,
+  validateRequest,
   asyncHandler(transactionController.generateTransaction)
 );
 
