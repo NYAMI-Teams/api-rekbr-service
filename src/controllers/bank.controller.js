@@ -13,7 +13,17 @@ const getDummyAccount = async (req, res) => {
   return resSuccess(res, "Akun dummy berhasil diambil", result, 200);
 }
 
+const saveAccount = async (req, res) => {
+  const {user_id, bank_id, account_number, account_holder_name} = req.body;
+  const result = await backService.saveAccount({user_id, bank_id, account_number, account_holder_name});
+  if (result.alreadyExists) {
+    return resSuccess(res, result.message, result.data, 200);
+  }
+  return resSuccess(res, "Akun berhasil disimpan", result, 201);
+}
+
 export default {
   getBanks,
   getDummyAccount,
+  saveAccount,
 };

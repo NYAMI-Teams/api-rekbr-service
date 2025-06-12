@@ -19,7 +19,22 @@ const getDummyAccount = async ({account_number, bank_id}) => {
   return accounts;
 }
 
+const saveAccount = async ({user_id, bank_id, account_number, account_holder_name}) => {
+  const existingAccount = await bankRepo.findAccount({user_id, bank_id, account_number});
+  if (existingAccount) {
+    return {
+      alreadyExists: true,
+      message: "Akun sudah ada",
+      data: existingAccount
+    };
+  }
+
+  const newAccount = await bankRepo.createAccount({user_id, bank_id, account_number, account_holder_name});
+  return newAccount;
+}
+
 export default {
   listBanks,
   getDummyAccount,
+  saveAccount,
 };

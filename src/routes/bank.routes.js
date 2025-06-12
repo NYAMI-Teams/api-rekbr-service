@@ -8,4 +8,6 @@ router.get("/bank-list", asyncHandler(bankController.getBanks));
 
 router.get("/account", asyncHandler(bankController.getDummyAccount));
 
+router.post("/account", asyncHandler(bankController.saveAccount));
+
 export default router;
