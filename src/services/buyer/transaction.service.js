@@ -21,6 +21,7 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
     sellerEmail: txn.seller?.email || null,
     createdAt: txn.created_at,
     paidAt: txn.paid_at,
+    paymentDeadline: txn.payment_deadline,
     shipmentDeadline: txn.shipment_deadline,
     shipmentDate: txn.paid_at
       ? new Date(txn.paid_at.getTime() + 86400000).toISOString()
