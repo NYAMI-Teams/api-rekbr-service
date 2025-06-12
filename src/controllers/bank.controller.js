@@ -1,10 +1,9 @@
 import backService from "../services/bank.service.js";
-import camelcaseKeys from "camelcase-keys";
-import { resSuccess } from "../utils/response.js";
+import resSuccess from "../utils/response.js";
 
 const getBanks = async (req, res) => {
   const result = await backService.listBanks();
-  return resSuccess(res, "Daftar bank berhasil diambil", result, 200);
+  return resSuccess(res, 200, "Daftar bank berhasil diambil", result);
 };
 
 export default {

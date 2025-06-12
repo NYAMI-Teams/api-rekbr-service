@@ -1,7 +1,14 @@
-export const resSuccess = (res, message, data=null, statusCode=200) => {
-  return res.status(statusCode).json({
+const resSuccess = (res, statusCode, message, data = null) => {
+  const response = {
     success: true,
     message,
-    data,
-  });
+  };
+
+  if (data) {
+    response.data = data;
+  }
+
+  return res.status(statusCode).json(response);
 };
+
+export default resSuccess;

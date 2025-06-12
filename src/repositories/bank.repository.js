@@ -1,4 +1,3 @@
-import camelcaseKeys from "camelcase-keys";
 import prisma from "../prisma/client.js";
 import toCamelCase from "../utils/camelCaseResponse.js";
 
