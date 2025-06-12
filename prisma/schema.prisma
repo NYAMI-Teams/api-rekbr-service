@@ -18,3 +18,14 @@ model BankList {
   bank_name String
   logo_url  String
 }
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  kyc_status String
+  status     String
+  is_admin   Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
