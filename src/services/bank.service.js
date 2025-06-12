@@ -55,8 +55,18 @@ const saveAccount = async ({
   };
 };
 
+const showAccount = async (user_id) => {
+  const accounts = await bankRepo.getAccounts(user_id);
+  if (!accounts || accounts.length === 0) {
+    return throwError("Tidak ada akun yang ditemukan", 404);
+  }
+  return accounts;
+}
+
+
 export default {
   listBanks,
   getDummyAccount,
   saveAccount,
+  showAccount,
 };

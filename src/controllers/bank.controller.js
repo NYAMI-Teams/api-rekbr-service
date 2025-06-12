@@ -27,8 +27,16 @@ const postAccount = async (req, res) => {
   return resSuccess(res, "Akun berhasil disimpan", result, 201);
 };
 
+const getAccounts = async (req, res) => {
+  console.log("getAccounts called with query:", req.query);
+  const {user_id} = req.query;
+  const result = await backService.showAccount(user_id);
+  return resSuccess(res, "Daftar akun berhasil diambil", result, 200)
+}
+
 export default {
   getBanks,
   getDummyAccount,
   postAccount,
+  getAccounts,
 };

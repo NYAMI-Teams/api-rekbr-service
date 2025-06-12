@@ -67,10 +67,36 @@ const createAccount = async ({
 
   return toCamelCase(newAccount);
 };
+
+const getAccounts = async (user_id) => {
+  console.log("getAccounts called with user_id:", user_id);
+
+  const accounts = await prisma.bankAccount.findMany({
+    where: { user_id },
+    select: {
+      id: true,
+      user_id: true,
+      bank_id: true,
+      account_number: true,
+      account_holder_name: true,
+      bank: {
+        select: {
+          bank_name: true,
+          logo_url: true,
+        },
+      },
+    },
+  });
+
+  return toCamelCase(accounts)
+
+};
+
 export default {
   getAllBanks,
   getDummyAccount,
   findAccount,
   createAccount,
   findBank,
+  getAccounts,
 };
