@@ -64,7 +64,23 @@ const simulatePayment = async (transactionId, buyerId) => {
   };
 };
 
+const confirmReceived = async (transactionId, buyerId) => {
+  const confirmedAt = new Date();
+  const result = await transactionRepo.confirmReceived(
+    transactionId,
+    buyerId,
+    confirmedAt
+  );
+
+  if (result.count === 0) {
+    throwError("Transaksi tidak ditemukan atau belum dikirim", 404);
+  }
+
+  return { success: true, confirmedAt };
+};
+
 export default {
   getTransactionDetailByBuyer,
   simulatePayment,
+  confirmReceived,
 };

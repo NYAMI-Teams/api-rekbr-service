@@ -65,9 +65,24 @@ const updateStatusToShipped = async (transactionId) => {
   });
 };
 
+const confirmReceived = async (transactionId, buyerId, confirmedAt) => {
+  return await prisma.transaction.updateMany({
+    where: {
+      id: transactionId,
+      buyer_id: buyerId,
+      status: "shipped",
+    },
+    data: {
+      status: "completed",
+      confirmed_at: confirmedAt,
+    },
+  });
+};
+
 export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
   updatePaidTransaction,
   updateStatusToShipped,
+  confirmReceived,
 };

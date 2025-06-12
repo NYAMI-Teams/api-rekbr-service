@@ -17,4 +17,10 @@ router.post(
   asyncHandler(buyerTransactionController.simulatePayment)
 );
 
+router.post(
+  "/transactions/:transactionId/confirm",
+  authentication,
+  asyncHandler(buyerTransactionController.confirmReceived)
+);
+
 export default router;

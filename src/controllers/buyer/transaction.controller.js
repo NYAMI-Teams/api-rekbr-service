@@ -21,7 +21,19 @@ const simulatePayment = async (req, res) => {
   return resSuccess(res, 200, "Pembayaran simulasi berhasil", data);
 };
 
+const confirmReceived = async (req, res) => {
+  const { transactionId } = req.params;
+  const buyerId = req.user.id;
+
+  const result = await buyerTransactionService.confirmReceived(
+    transactionId,
+    buyerId
+  );
+  return resSuccess(res, 200, "Barang berhasil dikonfirmasi diterima", result);
+};
+
 export default {
   getTransactionDetailBuyer,
   simulatePayment,
+  confirmReceived,
 };
