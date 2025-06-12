@@ -1,5 +1,4 @@
 import bankRepo from "../repositories/bank.repository.js";
-import { resSuccess } from "../utils/response.js";
 import throwError from "../utils/throwError.js";
 
 const listBanks = async () => {

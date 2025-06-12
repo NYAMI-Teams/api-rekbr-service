@@ -1,4 +1,3 @@
-import camelcaseKeys from "camelcase-keys";
 import prisma from "../prisma/client.js";
 import toCamelCase from "../utils/camelCaseResponse.js";
 
@@ -11,7 +10,7 @@ const getAllBanks = async () => {
     },
   });
 
-  return banks.map(bank => toCamelCase(bank));
+  return banks.map((bank) => toCamelCase(bank));
 };
 
 export default {
