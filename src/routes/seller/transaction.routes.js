@@ -1,12 +1,17 @@
 import { Router } from "express";
-import transactionController from "../../controllers/seller/transaction.controller.js";
+import sellerTransactionController from "../../controllers/seller/transaction.controller.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
 
 const router = Router();
 
 router.get(
   "/transactions/:transactionId",
-  asyncHandler(transactionController.getTransactionDetailSeller)
+  asyncHandler(sellerTransactionController.getTransactionDetailSeller)
+);
+
+router.post(
+  "/transactions/:transactionId/shipment",
+  asyncHandler(sellerTransactionController.inputShipment)
 );
 
 export default router;

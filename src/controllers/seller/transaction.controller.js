@@ -11,6 +11,18 @@ const getTransactionDetailSeller = async (req, res) => {
   return resSuccess(res, "Detail transaksi seller berhasil diambil", data, 200);
 };
 
+const inputShipment = async (req, res) => {
+  const { transactionId } = req.params;
+  const sellerId = "46dca94f-4c79-4d45-99ed-10e2f900441a";
+  const result = await sellerTransactionService.inputShipment(
+    transactionId,
+    sellerId,
+    req.body
+  );
+  return resSuccess(res, "Resi berhasil disimpan", result, 200);
+};
+
 export default {
   getTransactionDetailSeller,
+  inputShipment,
 };

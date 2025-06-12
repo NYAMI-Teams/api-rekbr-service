@@ -1,5 +1,6 @@
 import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
+import shipmentRepo from "../../repositories/shipment.repository.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -23,13 +24,14 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
     paidAt: txn.paid_at,
     paymentDeadline: txn.payment_deadline,
     shipmentDeadline: txn.shipment_deadline,
-    shipmentDate: txn.paid_at
-      ? new Date(txn.paid_at.getTime() + 86400000).toISOString()
+    shipment: txn.shipment
+      ? {
+          trackingNumber: txn.shipment.tracking_number,
+          courier: txn.shipment.courier?.name || null,
+          shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+          photoUrl: txn.shipment.photo_url || null,
+        }
       : null,
-    shipment: {
-      trackingNumber: "DUMMY-TRACK",
-      courier: "JNE REG",
-    },
     fundReleaseRequest: {
       requested: true,
       status: "approved",
@@ -46,6 +48,28 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
+const inputShipment = async (transactionId, sellerId, data) => {
+  const transaction = await transactionRepo.getTransactionDetailBySeller(
+    transactionId,
+    sellerId
+  );
+  if (!transaction) throwError("Transaksi tidak ditemukan", 404);
+
+  if (transaction.status !== "waiting_shipment")
+    throwError("Transaksi belum bisa dikirim", 400);
+
+  await shipmentRepo.createShipment({
+    transactionId,
+    courierId: data.courierId,
+    trackingNumber: data.trackingNumber,
+    photoUrl: data.photoUrl,
+  });
+
+  await transactionRepo.updateStatusToShipped(transactionId);
+
+  return { success: true };
+};
 export default {
   getTransactionDetailBySeller,
+  inputShipment,
 };

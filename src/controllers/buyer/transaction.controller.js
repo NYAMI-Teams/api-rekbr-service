@@ -3,7 +3,7 @@ import { resSuccess } from "../../utils/response.js";
 
 const getTransactionDetailBuyer = async (req, res) => {
   const { transactionId } = req.params;
-  const buyerId = "46dca94f-4c79-4d45-99ed-10e2f900441a";
+  const buyerId = "dd1964c4-5bf2-4414-87d1-0853bf02f14e";
   const data = await buyerTransactionService.getTransactionDetailByBuyer(
     transactionId,
     buyerId
@@ -11,6 +11,17 @@ const getTransactionDetailBuyer = async (req, res) => {
   return resSuccess(res, "Detail transaksi buyer berhasil diambil", data, 200);
 };
 
+const simulatePayment = async (req, res) => {
+  const { transactionId } = req.params;
+  const buyerId = "dd1964c4-5bf2-4414-87d1-0853bf02f14e";
+  const data = await buyerTransactionService.simulatePayment(
+    transactionId,
+    buyerId
+  );
+  return resSuccess(res, "Pembayaran simulasi berhasil", data, 200);
+};
+
 export default {
   getTransactionDetailBuyer,
+  simulatePayment,
 };

@@ -1,12 +1,17 @@
 import { Router } from "express";
-import transactionController from "../../controllers/buyer/transaction.controller.js";
+import buyerTransactionController from "../../controllers/buyer/transaction.controller.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
 
 const router = Router();
 
 router.get(
   "/transactions/:transactionId",
-  asyncHandler(transactionController.getTransactionDetailBuyer)
+  asyncHandler(buyerTransactionController.getTransactionDetailBuyer)
+);
+
+router.post(
+  "/transactions/:transactionId/simulate-payment",
+  asyncHandler(buyerTransactionController.simulatePayment)
 );
 
 export default router;

@@ -91,6 +91,28 @@ model Transaction {
   refund_amount Int?
   refund_reason String?
 
+  shipment Shipment?
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model Shipment {
+  id              String      @id @default(uuid())
+  transaction     Transaction @relation(fields: [transaction_id], references: [id])
+  transaction_id  String      @unique
+  courier         CourierList @relation(fields: [courier_id], references: [id])
+  courier_id      String
+  tracking_number String
+  shipment_date   DateTime
+  received_date   DateTime?
+  photo_url       String
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+}
+
+model CourierList {
+  id        String     @id @default(uuid())
+  name      String
+  shipments Shipment[]
 }
