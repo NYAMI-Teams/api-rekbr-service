@@ -12,7 +12,7 @@ router.get(
 );
 
 router.post(
-  "/transactions/:transactionId/shipment",
+  "/transactions/:transactionId/shipping",
   authentication,
   asyncHandler(sellerTransactionController.inputShipment)
 );

@@ -18,7 +18,7 @@ router.post(
 );
 
 router.post(
-  "/transactions/:transactionId/confirm",
+  "/transactions/:transactionId/confirm-received",
   authentication,
   asyncHandler(buyerTransactionController.confirmReceived)
 );
