@@ -69,7 +69,25 @@ const inputShipment = async (transactionId, sellerId, data) => {
 
   return { success: true };
 };
+
+const cancelTransactionBySeller = async (transactionId, sellerId) => {
+  const result = await transactionRepo.cancelTransactionBySeller(
+    transactionId,
+    sellerId
+  );
+
+  if (result.count === 0) {
+    throwError(
+      "Transaksi tidak dapat dibatalkan. Mungkin sudah dikirim atau bukan milik Anda.",
+      400
+    );
+  }
+
+  return { success: true };
+};
+
 export default {
   getTransactionDetailBySeller,
   inputShipment,
+  cancelTransactionBySeller,
 };

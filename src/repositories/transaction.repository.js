@@ -79,10 +79,27 @@ const confirmReceived = async (transactionId, buyerId, confirmedAt) => {
   });
 };
 
+const cancelTransactionBySeller = async (transactionId, sellerId) => {
+  return await prisma.transaction.updateMany({
+    where: {
+      id: transactionId,
+      seller_id: sellerId,
+      status: {
+        in: ["pending_payment", "waiting_shipment"],
+      },
+    },
+    data: {
+      status: "cancelled",
+      cancelled_at: new Date(),
+    },
+  });
+};
+
 export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
   updatePaidTransaction,
   updateStatusToShipped,
   confirmReceived,
+  cancelTransactionBySeller,
 };

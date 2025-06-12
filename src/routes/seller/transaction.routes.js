@@ -17,6 +17,12 @@ router.post(
   asyncHandler(sellerTransactionController.inputShipment)
 );
 
+router.post(
+  "/transactions/:transactionId/cancel",
+  authentication,
+  asyncHandler(sellerTransactionController.cancelTransactionBySeller)
+);
+
 export default router;
 
 /**

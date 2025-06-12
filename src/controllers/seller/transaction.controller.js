@@ -22,7 +22,20 @@ const inputShipment = async (req, res) => {
   return resSuccess(res, 200, "Resi berhasil disimpan", result);
 };
 
+const cancelTransactionBySeller = async (req, res) => {
+  const { transactionId } = req.params;
+  const sellerId = req.user.id;
+
+  const result = await sellerTransactionService.cancelTransactionBySeller(
+    transactionId,
+    sellerId
+  );
+
+  return resSuccess(res, 200, "Transaksi berhasil dibatalkan", result);
+};
+
 export default {
   getTransactionDetailSeller,
   inputShipment,
+  cancelTransactionBySeller,
 };
