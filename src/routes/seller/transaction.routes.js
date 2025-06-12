@@ -9,4 +9,9 @@ router.get(
   asyncHandler(transactionController.getTransactionDetailSeller)
 );
 
+router.post(
+  "/transactions",
+  asyncHandler(transactionController.generateTransaction)
+);
+
 export default router;

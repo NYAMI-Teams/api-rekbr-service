@@ -8,9 +8,42 @@ const getTransactionDetailSeller = async (req, res) => {
     transactionId,
     sellerId
   );
-  return resSuccess(res, "Detail transaksi seller berhasil diambil", data, 200);
+  return resSuccess(res, 200, "Detail transaksi seller berhasil diambil", data);
 };
+
+const generateTransaction = async (req, res) => {
+  const {
+    seller_id,
+    buyer_id,
+    item_name,
+    item_price,
+    platform_fee,
+    insurance_fee,
+    total_amount,
+    status,
+    virtual_account_number,
+    payment_deadline,
+    withdrawal_bank_account_id
+  } = req.body;
+
+  const newTransaction = await sellerTransactionService.generateTransaction({
+    seller_id,
+    buyer_id,
+    item_name,
+    item_price,
+    platform_fee,
+    insurance_fee,
+    total_amount,
+    status,
+    virtual_account_number,
+    payment_deadline,
+    withdrawal_bank_account_id
+  });
+
+  return resSuccess(res, 201, "Transaksi berhasil dibuat", newTransaction);
+}
 
 export default {
   getTransactionDetailSeller,
+  generateTransaction,
 };

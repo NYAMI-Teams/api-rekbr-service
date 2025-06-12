@@ -1,4 +1,5 @@
 import prisma from "../prisma/client.js";
+import toCamelCase from "../utils/camelCaseResponse.js";
 
 const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   return await prisma.transaction.findFirst({
@@ -33,7 +34,49 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   });
 };
 
+const generateTransactionCode = () => {
+  const prefix = "TRX";
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `${prefix}-${timestamp}-${random}`;
+};
+
+const createTransaction = async ({
+seller_id,
+buyer_id,
+item_name,
+item_price,
+platform_fee,
+insurance_fee,
+total_amount,
+status,
+virtual_account_number,
+payment_deadline,
+withdrawal_bank_account_id
+}) => {
+  const transaction_code = generateTransactionCode();
+  const newTransaction = await prisma.transaction.create({
+    data: {
+      seller_id,
+      buyer_id,
+      item_name,
+      item_price,
+      platform_fee,
+      insurance_fee,
+      total_amount,
+      status,
+      virtual_account_number,
+      payment_deadline,
+      withdrawal_bank_account_id,
+      transaction_code
+    },
+  });
+
+  return toCamelCase(newTransaction);
+};
+
 export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
+  createTransaction,
 };

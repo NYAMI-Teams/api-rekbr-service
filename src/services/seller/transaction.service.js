@@ -46,6 +46,36 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
+const generateTransaction = async ({seller_id,
+  buyer_id,
+  item_name,
+  item_price,
+  platform_fee,
+  insurance_fee,
+  total_amount,
+  status,
+  virtual_account_number,
+  payment_deadline,
+  withdrawal_bank_account_id}) => {
+  
+    const newTransaction = await transactionRepo.createTransaction({
+      seller_id,
+      buyer_id,
+      item_name,
+      item_price,
+      platform_fee,
+      insurance_fee,
+      total_amount,
+      status,
+      virtual_account_number,
+      payment_deadline,
+      withdrawal_bank_account_id
+    });
+
+    return newTransaction;
+  }
+
 export default {
   getTransactionDetailBySeller,
+  generateTransaction,
 };
