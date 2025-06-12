@@ -11,15 +11,15 @@ const getAllBanks = async () => {
     },
   });
 
-  return banks.map(bank => toCamelCase(bank));
+  return banks.map((bank) => toCamelCase(bank));
 };
 
 const getDummyAccount = async (account_number, bank_id) => {
   const accounts = await prisma.dummyAccount.findMany({
     where: {
       account_number,
-      bank_id
-    }, 
+      bank_id,
+    },
     select: {
       id: true,
       bank_id: true,
@@ -27,22 +27,35 @@ const getDummyAccount = async (account_number, bank_id) => {
     },
   });
 
-  return accounts.map(account => toCamelCase(account));
+  return accounts.map((account) => toCamelCase(account));
 };
 
-const findAccount = async ({user_id, bank_id, account_number}) => {
+const findAccount = async ({ user_id, bank_id, account_number }) => {
   const existing = await prisma.bankAccount.findFirst({
     where: {
       user_id,
       bank_id,
       account_number,
     },
-  })
+  });
 
   return existing ? toCamelCase(existing) : null;
-}
+};
 
-const createAccount = async ({user_id, bank_id, account_number, account_name}) => {
+const findBank = async (bank_id) => {
+  const bank = await prisma.bankList.findUnique({
+    where: { id: bank_id },
+  });
+
+  return bank ? toCamelCase(bank) : null;
+};
+
+const createAccount = async ({
+  user_id,
+  bank_id,
+  account_number,
+  account_holder_name: account_name,
+}) => {
   const newAccount = await prisma.bankAccount.create({
     data: {
       user_id,
@@ -54,11 +67,10 @@ const createAccount = async ({user_id, bank_id, account_number, account_name}) =
 
   return toCamelCase(newAccount);
 };
-
-
 export default {
   getAllBanks,
   getDummyAccount,
   findAccount,
   createAccount,
+  findBank,
 };
