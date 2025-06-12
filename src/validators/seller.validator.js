@@ -15,11 +15,7 @@ const createTransactionValidation = [
   body("status").notEmpty().withMessage("Status transaksi wajib diisi"),
 
   body("virtual_account_number").notEmpty().withMessage("Nomor VA wajib diisi"),
-
-  body("payment_deadline")
-    .isISO8601()
-    .withMessage("Format deadline pembayaran tidak valid"),
-
+  
   body("withdrawal_bank_account_id")
     .notEmpty()
     .withMessage("Rekening penarikan wajib diisi"),

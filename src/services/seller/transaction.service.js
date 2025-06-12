@@ -62,13 +62,16 @@ const generateTransaction = async ({seller_id,
   item_price,
   status,
   virtual_account_number,
-  payment_deadline,
   withdrawal_bank_account_id}) => {
 
     // plt fee, insurance fee, dan total amount are hardcoded for simplicity
     const platform_fee = 25000;
     const insurance_fee = 5000;
     const total_amount = item_price + platform_fee + insurance_fee;
+
+    //payment deadline also hardocdeed
+    const payment_deadline = new Date(Date.now() + 2 * 60 * 60 * 1000)
+    const created_at = new Date(Date.now());
 
     const existingTransaction = await transactionRepo.findActiveTransaction({
       seller_id,
@@ -91,7 +94,8 @@ const generateTransaction = async ({seller_id,
       status,
       virtual_account_number,
       payment_deadline,
-      withdrawal_bank_account_id
+      withdrawal_bank_account_id,
+      created_at,
     });
 
     return newTransaction;
