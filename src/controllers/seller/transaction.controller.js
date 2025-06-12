@@ -3,7 +3,7 @@ import resSuccess from "../../utils/response.js";
 
 const getTransactionDetailSeller = async (req, res) => {
   const { transactionId } = req.params;
-  const sellerId = "46dca94f-4c79-4d45-99ed-10e2f900441a";
+  const sellerId = req.user.id;
   const data = await sellerTransactionService.getTransactionDetailBySeller(
     transactionId,
     sellerId
@@ -13,13 +13,13 @@ const getTransactionDetailSeller = async (req, res) => {
 
 const inputShipment = async (req, res) => {
   const { transactionId } = req.params;
-  const sellerId = "46dca94f-4c79-4d45-99ed-10e2f900441a";
+  const sellerId = req.user.id;
   const result = await sellerTransactionService.inputShipment(
     transactionId,
     sellerId,
     req.body
   );
-  return resSuccess(res, "Resi berhasil disimpan", result, 200);
+  return resSuccess(res, 200, "Resi berhasil disimpan", result);
 };
 
 export default {
