@@ -57,7 +57,13 @@ const generateTransaction = async ({seller_id,
   virtual_account_number,
   payment_deadline,
   withdrawal_bank_account_id}) => {
-  
+    const existingTransaction = await transactionRepo.findActiveTransaction({
+      seller_id,
+      buyer_id,
+    });
+    if (existingTransaction) {
+      throwError(`Transaksi aktif sudah ada untuk seller dan buyer ini dengan ID ${existingTransaction.transactionCode}`, 400);
+    }
     const newTransaction = await transactionRepo.createTransaction({
       seller_id,
       buyer_id,

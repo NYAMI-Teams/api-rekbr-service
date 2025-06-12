@@ -41,19 +41,33 @@ const generateTransactionCode = () => {
   return `${prefix}-${timestamp}-${random}`;
 };
 
+const findActiveTransaction = async ({ seller_id, buyer_id }) => {
+  const activeTransaction = await prisma.transaction.findFirst({
+    where: {
+      seller_id,
+      buyer_id,
+      status: {
+        notIn: ["completed", "canceled"],
+      },
+    },
+  });
+  return activeTransaction ? toCamelCase(activeTransaction) : null;
+};
+
 const createTransaction = async ({
-seller_id,
-buyer_id,
-item_name,
-item_price,
-platform_fee,
-insurance_fee,
-total_amount,
-status,
-virtual_account_number,
-payment_deadline,
-withdrawal_bank_account_id
+  seller_id,
+  buyer_id,
+  item_name,
+  item_price,
+  platform_fee,
+  insurance_fee,
+  total_amount,
+  status,
+  virtual_account_number,
+  payment_deadline,
+  withdrawal_bank_account_id,
 }) => {
+
   const transaction_code = generateTransactionCode();
   const newTransaction = await prisma.transaction.create({
     data: {
@@ -68,7 +82,7 @@ withdrawal_bank_account_id
       virtual_account_number,
       payment_deadline,
       withdrawal_bank_account_id,
-      transaction_code
+      transaction_code,
     },
   });
 
@@ -79,4 +93,5 @@ export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
   createTransaction,
+  findActiveTransaction,
 };
