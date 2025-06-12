@@ -1,5 +1,5 @@
 import sellerTransactionService from "../../services/seller/transaction.service.js";
-import { resSuccess } from "../../utils/response.js";
+import resSuccess from "../../utils/response.js";
 
 const getTransactionDetailSeller = async (req, res) => {
   const { transactionId } = req.params;
@@ -8,7 +8,7 @@ const getTransactionDetailSeller = async (req, res) => {
     transactionId,
     sellerId
   );
-  return resSuccess(res, "Detail transaksi seller berhasil diambil", data, 200);
+  return resSuccess(res, 200, "Detail transaksi seller berhasil diambil", data);
 };
 
 const inputShipment = async (req, res) => {
