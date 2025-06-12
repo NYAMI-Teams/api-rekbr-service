@@ -17,6 +17,8 @@ model BankList {
   id        String @id @default(uuid())
   bank_name String
   logo_url  String
+  dummyAccounts DummyAccount[]
+  bankAccounts BankAccount[]
 }
 
 model User {
@@ -28,4 +30,25 @@ model User {
   is_admin   Boolean  @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  bankAccounts BankAccount[]
+}
+
+model DummyAccount {
+  id String @id @default(uuid())
+  bank BankList @relation(fields: [bank_id], references: [id])
+  bank_id String
+  account_number String
+  account_name String
+}
+model BankAccount {Add commentMore actions
+  id                      String        @id @default(uuid())
+  user                    User          @relation(fields: [user_id], references: [id])
+  user_id                 String
+  bank                    BankList      @relation(fields: [bank_id], references: [id])
+  bank_id                 String
+  account_number          String
+  account_holder_name     String
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  // withdrawal_transactions Transaction[] @relation("WithdrawalBankAccount")
 }
