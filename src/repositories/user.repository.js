@@ -17,7 +17,18 @@ const findUserByEmail = async (email) => {
   const user = await prisma.user.findUnique({
     where: { email },
     omit: {
-      password: true, // Omit password from the respon
+      // password: true, // Omit password from the respon
+    },
+  });
+  return user ? toCamelCase(user) : null;
+}
+
+const findUserById = async (id) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    omit: {
+      id: true, // Omit id from the response
+      password: true, // Omit password from the response
     },
   });
   return user ? toCamelCase(user) : null;
@@ -30,8 +41,11 @@ const updateUserStatus = async (email, status) => {
   });
 }
 
+
+
 export default {
   createUser,
   findUserByEmail,
+  findUserById,
   updateUserStatus,
 };

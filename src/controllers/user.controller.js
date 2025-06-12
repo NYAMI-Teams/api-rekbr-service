@@ -22,9 +22,16 @@ const verifyEmail = async (req, res) => {
   return resSuccess(res, 200, "Berhasil verifikasi email");
 }
 
+const getProfile = async (req, res) => {
+  const userId = req.user.id;
+  const user = await userService.getProfile(userId);
+  return resSuccess(res, 200, "Berhasil mendapatkan profil", user);
+};
+
 export default {
   register,
   login,
   resendVerifyEmail,
   verifyEmail,
+  getProfile,
 };

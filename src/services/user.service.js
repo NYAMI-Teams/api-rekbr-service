@@ -7,7 +7,7 @@ import { sendOtpEmail } from "./email.service.js";
 
 
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
@@ -62,7 +62,6 @@ const login = async ({ email, password }) => {
   if (!isPasswordValid) {
     throwError("email atau password salah", 400);
   }
-
   const accessToken = generateAccessToken(user);
   const refreshToken = await generateRefreshToken(user);
 
@@ -119,9 +118,18 @@ const verifyEmail = async ({ email, otpCode }) => {
   return result;
 }
 
+const getProfile = async (userId) => {
+  const user = await userRepository.findUserById(userId);
+  if (!user) {
+    throwError("User tidak ditemukan", 404);
+  }
+  return user;
+}
+
 export default {
   register,
   login,
   resendVerifyEmail,
   verifyEmail,
+  getProfile,
 };
