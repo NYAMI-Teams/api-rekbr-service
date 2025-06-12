@@ -14,7 +14,83 @@ datasource db {
 }
 
 model BankList {
-  id        String @id @default(uuid())
-  bank_name String
-  logo_url  String
+  id            String         @id @default(uuid())
+  bank_name     String
+  logo_url      String
+  dummyAccounts DummyAccount[]
+  bankAccounts  BankAccount[]
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  kyc_status String
+  status     String
+  is_admin   Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  bankAccounts           BankAccount[]
+  transactions_seller    Transaction[] @relation("SellerTransactions")
+  transactions_buyer     Transaction[] @relation("BuyerTransactions")
+  cancelled_transactions Transaction[] @relation("CancelledByUser")
+}
+
+model DummyAccount {
+  id             String   @id @default(uuid())
+  bank           BankList @relation(fields: [bank_id], references: [id])
+  bank_id        String
+  account_number String
+  account_name   String
+}
+
+model BankAccount {
+  id                      String        @id @default(uuid())
+  user                    User          @relation(fields: [user_id], references: [id])
+  user_id                 String
+  bank                    BankList      @relation(fields: [bank_id], references: [id])
+  bank_id                 String
+  account_number          String
+  account_holder_name     String
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  withdrawal_transactions Transaction[] @relation("WithdrawalBankAccount")
+}
+
+model Transaction {
+  id                     String    @id @default(uuid())
+  transaction_code       String    @unique
+  seller                 User      @relation("SellerTransactions", fields: [seller_id], references: [id])
+  seller_id              String
+  buyer                  User      @relation("BuyerTransactions", fields: [buyer_id], references: [id])
+  buyer_id               String
+  item_name              String
+  item_price             Int
+  platform_fee           Int
+  insurance_fee          Int
+  total_amount           Int
+  status                 String
+  virtual_account_number String
+  paid_at                DateTime?
+  payment_deadline       DateTime?
+  shipment_deadline      DateTime?
+  confirmed_at           DateTime?
+
+  withdrawal_bank_account    BankAccount? @relation("WithdrawalBankAccount", fields: [withdrawal_bank_account_id], references: [id])
+  withdrawal_bank_account_id String?
+  withdrawn_at               DateTime?
+  withdrawn_amount           Int?
+
+  cancelled_at    DateTime?
+  cancelled_by    User?     @relation("CancelledByUser", fields: [cancelled_by_id], references: [id])
+  cancelled_by_id String?
+  cancel_reason   String?
+
+  refunded_at   DateTime?
+  refund_amount Int?
+  refund_reason String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

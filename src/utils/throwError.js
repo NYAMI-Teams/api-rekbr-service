@@ -10,4 +10,4 @@ const throwError = (message, statusCode = 500, errors = null) => {
   throw new AppError(message, statusCode, errors);
 };
 
-module.exports = throwError;
+export default throwError;

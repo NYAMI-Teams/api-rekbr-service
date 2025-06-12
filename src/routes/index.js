@@ -1,8 +1,18 @@
-const express = require("express");
-const router = express.Router();
+import { Router } from "express";
+import bankRoutes from "./bank.routes.js";
+import sellerTransactionRoutes from "./seller/transaction.routes.js";
+import buyerTransactionRoutes from "./buyer/transaction.routes.js";
 
-const bankRoutes = require("./bank.routes");
+const router = Router();
 
-router.use("/seller/bank-list", bankRoutes);
+router.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to the API",
+  });
+});
 
-module.exports = router;
+router.use("/bank", bankRoutes);
+router.use("/buyer", buyerTransactionRoutes);
+router.use("/seller", sellerTransactionRoutes);
+
+export default router;
