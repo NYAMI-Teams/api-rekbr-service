@@ -1,11 +1,12 @@
-const bankService = require("../services/bank.service");
-const { resSuccess } = require("../utils/response");
+import backService from "../services/bank.service.js";
+import camelcaseKeys from "camelcase-keys";
+import { resSuccess } from "../utils/response.js";
 
 const getBanks = async (req, res) => {
-  const banks = await bankService.listBanks();
-  return resSuccess(res, "Daftar bank berhasil diambil", banks, 200);
+  const result = await backService.listBanks();
+  return resSuccess(res, "Daftar bank berhasil diambil", result, 200);
 };
 
-module.exports = {
+export default {
   getBanks,
 };

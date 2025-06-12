@@ -1,14 +1,15 @@
-const bankRepo = require("../repositories/bank.repository");
+import bankRepo from "../repositories/bank.repository.js";
+import { resSuccess } from "../utils/response.js";
+import throwError from "../utils/throwError.js";
 
 const listBanks = async () => {
   const banks = await bankRepo.getAllBanks();
-  return banks.map((bank) => ({
-    bankId: bank.id,
-    logoUrl: bank.logo_url,
-    bankName: bank.bank_name,
-  }));
+  if (!banks || banks.length === 0) {
+    return throwError("Tidak ada bank yang ditemukan", 400);
+  }
+  return banks;
 };
 
-module.exports = {
+export default {
   listBanks,
 };
