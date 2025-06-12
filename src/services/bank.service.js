@@ -10,6 +10,16 @@ const listBanks = async () => {
   return banks;
 };
 
+const getDummyAccount = async ({account_number, bank_id}) => {
+  const accounts = await bankRepo.getDummyAccount(account_number, bank_id);
+  if (!accounts || accounts.length === 0) {
+    return throwError("Tidak ada akun dummy yang ditemukan", 404);
+  }
+
+  return accounts;
+}
+
 export default {
   listBanks,
+  getDummyAccount,
 };
