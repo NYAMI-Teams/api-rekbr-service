@@ -104,15 +104,42 @@ const getTransactionListBySeller = async (sellerId) => {
     return [];
   }
 
-  return txn.map((txn) => ({
-    itemName: txn.item_name,
-    totalAmount: txn.total_amount,
-    buyerEmail: txn.buyer?.email || "-",
-    virtualAccount: txn.virtual_account_number,
-    status: txn.status,
-    paymentDeadline: txn.payment_deadline,
-    currentTimestamp: new Date().toISOString(),
-  }));
+  const transactionsWithFR = await Promise.all(
+    txn.map(async (txn) => {
+      const fr = await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(txn.id);
+
+      return {
+        id: txn.id,
+        transactionCode: txn.transaction_code,
+        itemName: txn.item_name,
+        totalAmount: txn.total_amount,
+        buyerEmail: txn.buyer?.email || "-",
+        virtualAccount: txn.virtual_account_number,
+        status: txn.status,
+        paymentDeadline: txn.payment_deadline,
+        shipmentDeadline: txn.shipment_deadline,
+        currentTimestamp: new Date().toISOString(),
+        trackingNumber: txn.shipment?.tracking_number || null,
+        fundReleaseRequest: fr
+          ? {
+              requested: true,
+              status: fr.status,
+              requestedAt: fr.created_at.toISOString(),
+              resolvedAt: fr.resolved_at?.toISOString() || null,
+              adminEmail: fr.admin?.email || null,
+            }
+          : {
+              requested: false,
+              status: null,
+              requestedAt: null,
+              resolvedAt: null,
+              adminEmail: null,
+            },
+      };
+    })
+  );
+
+  return transactionsWithFR;
 };
 
 const generateTransactionCode = () => {
