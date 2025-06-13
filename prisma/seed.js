@@ -145,6 +145,18 @@ async function main() {
     });
   }
 
+  await prisma.courierList.createMany({
+    data: [
+      { name: "J&T Express Indonesia" },
+      { name: "JNE REG" },
+      { name: "SiCepat Ekspres" },
+      { name: "AnterAja" },
+      { name: "Ninja Xpress" },
+      { name: "POS Indonesia" },
+    ],
+    skipDuplicates: true,
+  });
+
   console.log("✅ Seeding selesai");
 }
 
