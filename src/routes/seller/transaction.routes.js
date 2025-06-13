@@ -2,6 +2,7 @@ import { Router } from "express";
 import sellerTransactionController from "../../controllers/seller/transaction.controller.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
 import authentication from "../../middlewares/authentication.js";
+<<<<<<< HEAD
 
 const router = Router();
 
@@ -22,6 +23,14 @@ router.post(
   authentication,
   asyncHandler(sellerTransactionController.cancelTransactionBySeller)
 );
+=======
+import uploadImage from "../../middlewares/uploadImage.js";
+
+const router = Router();
+
+router.post("/transaction/:transactionId/request-confirmation-shipment", authentication, uploadImage("evidance"), asyncHandler(transactionController.confirmationShipmentRequest));
+router.get("/transactions/:transactionId", asyncHandler(transactionController.getTransactionDetailSeller));
+>>>>>>> 6a0f52a2c68a9532140d1bcaef36d0f589fcd0a4
 
 export default router;
 

@@ -35,6 +35,9 @@ model User {
   transactions_seller    Transaction[] @relation("SellerTransactions")
   transactions_buyer     Transaction[] @relation("BuyerTransactions")
   cancelled_transactions Transaction[] @relation("CancelledByUser")
+
+  fund_release_requests FundReleaseRequest[] @relation("FundReleaseSeller")
+  fund_release_admins   FundReleaseRequest[] @relation("FundReleaseAdmin")
 }
 
 model DummyAccount {
@@ -91,11 +94,16 @@ model Transaction {
   refund_amount Int?
   refund_reason String?
 
+<<<<<<< HEAD
   shipment Shipment?
+=======
+  fund_release_requests FundReleaseRequest[] 
+>>>>>>> 6a0f52a2c68a9532140d1bcaef36d0f589fcd0a4
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
+<<<<<<< HEAD
 
 model Shipment {
   id              String      @id @default(uuid())
@@ -116,3 +124,19 @@ model CourierList {
   name      String
   shipments Shipment[]
 }
+=======
+model FundReleaseRequest {
+  id           String    @id @default(uuid())
+  transaction  Transaction @relation(fields: [transaction_id], references: [id])
+  transaction_id String
+  seller       User      @relation("FundReleaseSeller", fields: [seller_id], references: [id])
+  seller_id    String
+  evidence_url Json
+  reason       String
+  status       String    // enum: pending, approved, rejected
+  admin        User?     @relation("FundReleaseAdmin", fields: [admin_id], references: [id])
+  admin_id     String?
+  created_at   DateTime  @default(now())
+  resolved_at  DateTime?
+}
+>>>>>>> 6a0f52a2c68a9532140d1bcaef36d0f589fcd0a4
