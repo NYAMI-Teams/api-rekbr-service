@@ -8,7 +8,7 @@ const getTransactionDetailBuyer = async (req, res) => {
     transactionId,
     buyerId
   );
-  return resSuccess(res, "Detail transaksi buyer berhasil diambil", data, 200);
+  return resSuccess(res, 200, "Detail transaksi buyer berhasil diambil", data);
 };
 
 export default {

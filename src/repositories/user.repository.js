@@ -41,6 +41,12 @@ const updateUserStatus = async (email, status) => {
   });
 }
 
+const updateUserKycStatus = async (email, kycStatus) => {
+  return await prisma.user.update({
+    where: { email },
+    data: { kyc_status: kycStatus },
+  });
+}
 
 
 export default {
@@ -48,4 +54,5 @@ export default {
   findUserByEmail,
   findUserById,
   updateUserStatus,
+  updateUserKycStatus,
 };
