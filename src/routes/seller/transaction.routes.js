@@ -28,12 +28,8 @@ router.post(
 router.post(
   "/transaction/:transactionId/request-confirmation-shipment",
   authentication,
-  uploadImage("evidance"),
+  uploadImage("evidence"),
   asyncHandler(sellerTransactionController.confirmationShipmentRequest)
-);
-router.get(
-  "/transactions/:transactionId",
-  asyncHandler(sellerTransactionController.getTransactionDetailSeller)
 );
 
 router.get(

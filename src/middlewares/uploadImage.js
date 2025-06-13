@@ -1,5 +1,4 @@
 import upload from "../utils/multer.js";
-import throwError from "../utils/throwError.js";
 
 // Factory middleware upload image
 const uploadImage = (fieldName = "image") => (req, res, next) => {

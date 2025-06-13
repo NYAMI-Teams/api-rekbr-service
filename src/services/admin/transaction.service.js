@@ -83,7 +83,23 @@ const getAllTransactionsForAdmin = async () => {
   }));
 };
 
+const updateFundReleaseRequest = async (transactionId, status, adminId) => {
+  const txn = await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+    transactionId
+  );
+  if (!txn) throwError("Permintaan rilis dana tidak ditemukan", 404);
+  if (txn.status !== "pending") {
+    throwError("Permintaan rilis dana tidak dalam status 'pending'", 400);
+  }
+  await fundReleaseRequestRepository.updateFundReleaseRequestStatus(
+    txn.id,
+    status,
+    adminId
+  );
+}
+
 export default {
   getTransactionDetailByAdmin,
   getAllTransactionsForAdmin,
+  updateFundReleaseRequest,
 };

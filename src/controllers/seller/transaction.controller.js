@@ -1,5 +1,4 @@
 import sellerTransactionService from "../../services/seller/transaction.service.js";
-import uploadToSpaces from "../../services/digital-storage.service.js";
 import resSuccess from "../../utils/response.js";
 
 const getTransactionDetailSeller = async (req, res) => {
@@ -93,12 +92,12 @@ const confirmationShipmentRequest = async (req, res) => {
   );
 };
 
+
 export default {
   getTransactionDetailSeller,
-  confirmationShipmentRequest,
-  getTransactionDetailSeller,
-  generateTransaction,
   getTransactionListSeller,
+  confirmationShipmentRequest,
+  generateTransaction,
   cancelTransactionBySeller,
   inputShipment,
 };
