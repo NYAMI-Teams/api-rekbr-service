@@ -15,7 +15,7 @@ router.get(
 router.get(
   "/transactions",
   authentication,
-  asyncHandler(transactionController.getTransactionDetailSeller)
+  asyncHandler(transactionController.getTransactionListSeller)
 );
 
 router.post(

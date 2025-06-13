@@ -1,56 +1,74 @@
 import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 
-const formatTransaction = (txn) => ({
-  id: txn.id,
-  transactionCode: txn.transaction_code,
-  status: txn.status,
-  itemName: txn.item_name,
-  itemPrice: txn.item_price,
-  insuranceFee: txn.insurance_fee,
-  platformFee: txn.platform_fee,
-  totalAmount: txn.total_amount,
-  virtualAccount: txn.virtual_account_number,
-  buyerEmail: txn.buyer?.email || null,
-  createdAt: txn.created_at,
-  paidAt: txn.paid_at,
-  paymentDeadline: txn.payment_deadline,
-  shipmentDeadline: txn.shipment_deadline,
-  shipmentDate: txn.paid_at
-    ? new Date(txn.paid_at.getTime() + 86400000).toISOString()
-    : null,
-  shipment: {
-    trackingNumber: "DUMMY-TRACK",
-    courier: "JNE REG",
-  },
-  fundReleaseRequest: {
-    requested: true,
-    status: "approved",
-    requestedAt: new Date().toISOString(),
-    resolvedAt: new Date(Date.now() + 3600000).toISOString(),
-  },
-  buyerConfirmedAt: txn.confirmed_at,
-  rekeningSeller: {
-    bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
-    accountNumber: txn.withdrawal_bank_account?.account_number || null,
-    logoUrl: txn.withdrawal_bank_account?.bank?.logo_url || null,
-  },
-  currentTimestamp: new Date().toISOString(),
-});
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
-  const txns = await transactionRepo.getTransactionDetailBySeller(transactionId, sellerId);
+  const txn = await transactionRepo.getTransactionDetailBySeller(
+    transactionId,
+    sellerId
+  );
+  if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
-  // Detail view (single)
-  if (transactionId) {
-    if (!txns) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
-    return formatTransaction(txns);
-  }
-
-  // List view (array)
-  return txns.map(txn => formatTransaction(txn));
+  return {
+    id: txn.id,
+    transactionCode: txn.transaction_code,
+    status: txn.status,
+    itemName: txn.item_name,
+    itemPrice: txn.item_price,
+    insuranceFee: txn.insurance_fee,
+    platformFee: txn.platform_fee,
+    totalAmount: txn.total_amount,
+    virtualAccount: txn.virtual_account_number,
+    buyerEmail: txn.buyer?.email || null,
+    createdAt: txn.created_at,
+    paidAt: txn.paid_at,
+    paymentDeadline: txn.payment_deadline,
+    shipmentDeadline: txn.shipment_deadline,
+    shipmentDate: txn.paid_at
+      ? new Date(txn.paid_at.getTime() + 86400000).toISOString()
+      : null,
+    shipment: {
+      trackingNumber: "DUMMY-TRACK",
+      courier: "JNE REG",
+    },
+    fundReleaseRequest: {
+      requested: true,
+      status: "approved",
+      requestedAt: new Date().toISOString(),
+      resolvedAt: new Date(Date.now() + 3600000).toISOString(),
+    },
+    buyerConfirmedAt: txn.confirmed_at,
+    rekeningSeller: {
+      bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
+      accountNumber: txn.withdrawal_bank_account?.account_number || null,
+      logoUrl: txn.withdrawal_bank_account?.bank?.logo_url || null,
+    },
+    currentTimestamp: new Date().toISOString(),
+  };
 
 };
+
+const getTransactionListBySeller = async (sellerId) => {
+  const txn = await transactionRepo.getTransactionListForSeller(
+    sellerId
+  );
+ // Return empty array if no transactions (no throw)
+ if (!txn || txn.length === 0) {
+  return [];
+}
+
+  return txn.map((txn) => ({
+    itemName: txn.item_name,
+    totalAmount: txn.total_amount,
+    buyerEmail: txn.buyer?.email || "-",
+    virtualAccount: txn.virtual_account_number,
+    status: txn.status,
+    paymentDeadline: txn.payment_deadline,
+    currentTimestamp: new Date().toISOString(),
+  }));
+
+};
+
 
 const generateTransactionCode = () => {
   const prefix = "TRX";
@@ -127,4 +145,5 @@ export default {
   getTransactionDetailBySeller,
   generateTransaction,
   generateTransactionCode,
+  getTransactionListBySeller,
 };

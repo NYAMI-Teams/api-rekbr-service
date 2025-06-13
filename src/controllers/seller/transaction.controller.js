@@ -8,11 +8,22 @@ const getTransactionDetailSeller = async (req, res) => {
     transactionId,
     sellerId
   );
-  if (transactionId) {
-    return resSuccess(res, 200, "Detail transaksi seller berhasil diambil", data);
-  } else {
-    return resSuccess(res, 200, "List transaksi seller berhasil diambil", data);
-  }
+  return resSuccess(res, 200, "Detail transaksi seller berhasil diambil", data);
+  
+};
+
+const getTransactionListSeller = async (req, res) => {
+  const sellerId = req.user.id;
+  
+  const data = await sellerTransactionService.getTransactionListBySeller(
+    sellerId
+  );
+
+  const message = data.length === 0
+  ? "Transaksi tidak ada"
+  : "List transaksi seller berhasil diambil";
+
+  return resSuccess(res, 200, message, data);
   
 };
 
@@ -43,4 +54,5 @@ const generateTransaction = async (req, res) => {
 export default {
   getTransactionDetailSeller,
   generateTransaction,
+  getTransactionListSeller,
 };
