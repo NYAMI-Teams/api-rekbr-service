@@ -5,6 +5,7 @@ import authentication from "../middlewares/authentication.js";
 import asyncHandler from "../middlewares/asyncHandler.js";
 import sellerTransactionRoutes from "./seller/transaction.routes.js";
 import buyerTransactionRoutes from "./buyer/transaction.routes.js";
+import adminTransactionRoutes from "./admin/transaction.routes.js";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/bank", bankRoutes);
 router.use("/user", userRoutes);
 router.use("/buyer", buyerTransactionRoutes);
 router.use("/seller", sellerTransactionRoutes);
+router.use("/admin", adminTransactionRoutes);
 
 export default router;
