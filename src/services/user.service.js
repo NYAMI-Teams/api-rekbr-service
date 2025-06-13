@@ -9,7 +9,7 @@ import { sendOtpEmail } from "./email.service.js";
 const generateAccessToken = async (user) => {
   const tokenId = Date.now().toString(); 
   const userId = user.id;
-  const payload = { id: userId, tokenId };
+  const payload = { id: userId, tokenId, isAdmin: user.isAdmin };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
@@ -78,6 +78,7 @@ const login = async ({ email, password }) => {
   const result = {
     accessToken,
     refreshToken,
+    isAdmin: user.isAdmin,
   }
 
   return result;

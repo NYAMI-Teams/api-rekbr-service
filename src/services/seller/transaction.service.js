@@ -233,7 +233,7 @@ const confirmationShipmentRequest = async ({
   );
   if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
-  if (txn.status !== "waiting_shipment") {
+  if (txn.status !== "shipped") {
     throwError("Gagal meminta konfirmasi", 400);
   }
 

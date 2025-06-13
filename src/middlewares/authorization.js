@@ -1,9 +1,9 @@
 import throwError from "../utils/throwError.js";
 
 const authorization = (req, res, next) => {
-    const role = req.user.role;
-    console.log(role);
-    if (role !== "admin") {
+    const isAdmin = req.user.isAdmin;
+
+    if (!isAdmin) {
         throwError("access denied", 403);
     }
     next();
