@@ -38,6 +38,8 @@ export default router;
  *   get:
  *     summary: Mendapatkan detail transaksi seller
  *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: transactionId
  *         in: path
@@ -87,6 +89,7 @@ export default router;
  *                   format: date-time
  *                 shipment:
  *                   type: object
+ *                   nullable: true
  *                   properties:
  *                     trackingNumber:
  *                       type: string
@@ -110,9 +113,7 @@ export default router;
  *                     resolvedAt:
  *                       type: string
  *                       format: date-time
- *                 buyerConfirmedAt:
- *                   type: string
- *                   format: date-time
+ *
  *                 rekeningSeller:
  *                   type: object
  *                   properties:
@@ -122,19 +123,27 @@ export default router;
  *                       type: string
  *                     logoUrl:
  *                       type: string
+ *                 buyerConfirmedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 buyerConfirmDeadline:
+ *                   type: string
+ *                   format: date-time
  *                 currentTimestamp:
  *                   type: string
  *                   format: date-time
  *       404:
- *         description: Transaksi tidak ditemukan
+ *         description: Transaksi tidak ditemukan atau bukan milik Anda
  */
 
 /**
  * @swagger
- * /api/seller/transactions/{transactionId}/shipment:
+ * /api/seller/transactions/{transactionId}/shipping:
  *   post:
  *     summary: Input resi pengiriman untuk transaksi seller
  *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: transactionId
  *         in: path
@@ -173,4 +182,35 @@ export default router;
  *         description: Transaksi tidak ditemukan
  *       400:
  *         description: Transaksi belum bisa dikirim
+ */
+
+/**
+ * @swagger
+ * /api/seller/transactions/{transactionId}/cancel:
+ *   post:
+ *     summary: Membatalkan transaksi seller
+ *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: transactionId
+ *         in: path
+ *         required: true
+ *         description: ID transaksi
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Transaksi berhasil dibatalkan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       404:
+ *         description: Transaksi tidak ditemukan
+ *       400:
+ *         description: Transaksi tidak dapat dibatalkan
  */

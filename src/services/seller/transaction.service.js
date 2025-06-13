@@ -31,19 +31,25 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
           photoUrl: txn.shipment.photo_url || null,
         }
-      : null,
+      : {
+          trackingNumber: null,
+          courier: null,
+          shipmentDate: null,
+          photoUrl: null,
+        },
     fundReleaseRequest: {
       requested: true,
       status: "approved",
       requestedAt: new Date().toISOString(),
       resolvedAt: new Date(Date.now() + 3600000).toISOString(),
     },
-    buyerConfirmedAt: txn.confirmed_at,
     rekeningSeller: {
       bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
       accountNumber: txn.withdrawal_bank_account?.account_number || null,
       logoUrl: txn.withdrawal_bank_account?.bank?.logo_url || null,
     },
+    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
+    buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
   };
 };
