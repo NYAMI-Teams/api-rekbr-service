@@ -139,6 +139,11 @@ const getTransactionListForSeller = async (sellerId) => {
       buyer: {
         select: { email: true },
       },
+      shipment: {
+        select: {
+          tracking_number: true,
+        },
+      },
     },
   });
 };
