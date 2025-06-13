@@ -1,16 +1,17 @@
 import { Router } from "express";
 import sellerTransactionController from "../../controllers/seller/transaction.controller.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
+import transactionValidator from "../../validators/seller.validator.js";
+import validateRequest from "../../middlewares/validateRequest.js";
 import authentication from "../../middlewares/authentication.js";
 import uploadImage from "../../middlewares/uploadImage.js";
-
 const router = Router();
 
 router.get(
-  "/transactions/:transactionId",
+  "/transactions/:transactionId", 
   authentication,
   asyncHandler(sellerTransactionController.getTransactionDetailSeller)
-);
+)
 
 router.post(
   "/transactions/:transactionId/shipping",
@@ -33,6 +34,20 @@ router.post(
 router.get(
   "/transactions/:transactionId",
   asyncHandler(sellerTransactionController.getTransactionDetailSeller)
+);
+
+router.get(
+  "/transactions",
+  authentication,
+  asyncHandler(sellerTransactionController.getTransactionListSeller)
+);
+
+router.post(
+  "/transactions",
+  authentication,
+  transactionValidator.createTransactionValidation,
+  validateRequest,
+  asyncHandler(sellerTransactionController.generateTransaction)
 );
 
 export default router;

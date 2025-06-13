@@ -12,6 +12,45 @@ const getTransactionDetailSeller = async (req, res) => {
   return resSuccess(res, 200, "Detail transaksi seller berhasil diambil", data);
 };
 
+const getTransactionListSeller = async (req, res) => {
+  const sellerId = req.user.id;
+
+  const data = await sellerTransactionService.getTransactionListBySeller(
+    sellerId
+  );
+
+  const message =
+    data.length === 0
+      ? "Transaksi tidak ada"
+      : "List transaksi seller berhasil diambil";
+
+  return resSuccess(res, 200, message, data);
+};
+
+const generateTransaction = async (req, res) => {
+  const {
+    buyer_id,
+    item_name,
+    item_price,
+    status,
+    virtual_account_number,
+    withdrawal_bank_account_id,
+  } = req.body;
+  const seller_id = req.user.id;
+
+  const newTransaction = await sellerTransactionService.generateTransaction({
+    seller_id,
+    buyer_id,
+    item_name,
+    item_price,
+    status,
+    virtual_account_number,
+    withdrawal_bank_account_id,
+  });
+
+  return resSuccess(res, 201, "Transaksi berhasil dibuat", newTransaction);
+};
+
 const inputShipment = async (req, res) => {
   const { transactionId } = req.params;
   const sellerId = req.user.id;
@@ -57,4 +96,9 @@ const confirmationShipmentRequest = async (req, res) => {
 export default {
   getTransactionDetailSeller,
   confirmationShipmentRequest,
+  getTransactionDetailSeller,
+  generateTransaction,
+  getTransactionListSeller,
+  cancelTransactionBySeller,
+  inputShipment,
 };

@@ -15,7 +15,6 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
     await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
       transactionId
     );
-
   return {
     id: txn.id,
     transactionCode: txn.transaction_code,
@@ -58,6 +57,33 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           requestedAt: null,
           resolvedAt: null,
         },
+    shipment: txn.shipment
+      ? {
+          trackingNumber: txn.shipment.tracking_number,
+          courier: txn.shipment.courier?.name || null,
+          shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+          photoUrl: txn.shipment.photo_url || null,
+        }
+      : {
+          trackingNumber: null,
+          courier: null,
+          shipmentDate: null,
+          photoUrl: null,
+        },
+    fundReleaseRequest: fr
+      ? {
+          requested: true,
+          status: fr.status,
+          requestedAt: fr.created_at.toISOString(),
+          resolvedAt: fr.resolved_at?.toISOString() || null,
+          adminEmail: fr.admin?.email || null,
+        }
+      : {
+          requested: false,
+          status: null,
+          requestedAt: null,
+          resolvedAt: null,
+        },
     rekeningSeller: {
       bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
       accountNumber: txn.withdrawal_bank_account?.account_number || null,
@@ -65,8 +91,96 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
     },
     buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
     buyerConfirmedAt: txn.confirmed_at,
+    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
+    buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
   };
+};
+
+const getTransactionListBySeller = async (sellerId) => {
+  const txn = await transactionRepo.getTransactionListForSeller(sellerId);
+  // Return empty array if no transactions (no throw)
+  if (!txn || txn.length === 0) {
+    return [];
+  }
+
+  return txn.map((txn) => ({
+    itemName: txn.item_name,
+    totalAmount: txn.total_amount,
+    buyerEmail: txn.buyer?.email || "-",
+    virtualAccount: txn.virtual_account_number,
+    status: txn.status,
+    paymentDeadline: txn.payment_deadline,
+    currentTimestamp: new Date().toISOString(),
+  }));
+};
+
+const generateTransactionCode = () => {
+  const prefix = "TRX";
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `${prefix}-${timestamp}-${random}`;
+};
+
+const generateTransaction = async ({
+  seller_id,
+  buyer_id,
+  item_name,
+  item_price,
+  status,
+  virtual_account_number,
+  withdrawal_bank_account_id,
+}) => {
+  // plt fee, insurance fee, dan total amount are hardcoded for simplicity
+  let platform_fee = 0;
+  if (item_price >= 10000 && item_price < 499999) {
+    platform_fee = 5000;
+  } else if (item_price >= 500000 && item_price < 4999999) {
+    platform_fee = item_price * 0.01;
+  } else if (item_price >= 5000000) {
+    platform_fee = item_price * 0.008;
+  } else {
+    throwError("Harga item tidak valid untuk transaksi", 400);
+  }
+  const insurance_fee = 0.002 * item_price;
+  const total_amount = item_price + platform_fee + insurance_fee;
+
+  //payment deadline also hardocdeed
+  const payment_deadline = new Date(Date.now() + 2 * 60 * 60 * 1000);
+  const created_at = new Date(Date.now());
+
+  //status is hardcoded to pending_payment
+  status = "pending_payment";
+
+  const existingTransaction = await transactionRepo.findActiveTransaction({
+    seller_id,
+    buyer_id,
+  });
+  if (existingTransaction) {
+    throwError(
+      `Transaksi aktif sudah ada untuk seller dan buyer ini dengan ID ${existingTransaction.transactionCode}`,
+      400
+    );
+  }
+  const transaction_code = generateTransactionCode();
+
+  const newTransaction = await transactionRepo.createTransaction({
+    transaction_code,
+    seller_id,
+    buyer_id,
+    item_name,
+    item_price,
+    platform_fee,
+    insurance_fee,
+    total_amount,
+    status,
+    virtual_account_number,
+    payment_deadline,
+    withdrawal_bank_account_id,
+    created_at,
+  });
+
+  return newTransaction;
 };
 
 const inputShipment = async (transactionId, sellerId, data) => {
@@ -146,4 +260,8 @@ export default {
   inputShipment,
   cancelTransactionBySeller,
   confirmationShipmentRequest,
+  getTransactionDetailBySeller,
+  generateTransaction,
+  generateTransactionCode,
+  getTransactionListBySeller,
 };
