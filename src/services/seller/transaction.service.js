@@ -56,7 +56,8 @@ const generateTransactionCode = () => {
 
 
 
-const generateTransaction = async ({seller_id,
+const generateTransaction = async ({
+  seller_id,
   buyer_id,
   item_name,
   item_price,
@@ -65,13 +66,28 @@ const generateTransaction = async ({seller_id,
   withdrawal_bank_account_id}) => {
 
     // plt fee, insurance fee, dan total amount are hardcoded for simplicity
-    const platform_fee = 25000;
-    const insurance_fee = 5000;
+    let platform_fee = 0;
+    if (item_price >= 10000 && item_price < 499999) {
+      platform_fee = 5000;
+    }
+    else if (item_price >= 500000 && item_price < 4999999){
+      platform_fee = item_price * 0.01;
+    }
+    else if (item_price >= 5000000) {
+      platform_fee = item_price * 0.008;
+    } 
+    else {
+      throwError("Harga item tidak valid untuk transaksi", 400);
+    }
+    const insurance_fee = 0.002* item_price;
     const total_amount = item_price + platform_fee + insurance_fee;
 
     //payment deadline also hardocdeed
     const payment_deadline = new Date(Date.now() + 2 * 60 * 60 * 1000)
     const created_at = new Date(Date.now());
+
+    //status is hardcoded to pending_payment
+    status = "pending_payment";
 
     const existingTransaction = await transactionRepo.findActiveTransaction({
       seller_id,

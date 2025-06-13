@@ -17,26 +17,19 @@ const generateTransaction = async (req, res) => {
     buyer_id,
     item_name,
     item_price,
-    platform_fee,
-    insurance_fee,
-    total_amount,
     status,
     virtual_account_number,
-    payment_deadline,
     withdrawal_bank_account_id
   } = req.body;
+  // const seller_id = req.user.id;
 
   const newTransaction = await sellerTransactionService.generateTransaction({
     seller_id,
     buyer_id,
     item_name,
     item_price,
-    platform_fee,
-    insurance_fee,
-    total_amount,
     status,
     virtual_account_number,
-    payment_deadline,
     withdrawal_bank_account_id
   });
 

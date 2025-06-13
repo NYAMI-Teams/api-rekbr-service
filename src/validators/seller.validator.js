@@ -12,10 +12,8 @@ const createTransactionValidation = [
     .isInt({ min: 0 })
     .withMessage("Harga item harus berupa angka positif"),
 
-  body("status").notEmpty().withMessage("Status transaksi wajib diisi"),
-
   body("virtual_account_number").notEmpty().withMessage("Nomor VA wajib diisi"),
-  
+
   body("withdrawal_bank_account_id")
     .notEmpty()
     .withMessage("Rekening penarikan wajib diisi"),

@@ -6,6 +6,7 @@ import validateRequest from "../middlewares/validateRequest.js";
 import authentication from "../middlewares/authentication.js";
 
 const router = Router();
+console.log("test user routes");
 
 router.post("/register", userValidator.createUserValidation, validateRequest, asyncHandler(userController.register));
 router.post("/login", userValidator.loginUserValidation, validateRequest, asyncHandler(userController.login));
