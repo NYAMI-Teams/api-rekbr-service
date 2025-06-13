@@ -1,5 +1,6 @@
 import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
+import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 
 const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   const txn = await transactionRepo.getTransactionDetailByBuyer(
@@ -7,6 +8,11 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
     buyerId
   );
   if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
+
+  const fr =
+    await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+      transactionId
+    );
 
   return {
     id: txn.id,
@@ -36,12 +42,15 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           shipmentDate: null,
           photoUrl: null,
         },
-    fundReleaseRequest: {
-      requested: true,
-      status: "approved",
-      requestedAt: new Date().toISOString(),
-      resolvedAt: new Date(Date.now() + 3600000).toISOString(),
-    },
+    fundReleaseRequest: fr
+      ? {
+          requested: true,
+          status: fr.status,
+          requestedAt: fr.created_at.toISOString(),
+          resolvedAt: fr.resolved_at?.toISOString() || null,
+          adminEmail: fr.admin?.email || null,
+        }
+      : { requested: false, status: null, requestedAt: null, resolvedAt: null },
     buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
     buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),

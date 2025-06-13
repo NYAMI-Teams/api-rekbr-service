@@ -11,6 +11,11 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   );
   if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
+  const fr =
+    await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+      transactionId
+    );
+
   return {
     id: txn.id,
     transactionCode: txn.transaction_code,
@@ -39,12 +44,20 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           shipmentDate: null,
           photoUrl: null,
         },
-    fundReleaseRequest: {
-      requested: true,
-      status: "approved",
-      requestedAt: new Date().toISOString(),
-      resolvedAt: new Date(Date.now() + 3600000).toISOString(),
-    },
+    fundReleaseRequest: fr
+      ? {
+          requested: true,
+          status: fr.status,
+          requestedAt: fr.created_at.toISOString(),
+          resolvedAt: fr.resolved_at?.toISOString() || null,
+          adminEmail: fr.admin?.email || null,
+        }
+      : {
+          requested: false,
+          status: null,
+          requestedAt: null,
+          resolvedAt: null,
+        },
     rekeningSeller: {
       bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
       accountNumber: txn.withdrawal_bank_account?.account_number || null,
