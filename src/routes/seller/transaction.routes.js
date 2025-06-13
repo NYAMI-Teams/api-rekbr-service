@@ -13,12 +13,6 @@ router.get(
   asyncHandler(sellerTransactionController.getTransactionDetailSeller)
 )
 
-router.get(
-  "/transactions/:transactionId",
-  authentication,
-  asyncHandler(sellerTransactionController.getTransactionDetailSeller)
-);
-
 router.post(
   "/transactions/:transactionId/shipping",
   authentication,

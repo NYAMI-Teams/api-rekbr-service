@@ -99,4 +99,6 @@ export default {
   getTransactionDetailSeller,
   generateTransaction,
   getTransactionListSeller,
+  cancelTransactionBySeller,
+  inputShipment,
 };

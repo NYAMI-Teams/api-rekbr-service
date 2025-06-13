@@ -15,7 +15,6 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
     await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
       transactionId
     );
-
   return {
     id: txn.id,
     transactionCode: txn.transaction_code,
@@ -58,11 +57,40 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           requestedAt: null,
           resolvedAt: null,
         },
+    shipment: txn.shipment
+      ? {
+          trackingNumber: txn.shipment.tracking_number,
+          courier: txn.shipment.courier?.name || null,
+          shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+          photoUrl: txn.shipment.photo_url || null,
+        }
+      : {
+          trackingNumber: null,
+          courier: null,
+          shipmentDate: null,
+          photoUrl: null,
+        },
+    fundReleaseRequest: fr
+      ? {
+          requested: true,
+          status: fr.status,
+          requestedAt: fr.created_at.toISOString(),
+          resolvedAt: fr.resolved_at?.toISOString() || null,
+          adminEmail: fr.admin?.email || null,
+        }
+      : {
+          requested: false,
+          status: null,
+          requestedAt: null,
+          resolvedAt: null,
+        },
     rekeningSeller: {
       bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
       accountNumber: txn.withdrawal_bank_account?.account_number || null,
       logoUrl: txn.withdrawal_bank_account?.bank?.logo_url || null,
     },
+    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
+    buyerConfirmedAt: txn.confirmed_at,
     buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
     buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
