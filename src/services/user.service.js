@@ -84,12 +84,9 @@ const login = async ({ email, password }) => {
 }
 
 const resendVerifyEmail = async ({ email }) => {
-  const user = await userRepository.findUserByEmail(email);
+  const user = await redisClient.get("user:" + email);
   if (!user) {
     throwError("User tidak ditemukan", 404);
-  }
-  if (user.status === "active") {
-    throwError("Email sudah diverifikasi", 400);
   }
   const otpCode = await generateOtpCode("verifyEmail:" + email);
 

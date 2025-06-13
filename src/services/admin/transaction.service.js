@@ -2,12 +2,9 @@ import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 
-const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
-  const txn = await transactionRepo.getTransactionDetailByBuyer(
-    transactionId,
-    buyerId
-  );
-  if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
+const getTransactionDetailByAdmin = async (transactionId) => {
+  const txn = await transactionRepo.getTransactionDetailByAdmin(transactionId);
+  if (!txn) throwError("Transaksi tidak ditemukan", 404);
 
   const fr =
     await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
@@ -25,6 +22,7 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
     totalAmount: txn.total_amount,
     virtualAccount: txn.virtual_account_number,
     sellerEmail: txn.seller?.email || null,
+    buyerEmail: txn.buyer?.email || null,
     createdAt: txn.created_at,
     paidAt: txn.paid_at,
     paymentDeadline: txn.payment_deadline,
@@ -42,59 +40,50 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           shipmentDate: null,
           photoUrl: null,
         },
+    withdrawalBank: txn.withdrawal_bank_account
+      ? {
+          bankName: txn.withdrawal_bank_account.bank?.bank_name || null,
+          accountNumber: txn.withdrawal_bank_account.account_number || null,
+          logoUrl: txn.withdrawal_bank_account.bank?.logo_url || null,
+        }
+      : {
+          bankName: null,
+          accountNumber: null,
+          logoUrl: null,
+        },
     fundReleaseRequest: fr
       ? {
           requested: true,
           status: fr.status,
+          evidenceUrl: fr.evidence_url,
           requestedAt: fr.created_at.toISOString(),
           resolvedAt: fr.resolved_at?.toISOString() || null,
           adminEmail: fr.admin?.email || null,
         }
       : { requested: false, status: null, requestedAt: null, resolvedAt: null },
-    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
+    buyerConfirmDeadline: txn.shipment_deadline, // Nanti diubah jadi value saat admin approve
     buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
   };
 };
 
-const simulatePayment = async (transactionId, buyerId) => {
-  const paidAt = new Date();
-  const shipmentDeadline = new Date(paidAt.getTime() + 2 * 24 * 60 * 60 * 1000); // +2 hari
-
-  const updated = await transactionRepo.updatePaidTransaction(
-    transactionId,
-    buyerId,
-    paidAt,
-    shipmentDeadline
-  );
-  if (updated.count === 0)
-    throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
-
-  return {
-    transactionCode: transactionId,
-    status: "waiting_shipment",
-    paidAt: paidAt.toISOString(),
-    shipmentDeadline: shipmentDeadline.toISOString(),
-  };
-};
-
-const confirmReceived = async (transactionId, buyerId) => {
-  const confirmedAt = new Date();
-  const result = await transactionRepo.confirmReceived(
-    transactionId,
-    buyerId,
-    confirmedAt
-  );
-
-  if (result.count === 0) {
-    throwError("Transaksi tidak ditemukan atau belum dikirim", 404);
-  }
-
-  return { success: true, confirmedAt };
+const getAllTransactionsForAdmin = async () => {
+  const txns = await transactionRepo.getAllTransactionsForAdmin();
+  return txns.map((txn) => ({
+    id: txn.id,
+    transactionCode: txn.transaction_code,
+    itemName: txn.item_name,
+    itemPrice: txn.item_price,
+    totalAmount: txn.total_amount,
+    buyerEmail: txn.buyer?.email || null,
+    sellerEmail: txn.seller?.email || null,
+    status: txn.status,
+    createdAt: txn.created_at,
+    fundReleaseStatus: "pending", // mock until table exists
+  }));
 };
 
 export default {
-  getTransactionDetailByBuyer,
-  simulatePayment,
-  confirmReceived,
+  getTransactionDetailByAdmin,
+  getAllTransactionsForAdmin,
 };
