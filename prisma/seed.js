@@ -34,6 +34,36 @@ async function main() {
     skipDuplicates: true,
   });
 
+ await prisma.user.createMany({
+    data: [
+      {
+        id: "b1b1b1b1-b1b1-b1b1-b1b1-b1b1b1b1b1b1",
+        email: "buyer@gmail.com",
+        password: "$2a$12$WNPs0wziKX.9lLBikRLnA.uKmXQ6bhYjhsYZAhWXBSxJzjtGCCOGe", // testing123
+        kyc_status: "unverified",
+        status: "inactive",
+        is_admin: false,
+      },
+      {
+        id: "s1s1s1s1-s1s1-s1s1-s1s1-s1s1s1s1s1s1",
+        email: "seller@gmail.com",
+        password: "$2a$12$cxENfGn7ncbjloYdHjcRC.pJNgS.c2DoQ5EtHbz29/8xTRd9KcHie", // testing123
+        kyc_status: "unverified",
+        status: "inactive",
+        is_admin: false,
+      },
+      {
+        id: "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1",
+        email: "admin@gmail.com",
+        password: "$2a$12$590YcijWhxc/g3L3/htA0.3Ydo32h8SdE5qSVguCLKWSoFQpTNmou", // testing123
+        kyc_status: "verified",
+        status: "active",
+        is_admin: true,
+      },
+    ],
+    skipDuplicates: true,
+  });
+  
   // Ambil ID bank untuk digunakan di dummyAccount
   const bni = await prisma.bankList.findFirst({
     where: { bank_name: "Bank Negara Indonesia" },

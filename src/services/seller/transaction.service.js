@@ -1,5 +1,7 @@
 import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
+import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
+import digitalStorageService from "../digital-storage.service.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -46,6 +48,32 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
+const confirmationShipmentRequest = async ({transactionId, sellerId, evidence, reason}) => {
+  const txn = await transactionRepo.getTransactionDetailBySeller(
+    transactionId,
+    sellerId
+  );
+  if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
+
+  if (txn.status !== "waiting_shipment") {
+    throwError("Gagal meminta konfirmasi", 400);
+  }
+
+  const evidenceUrl = await digitalStorageService.uploadToSpaces(evidence.buffer, evidence.originalname, evidence.mimetype);
+
+  const payload = {
+    transactionId,
+    sellerId,
+    evidenceUrl,
+    reason,
+  };
+
+  console.log(payload);
+
+  await fundReleaseRequestRepository.createFundReleaseRequest(payload);
+}
+
 export default {
   getTransactionDetailBySeller,
+  confirmationShipmentRequest,
 };
