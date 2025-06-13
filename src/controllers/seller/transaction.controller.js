@@ -12,7 +12,6 @@ const getTransactionDetailSeller = async (req, res) => {
   return resSuccess(res, 200, "Detail transaksi seller berhasil diambil", data);
 };
 
-<<<<<<< HEAD
 const inputShipment = async (req, res) => {
   const { transactionId } = req.params;
   const sellerId = req.user.id;
@@ -36,29 +35,26 @@ const cancelTransactionBySeller = async (req, res) => {
   return resSuccess(res, 200, "Transaksi berhasil dibatalkan", result);
 };
 
-export default {
-  getTransactionDetailSeller,
-  inputShipment,
-  cancelTransactionBySeller,
-=======
 const confirmationShipmentRequest = async (req, res) => {
   const { transactionId } = req.params;
   const { reason } = req.body;
   const sellerId = req.user.id;
   const evidence = req.file;
 
-  
   await sellerTransactionService.confirmationShipmentRequest({
     transactionId,
     sellerId,
     evidence,
-    reason
+    reason,
   });
-  return resSuccess(res, 200, "Permintaan konfirmasi pengiriman berhasil dibuat");
-}
+  return resSuccess(
+    res,
+    200,
+    "Permintaan konfirmasi pengiriman berhasil dibuat"
+  );
+};
 
 export default {
   getTransactionDetailSeller,
-  confirmationShipmentRequest
->>>>>>> 6a0f52a2c68a9532140d1bcaef36d0f589fcd0a4
+  confirmationShipmentRequest,
 };
