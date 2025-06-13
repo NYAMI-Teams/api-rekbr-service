@@ -15,11 +15,12 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   });
 };
 
-const getTransactionDetailBySeller = async (transactionId, sellerId) => {
-  return await prisma.transaction.findFirst({
+const getTransactionDetailBySeller = async (transactionId = null, sellerId) => {
+  const query = {
     where: {
-      id: transactionId,
       seller_id: sellerId,
+      ...(transactionId && { id: transactionId}),
+      
     },
     include: {
       buyer: {
@@ -31,7 +32,13 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
         },
       },
     },
-  });
+  }
+
+  if (transactionId) {
+    return await prisma.transaction.findFirst(query);
+  } else {
+    return await prisma.transaction.findMany(query);
+  }
 };
 
 const findActiveTransaction = async ({ seller_id, buyer_id }) => {

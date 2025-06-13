@@ -12,6 +12,12 @@ router.get(
   asyncHandler(transactionController.getTransactionDetailSeller)
 );
 
+router.get(
+  "/transactions",
+  authentication,
+  asyncHandler(transactionController.getTransactionDetailSeller)
+);
+
 router.post(
   "/transactions",
   authentication,

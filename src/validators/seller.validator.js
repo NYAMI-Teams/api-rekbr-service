@@ -1,7 +1,6 @@
 import { body } from "express-validator";
 
 const createTransactionValidation = [
-  body("seller_id").notEmpty().withMessage("Seller ID wajib diisi"),
 
   body("buyer_id").notEmpty().withMessage("Buyer ID wajib diisi"),
 
