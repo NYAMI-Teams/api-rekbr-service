@@ -39,6 +39,36 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   });
 };
 
+const getTransactionDetailByAdmin = async (transactionId) => {
+  return await prisma.transaction.findUnique({
+    where: { id: transactionId },
+    include: {
+      buyer: { select: { email: true } },
+      seller: { select: { email: true } },
+      withdrawal_bank_account: {
+        include: { bank: true },
+      },
+      shipment: {
+        include: {
+          courier: true,
+        },
+      },
+    },
+  });
+};
+
+const getAllTransactionsForAdmin = async () => {
+  return await prisma.transaction.findMany({
+    include: {
+      buyer: { select: { email: true } },
+      seller: { select: { email: true } },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+};
+
 const updatePaidTransaction = async (
   transactionId,
   buyerId,
@@ -98,6 +128,8 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
 export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
+  getTransactionDetailByAdmin,
+  getAllTransactionsForAdmin,
   updatePaidTransaction,
   updateStatusToShipped,
   confirmReceived,
