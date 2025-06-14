@@ -51,7 +51,7 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           adminEmail: fr.admin?.email || null,
         }
       : { requested: false, status: null, requestedAt: null, resolvedAt: null },
-    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
+    buyerConfirmDeadline: txn.buyer_confirm_deadline,
     buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
   };
@@ -80,17 +80,33 @@ const simulatePayment = async (transactionId, buyerId) => {
 
 const confirmReceived = async (transactionId, buyerId) => {
   const confirmedAt = new Date();
-  const result = await transactionRepo.confirmReceived(
-    transactionId,
-    buyerId,
-    confirmedAt
-  );
 
-  if (result.count === 0) {
+  const txn = await transactionRepo.getTransactionDetailByBuyer(
+    transactionId,
+    buyerId
+  );
+  if (!txn || txn.status !== "shipped") {
     throwError("Transaksi tidak ditemukan atau belum dikirim", 404);
   }
 
-  return { success: true, confirmedAt };
+  const amountToWithdraw =
+    txn.total_amount - txn.platform_fee - txn.insurance_fee;
+
+  const result = await transactionRepo.updateAfterBuyerConfirmation(
+    transactionId,
+    buyerId,
+    confirmedAt,
+    amountToWithdraw
+  );
+
+  if (result.count === 0) {
+    throwError("Gagal mengkonfirmasi penerimaan barang", 400);
+  }
+
+  return {
+    success: true,
+    confirmedAt,
+  };
 };
 
 export default {

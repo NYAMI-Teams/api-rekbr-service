@@ -6,15 +6,37 @@ import validateRequest from "../middlewares/validateRequest.js";
 import authentication from "../middlewares/authentication.js";
 
 const router = Router();
-console.log("test user routes");
 
-router.post("/register", userValidator.createUserValidation, validateRequest, asyncHandler(userController.register));
-router.post("/login", userValidator.loginUserValidation, validateRequest, asyncHandler(userController.login));
-router.post("/resend-verify-email", userValidator.resendVerifyEmailValidation, validateRequest, asyncHandler(userController.resendVerifyEmail));
-router.post("/verify-email", userValidator.verifyEmailValidation, validateRequest, asyncHandler(userController.verifyEmail));
-router.post("/verify-kyc", authentication, asyncHandler(userController.verifyKyc));
+router.post(
+  "/register",
+  userValidator.createUserValidation,
+  validateRequest,
+  asyncHandler(userController.register)
+);
+router.post(
+  "/login",
+  userValidator.loginUserValidation,
+  validateRequest,
+  asyncHandler(userController.login)
+);
+router.post(
+  "/resend-verify-email",
+  userValidator.resendVerifyEmailValidation,
+  validateRequest,
+  asyncHandler(userController.resendVerifyEmail)
+);
+router.post(
+  "/verify-email",
+  userValidator.verifyEmailValidation,
+  validateRequest,
+  asyncHandler(userController.verifyEmail)
+);
+router.post(
+  "/verify-kyc",
+  authentication,
+  asyncHandler(userController.verifyKyc)
+);
 router.get("/profile", authentication, asyncHandler(userController.getProfile));
-
 
 export default router;
 
@@ -169,7 +191,6 @@ export default router;
  *       404:
  *         description: User tidak terdaftar
  */
-
 
 /**
  * @swagger

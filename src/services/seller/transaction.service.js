@@ -57,41 +57,12 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           requestedAt: null,
           resolvedAt: null,
         },
-    shipment: txn.shipment
-      ? {
-          trackingNumber: txn.shipment.tracking_number,
-          courier: txn.shipment.courier?.name || null,
-          shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
-          photoUrl: txn.shipment.photo_url || null,
-        }
-      : {
-          trackingNumber: null,
-          courier: null,
-          shipmentDate: null,
-          photoUrl: null,
-        },
-    fundReleaseRequest: fr
-      ? {
-          requested: true,
-          status: fr.status,
-          requestedAt: fr.created_at.toISOString(),
-          resolvedAt: fr.resolved_at?.toISOString() || null,
-          adminEmail: fr.admin?.email || null,
-        }
-      : {
-          requested: false,
-          status: null,
-          requestedAt: null,
-          resolvedAt: null,
-        },
     rekeningSeller: {
       bankName: txn.withdrawal_bank_account?.bank?.bank_name || null,
       accountNumber: txn.withdrawal_bank_account?.account_number || null,
       logoUrl: txn.withdrawal_bank_account?.bank?.logo_url || null,
     },
-    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
-    buyerConfirmedAt: txn.confirmed_at,
-    buyerConfirmDeadline: txn.shipment_deadline, // nanti diubah jadi value saat admin approve
+    buyerConfirmDeadline: txn.buyer_confirm_deadline,
     buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
   };
@@ -106,7 +77,10 @@ const getTransactionListBySeller = async (sellerId) => {
 
   const transactionsWithFR = await Promise.all(
     txn.map(async (txn) => {
-      const fr = await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(txn.id);
+      const fr =
+        await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+          txn.id
+        );
 
       return {
         id: txn.id,
@@ -149,13 +123,17 @@ const generateTransactionCode = () => {
   return `${prefix}-${timestamp}-${random}`;
 };
 
+const generateVirtualAccountNumber = () => {
+  const prefix = "888";
+  const randomNumber = Math.floor(1000000000 + Math.random() * 9000000000);
+  return `${prefix}${randomNumber}`;
+};
+
 const generateTransaction = async ({
   seller_id,
   buyer_id,
   item_name,
   item_price,
-  status,
-  virtual_account_number,
   withdrawal_bank_account_id,
 }) => {
   // plt fee, insurance fee, dan total amount are hardcoded for simplicity
@@ -177,7 +155,8 @@ const generateTransaction = async ({
   const created_at = new Date(Date.now());
 
   //status is hardcoded to pending_payment
-  status = "pending_payment";
+  const status = "pending_payment";
+  const virtual_account_number = generateVirtualAccountNumber();
 
   const existingTransaction = await transactionRepo.findActiveTransaction({
     seller_id,
@@ -210,21 +189,34 @@ const generateTransaction = async ({
   return newTransaction;
 };
 
-const inputShipment = async (transactionId, sellerId, data) => {
+const inputShipment = async (
+  transactionId,
+  sellerId,
+  courierId,
+  trackingNumber,
+  photo
+) => {
   const transaction = await transactionRepo.getTransactionDetailBySeller(
     transactionId,
     sellerId
   );
+
   if (!transaction) throwError("Transaksi tidak ditemukan", 404);
 
   if (transaction.status !== "waiting_shipment")
     throwError("Transaksi belum bisa dikirim", 400);
 
+  const photoUrl = await digitalStorageService.uploadToSpaces(
+    photo.buffer,
+    photo.originalname,
+    photo.mimetype
+  );
+
   await shipmentRepo.createShipment({
     transactionId,
-    courierId: data.courierId,
-    trackingNumber: data.trackingNumber,
-    photoUrl: data.photoUrl,
+    courierId,
+    trackingNumber,
+    photoUrl,
   });
 
   await transactionRepo.updateStatusToShipped(transactionId);

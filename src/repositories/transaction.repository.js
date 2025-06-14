@@ -101,7 +101,12 @@ const updateStatusToShipped = async (transactionId) => {
   });
 };
 
-const confirmReceived = async (transactionId, buyerId, confirmedAt) => {
+const updateAfterBuyerConfirmation = async (
+  transactionId,
+  buyerId,
+  confirmedAt,
+  withdrawnAmount
+) => {
   return await prisma.transaction.updateMany({
     where: {
       id: transactionId,
@@ -111,6 +116,8 @@ const confirmReceived = async (transactionId, buyerId, confirmedAt) => {
     data: {
       status: "completed",
       confirmed_at: confirmedAt,
+      withdrawn_at: new Date(),
+      withdrawn_amount: withdrawnAmount,
     },
   });
 };
@@ -125,8 +132,10 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
       },
     },
     data: {
-      status: "cancelled",
+      status: "canceled",
       cancelled_at: new Date(),
+      cancel_reason: "Transaksi dibatalkan oleh penjual",
+      cancelled_by_id: sellerId,
     },
   });
 };
@@ -147,8 +156,6 @@ const getTransactionListForSeller = async (sellerId) => {
     },
   });
 };
-
-
 
 const findActiveTransaction = async ({ seller_id, buyer_id }) => {
   const activeTransaction = await prisma.transaction.findFirst({
@@ -195,7 +202,19 @@ const createTransaction = async ({
   });
 
   return toCamelCase(newTransaction);
-}
+};
+
+const updateTransactionBuyerConfirmDeadline = async (
+  transactionId,
+  deadline
+) => {
+  return await prisma.transaction.update({
+    where: { id: transactionId },
+    data: {
+      buyer_confirm_deadline: deadline,
+    },
+  });
+};
 
 export default {
   getTransactionDetailByBuyer,
@@ -207,6 +226,7 @@ export default {
   getAllTransactionsForAdmin,
   updatePaidTransaction,
   updateStatusToShipped,
-  confirmReceived,
   cancelTransactionBySeller,
+  updateAfterBuyerConfirmation,
+  updateTransactionBuyerConfirmDeadline,
 };
