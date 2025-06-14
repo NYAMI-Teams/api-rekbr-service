@@ -27,14 +27,8 @@ const getTransactionListSeller = async (req, res) => {
 };
 
 const generateTransaction = async (req, res) => {
-  const {
-    buyer_id,
-    item_name,
-    item_price,
-    status,
-    virtual_account_number,
-    withdrawal_bank_account_id,
-  } = req.body;
+  const { buyer_id, item_name, item_price, withdrawal_bank_account_id } =
+    req.body;
   const seller_id = req.user.id;
 
   const newTransaction = await sellerTransactionService.generateTransaction({
@@ -42,8 +36,6 @@ const generateTransaction = async (req, res) => {
     buyer_id,
     item_name,
     item_price,
-    status,
-    virtual_account_number,
     withdrawal_bank_account_id,
   });
 
@@ -53,11 +45,17 @@ const generateTransaction = async (req, res) => {
 const inputShipment = async (req, res) => {
   const { transactionId } = req.params;
   const sellerId = req.user.id;
+  const { courier_id, tracking_number } = req.body;
+  const photo = req.file;
+
   const result = await sellerTransactionService.inputShipment(
     transactionId,
     sellerId,
-    req.body
+    courier_id,
+    tracking_number,
+    photo
   );
+
   return resSuccess(res, 200, "Resi berhasil disimpan", result);
 };
 
@@ -91,7 +89,6 @@ const confirmationShipmentRequest = async (req, res) => {
     "Permintaan konfirmasi pengiriman berhasil dibuat"
   );
 };
-
 
 export default {
   getTransactionDetailSeller,

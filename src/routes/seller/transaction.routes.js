@@ -5,17 +5,21 @@ import transactionValidator from "../../validators/seller.validator.js";
 import validateRequest from "../../middlewares/validateRequest.js";
 import authentication from "../../middlewares/authentication.js";
 import uploadImage from "../../middlewares/uploadImage.js";
+import shipmentValidator from "../../validators/shipment.validator.js";
 const router = Router();
 
 router.get(
-  "/transactions/:transactionId", 
+  "/transactions/:transactionId",
   authentication,
   asyncHandler(sellerTransactionController.getTransactionDetailSeller)
-)
+);
 
 router.post(
   "/transactions/:transactionId/shipping",
   authentication,
+  uploadImage("photo"),
+  shipmentValidator.inputShipmentValidator,
+  validateRequest,
   asyncHandler(sellerTransactionController.inputShipment)
 );
 

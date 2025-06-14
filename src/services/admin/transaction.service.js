@@ -61,7 +61,7 @@ const getTransactionDetailByAdmin = async (transactionId) => {
           adminEmail: fr.admin?.email || null,
         }
       : { requested: false, status: null, requestedAt: null, resolvedAt: null },
-    buyerConfirmDeadline: txn.shipment_deadline, // Nanti diubah jadi value saat admin approve
+    buyerConfirmDeadline: txn.buyer_confirm_deadline,
     buyerConfirmedAt: txn.confirmed_at,
     currentTimestamp: new Date().toISOString(),
   };
@@ -84,19 +84,33 @@ const getAllTransactionsForAdmin = async () => {
 };
 
 const updateFundReleaseRequest = async (transactionId, status, adminId) => {
-  const txn = await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
-    transactionId
-  );
+  const txn =
+    await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+      transactionId
+    );
   if (!txn) throwError("Permintaan rilis dana tidak ditemukan", 404);
   if (txn.status !== "pending") {
     throwError("Permintaan rilis dana tidak dalam status 'pending'", 400);
   }
+
   await fundReleaseRequestRepository.updateFundReleaseRequestStatus(
     txn.id,
     status,
     adminId
   );
-}
+
+  // ⏰ Set buyer_confirm_deadline H+2 jika approved
+  if (status === "approved") {
+    const resolvedAt = new Date();
+    const buyerConfirmDeadline = new Date(
+      resolvedAt.getTime() + 2 * 24 * 60 * 60 * 1000
+    );
+    await transactionRepo.updateTransactionBuyerConfirmDeadline(
+      transactionId,
+      buyerConfirmDeadline
+    );
+  }
+};
 
 export default {
   getTransactionDetailByAdmin,
