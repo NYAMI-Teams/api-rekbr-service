@@ -8,31 +8,24 @@ import authorization from "../../middlewares/authorization.js";
 const router = Router();
 
 router.get(
-  "/transactions",
+  "/",
   authentication,
   authorization,
   asyncHandler(adminTransactionController.getAllTransactions)
 );
 
 router.get(
-  "/transactions/:transactionId",
+  "/:transactionId",
   authentication,
   authorization,
   asyncHandler(adminTransactionController.getTransactionDetailById)
 );
 
 router.post(
-  "/transactions/:transactionId/fund-release/:action",
+  "/:transactionId/fund-release/:action",
   authentication,
   authorization,
   asyncHandler(adminTransactionController.updateFundReleaseRequestStatus)
-);
-
-router.get(
-  "/users",
-  authentication,
-  authorization,
-  asyncHandler(adminUserController.getAllUsers)
 );
 
 export default router;
