@@ -24,8 +24,8 @@ const getAllTransactions = async (req, res) => {
   const skip = (Number(page) - 1) * Number(limit);
   const take = Number(limit);
 
-  const transactions = await adminTransactionService.getAllTransactionsForAdmin(
-    {
+  const { transactions, totalCount } =
+    await adminTransactionService.getAllTransactionsForAdmin({
       status,
       fundReleaseStatus,
       createdFrom,
@@ -33,14 +33,18 @@ const getAllTransactions = async (req, res) => {
       search,
       skip,
       take,
-    }
-  );
+    });
 
   return resSuccess(
     res,
     200,
     "Daftar transaksi berhasil diambil",
-    transactions
+    transactions,
+    {
+      page: Number(page),
+      limit: Number(limit),
+      totalCount,
+    }
   );
 };
 
