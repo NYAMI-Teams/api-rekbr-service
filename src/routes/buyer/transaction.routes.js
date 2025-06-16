@@ -23,6 +23,12 @@ router.post(
   asyncHandler(buyerTransactionController.confirmReceived)
 );
 
+router.get(
+  "/transactions",
+  authentication,
+  asyncHandler(buyerTransactionController.getTransactionListBuyer)
+);
+
 export default router;
 
 /**
