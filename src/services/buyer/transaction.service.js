@@ -128,23 +128,23 @@ const getTransactionListByBuyer = async (buyerId) => {
         transactionCode: txn.transaction_code,
         itemName: txn.item_name,
         totalAmount: txn.total_amount,
-        buyerEmail: txn.buyer?.email || "-",
+        sellerEmail: txn.seller?.email || "-",
         virtualAccount: txn.virtual_account_number,
         status: txn.status,
         paymentDeadline: txn.payment_deadline,
         shipmentDeadline: txn.shipment_deadline,
         currentTimestamp: new Date().toISOString(),
         shipment: txn.shipment
-        ? {
-            trackingNumber: txn.shipment.tracking_number,
-            courier: txn.shipment.courier?.name || null,
-            shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
-          }
-        : {
-            trackingNumber: null,
-            courier: null,
-            shipmentDate: null,
-          },
+          ? {
+              trackingNumber: txn.shipment.tracking_number,
+              courier: txn.shipment.courier?.name || null,
+              shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+            }
+          : {
+              trackingNumber: null,
+              courier: null,
+              shipmentDate: null,
+            },
         fundReleaseRequest: fr
           ? {
               requested: true,
@@ -160,16 +160,15 @@ const getTransactionListByBuyer = async (buyerId) => {
               resolvedAt: null,
               adminEmail: null,
             },
-            buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
-            buyerConfirmedAt: txn.confirmed_at || null,
-            currentTimestamp: new Date().toISOString(),
+        buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+        buyerConfirmedAt: txn.confirmed_at || null,
+        currentTimestamp: new Date().toISOString(),
       };
     })
   );
 
   return transactionsWithFR;
 };
-
 
 export default {
   getTransactionDetailByBuyer,
