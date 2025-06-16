@@ -27,16 +27,16 @@ const getTransactionListSeller = async (req, res) => {
 };
 
 const generateTransaction = async (req, res) => {
-  const { buyer_id, item_name, item_price, withdrawal_bank_account_id } =
+  const { email, item_name, item_price, withdrawal_bank_account_id } =
     req.body;
   const seller_id = req.user.id;
 
   const newTransaction = await sellerTransactionService.generateTransaction({
     seller_id,
-    buyer_id,
     item_name,
     item_price,
     withdrawal_bank_account_id,
+    email,
   });
 
   return resSuccess(res, 201, "Transaksi berhasil dibuat", newTransaction);

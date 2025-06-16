@@ -36,7 +36,13 @@ router.post(
   authentication,
   asyncHandler(userController.verifyKyc)
 );
+
 router.get("/profile", authentication, asyncHandler(userController.getProfile));
+
+router.get(
+  "/check-user",
+  asyncHandler(userController.getEmail)
+);
 
 export default router;
 
