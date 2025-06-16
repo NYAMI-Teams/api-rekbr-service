@@ -295,9 +295,11 @@ const updateTransactionBuyerConfirmDeadline = async (
   });
 };
 
-const getTransactionListForBuyer = async (buyerId) => {
+const getTransactionListForBuyer = async (buyerId, status) => {
   return await prisma.transaction.findMany({
-    where: { buyer_id: buyerId },
+    where: { buyer_id: buyerId,
+      ...(status ? { status } : {}),
+     },
     orderBy: { created_at: "desc" },
     include: {
       seller: {

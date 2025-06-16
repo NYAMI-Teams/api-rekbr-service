@@ -109,8 +109,8 @@ const confirmReceived = async (transactionId, buyerId) => {
   };
 };
 
-const getTransactionListByBuyer = async (buyerId) => {
-  const txn = await transactionRepo.getTransactionListForBuyer(buyerId);
+const getTransactionListByBuyer = async (buyerId, status=null) => {
+  const txn = await transactionRepo.getTransactionListForBuyer(buyerId, status);
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
     return [];
