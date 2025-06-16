@@ -217,9 +217,11 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
   });
 };
 
-const getTransactionListForSeller = async (sellerId) => {
+const getTransactionListForSeller = async (sellerId, status=null) => {
   return await prisma.transaction.findMany({
-    where: { seller_id: sellerId },
+    where: { seller_id: sellerId,
+      ...(status ? { status } : {}),
+    },
     orderBy: { created_at: "desc" },
     include: {
       buyer: {

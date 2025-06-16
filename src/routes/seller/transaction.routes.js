@@ -172,6 +172,13 @@ export default router;
  *     tags: [Seller Transactions]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - name: status
+ *         in: query
+ *         required: false
+ *         description: Status transaksi (e.g., completed, pending_payment, waiting_shipment)
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: List transaksi seller berhasil diambil

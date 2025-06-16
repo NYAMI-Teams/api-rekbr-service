@@ -69,8 +69,8 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
-const getTransactionListBySeller = async (sellerId) => {
-  const txn = await transactionRepo.getTransactionListForSeller(sellerId);
+const getTransactionListBySeller = async (sellerId, status=null) => {
+  const txn = await transactionRepo.getTransactionListForSeller(sellerId, status);
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
     return [];
