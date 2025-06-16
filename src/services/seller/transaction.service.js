@@ -171,7 +171,7 @@ const generateTransaction = async ({
   const total_amount = item_price + platform_fee + insurance_fee;
 
   //payment deadline also hardocdeed
-  const payment_deadline = new Date(Date.now() + 2 * 60 * 60 * 1000);
+  const payment_deadline = new Date(Date.now() + 3 * 60 * 60 * 1000);
   const created_at = new Date(Date.now());
 
   //status is hardcoded to pending_payment
