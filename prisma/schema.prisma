@@ -78,6 +78,7 @@ model Transaction {
   paid_at                DateTime?
   payment_deadline       DateTime?
   shipment_deadline      DateTime?
+  buyer_confirm_deadline DateTime?
   confirmed_at           DateTime?
 
   withdrawal_bank_account    BankAccount? @relation("WithdrawalBankAccount", fields: [withdrawal_bank_account_id], references: [id])

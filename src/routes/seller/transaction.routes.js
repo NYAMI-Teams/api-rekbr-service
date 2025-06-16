@@ -5,17 +5,21 @@ import transactionValidator from "../../validators/seller.validator.js";
 import validateRequest from "../../middlewares/validateRequest.js";
 import authentication from "../../middlewares/authentication.js";
 import uploadImage from "../../middlewares/uploadImage.js";
+import shipmentValidator from "../../validators/shipment.validator.js";
 const router = Router();
 
 router.get(
-  "/transactions/:transactionId", 
+  "/transactions/:transactionId",
   authentication,
   asyncHandler(sellerTransactionController.getTransactionDetailSeller)
-)
+);
 
 router.post(
   "/transactions/:transactionId/shipping",
   authentication,
+  uploadImage("photo"),
+  shipmentValidator.inputShipmentValidator,
+  validateRequest,
   asyncHandler(sellerTransactionController.inputShipment)
 );
 
@@ -136,7 +140,8 @@ export default router;
  *                     resolvedAt:
  *                       type: string
  *                       format: date-time
- *
+ *                     adminEmail:
+ *                       type: string
  *                 rekeningSeller:
  *                   type: object
  *                   properties:
@@ -236,4 +241,165 @@ export default router;
  *         description: Transaksi tidak ditemukan
  *       400:
  *         description: Transaksi tidak dapat dibatalkan
+ */
+
+/**
+ * @swagger
+ * /api/seller/transaction/{transactionId}/request-confirmation-shipment:
+ *   post:
+ *     summary: Permintaan konfirmasi pengiriman untuk transaksi seller
+ *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: transactionId
+ *         in: path
+ *         required: true
+ *         description: ID transaksi
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - evidence
+ *               - reason
+ *             properties:
+ *               evidence:
+ *                 type: string
+ *                 format: binary
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Permintaan konfirmasi pengiriman berhasil dibuat
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       404:
+ *         description: Transaksi tidak ditemukan atau bukan milik Anda
+ *       400:
+ *         description: Gagal meminta konfirmasi
+ */
+
+/**
+ * @swagger
+ * /api/seller/transactions:
+ *   get:
+ *     summary: Mendapatkan daftar transaksi seller
+ *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List transaksi seller berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   transactionCode:
+ *                     type: string
+ *                   itemName:
+ *                     type: string
+ *                   totalAmount:
+ *                     type: number
+ *                   buyerEmail:
+ *                     type: string
+ *                   virtualAccount:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   paymentDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                   shipmentDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                   currentTimestamp:
+ *                     type: string
+ *                     format: date-time
+ *                   trackingNumber:
+ *                     type: string
+ *                   fundReleaseRequest:
+ *                     type: object
+ *                     properties:
+ *                       requested:
+ *                         type: boolean
+ *                       status:
+ *                         type: string
+ *                       requestedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       resolvedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       adminEmail:
+ *                         type: string
+ *       404:
+ *         description: Transaksi tidak ditemukan
+ */
+
+/**
+ * @swagger
+ * /api/seller/transactions:
+ *   post:
+ *     summary: Membuat transaksi baru oleh seller
+ *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - buyer_id
+ *               - item_name
+ *               - item_price
+ *               - virtual_account_number
+ *               - withdrawal_bank_account_id
+ *             properties:
+ *               buyer_id:
+ *                 type: string
+ *               item_name:
+ *                 type: string
+ *               item_price:
+ *                 type: number
+ *               virtual_account_number:
+ *                 type: string
+ *               withdrawal_bank_account_id:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Transaksi berhasil dibuat
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 transactionCode:
+ *                   type: string
+ *                 itemName:
+ *                   type: string
+ *                 totalAmount:
+ *                   type: number
+ *                 status:
+ *                   type: string
+ *       400:
+ *         description: Transaksi aktif sudah ada untuk seller dan buyer ini
  */
