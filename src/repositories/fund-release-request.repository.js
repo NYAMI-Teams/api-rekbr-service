@@ -27,14 +27,22 @@ const getFundReleaseRequestByTransaction = async (transactionId) => {
   });
 };
 
+const getAllFundReleaseRequests = async () => {
+  return await prisma.fundReleaseRequest.findMany({
+    include: {
+      admin: { select: { email: true } },
+    },
+  });
+};
+
 const updateFundReleaseRequestStatus = async (id, status, adminId) => {
   return await prisma.fundReleaseRequest.update({
     where: { id },
-    data: { 
+    data: {
       status: status,
       admin_id: adminId,
       resolved_at: new Date(),
-     },
+    },
   });
 };
 
@@ -42,4 +50,5 @@ export default {
   createFundReleaseRequest,
   getFundReleaseRequestByTransaction,
   updateFundReleaseRequestStatus,
+  getAllFundReleaseRequests,
 };
