@@ -1,8 +1,6 @@
 import { Router } from "express";
 import bankRoutes from "./bank.routes.js";
 import userRoutes from "./user.routes.js";
-import authentication from "../middlewares/authentication.js";
-import asyncHandler from "../middlewares/asyncHandler.js";
 import sellerTransactionRoutes from "./seller/transaction.routes.js";
 import buyerTransactionRoutes from "./buyer/transaction.routes.js";
 import adminTransactionRoutes from "./admin/transaction.routes.js";

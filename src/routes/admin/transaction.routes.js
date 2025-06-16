@@ -1,5 +1,6 @@
 import { Router } from "express";
 import adminTransactionController from "../../controllers/admin/transaction.controller.js";
+import adminUserController from "../../controllers/admin/user.controller.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
 import authentication from "../../middlewares/authentication.js";
 import authorization from "../../middlewares/authorization.js";
@@ -21,10 +22,17 @@ router.get(
 );
 
 router.post(
-  '/transactions/:transactionId/fund-release/:action',
+  "/transactions/:transactionId/fund-release/:action",
   authentication,
   authorization,
   asyncHandler(adminTransactionController.updateFundReleaseRequestStatus)
+);
+
+router.get(
+  "/users",
+  authentication,
+  authorization,
+  asyncHandler(adminUserController.getAllUsers)
 );
 
 export default router;
@@ -268,4 +276,3 @@ export default router;
  *       404:
  *         description: Fund release request not found
  */
-

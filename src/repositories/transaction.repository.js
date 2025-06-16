@@ -82,16 +82,18 @@ const getAllTransactionsForAdmin = async ({
     }
   }
 
-  if (createdFrom && !createdTo) {
-    const start = new Date(createdFrom);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(createdFrom);
-    end.setHours(23, 59, 59, 999);
-    whereClause.created_at = { gte: start, lte: end };
-  } else if (createdFrom || createdTo) {
-    whereClause.created_at = {};
-    if (createdFrom) whereClause.created_at.gte = new Date(createdFrom);
-    if (createdTo) whereClause.created_at.lte = new Date(createdTo);
+  let createdToDate = null;
+  if (createdTo) {
+    const toDate = new Date(createdTo);
+    toDate.setHours(23, 59, 59, 999);
+    createdToDate = toDate;
+  }
+
+  if (createdFrom || createdTo) {
+    whereClause.created_at = {
+      ...(createdFrom && { gte: new Date(createdFrom) }),
+      ...(createdTo && { lte: createdToDate }),
+    };
   }
 
   if (search) {
@@ -217,11 +219,9 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
   });
 };
 
-const getTransactionListForSeller = async (sellerId, status=null) => {
+const getTransactionListForSeller = async (sellerId, status = null) => {
   return await prisma.transaction.findMany({
-    where: { seller_id: sellerId,
-      ...(status ? { status } : {}),
-    },
+    where: { seller_id: sellerId, ...(status ? { status } : {}) },
     orderBy: { created_at: "desc" },
     include: {
       buyer: {
@@ -297,9 +297,7 @@ const updateTransactionBuyerConfirmDeadline = async (
 
 const getTransactionListForBuyer = async (buyerId, status) => {
   return await prisma.transaction.findMany({
-    where: { buyer_id: buyerId,
-      ...(status ? { status } : {}),
-     },
+    where: { buyer_id: buyerId, ...(status ? { status } : {}) },
     orderBy: { created_at: "desc" },
     include: {
       seller: {

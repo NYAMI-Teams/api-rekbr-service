@@ -3,13 +3,17 @@ import resSuccess from "../utils/response.js";
 
 const register = async (req, res) => {
   await userService.register(req.body);
-  return resSuccess(res, 200, "Register berhasil, silakan cek email untuk verifikasi akun Anda");
+  return resSuccess(
+    res,
+    200,
+    "Register berhasil, silakan cek email untuk verifikasi akun Anda"
+  );
 };
 
 const login = async (req, res) => {
   const result = await userService.login(req.body);
   return resSuccess(res, 200, "Login berhasil", result);
-}
+};
 
 const resendVerifyEmail = async (req, res) => {
   await userService.resendVerifyEmail(req.body);
@@ -19,13 +23,13 @@ const resendVerifyEmail = async (req, res) => {
 const verifyEmail = async (req, res) => {
   const result = await userService.verifyEmail(req.body);
   return resSuccess(res, 200, "Berhasil verifikasi email", result);
-}
+};
 
 const verifyKyc = async (req, res) => {
   const userId = req.user.id;
   await userService.verifyKyc(userId);
   return resSuccess(res, 200, "Berhasil verifikasi KYC");
-}
+};
 
 const getProfile = async (req, res) => {
   const userId = req.user.id;
@@ -34,7 +38,7 @@ const getProfile = async (req, res) => {
 };
 
 const getEmail = async (req, res) => {
-  const result = await userService.checkEmail(req.body);
+  const result = await userService.checkEmail(req.query);
   return resSuccess(res, 200, "Berhasil mendapatkan user", result);
 };
 
