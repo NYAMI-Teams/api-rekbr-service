@@ -298,7 +298,7 @@ const getTransactionListForBuyer = async (buyerId) => {
     where: { buyer_id: buyerId },
     orderBy: { created_at: "desc" },
     include: {
-      buyer: {
+      seller: {
         select: { email: true },
       },
       shipment: {
