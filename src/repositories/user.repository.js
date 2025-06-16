@@ -41,9 +41,9 @@ const updateUserStatus = async (email, status) => {
   });
 }
 
-const updateUserKycStatus = async (email, kycStatus) => {
+const updateUserKycStatus = async (userId, kycStatus) => {
   return await prisma.user.update({
-    where: { email },
+    where: { id: userId },
     data: { kyc_status: kycStatus },
   });
 }

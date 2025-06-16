@@ -124,15 +124,7 @@ const verifyEmail = async ({ email, otpCode }) => {
   return result;
 };
 
-const verifyKyc = async ({
-  fullname,
-  birthDate,
-  lastEducation,
-  province,
-  city,
-  businessField,
-}) => {
-  const userId = req.user.id;
+const verifyKyc = async (userId) => {
   const user = await userRepository.findUserById(userId);
   if (!user) {
     throwError("User tidak ditemukan", 404);
@@ -140,9 +132,7 @@ const verifyKyc = async ({
   if (user.kycStatus === "verified") {
     throwError("KYC sudah diverifikasi", 400);
   }
-  const updatedUser = await userRepository.updateUserKycStatus(userId, {
-    kycStatus: "verified",
-  });
+  await userRepository.updateUserKycStatus(userId, "verified");
 };
 
 const getProfile = async (userId) => {

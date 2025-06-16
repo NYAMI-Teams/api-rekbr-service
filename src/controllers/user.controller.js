@@ -22,7 +22,8 @@ const verifyEmail = async (req, res) => {
 }
 
 const verifyKyc = async (req, res) => {
-  await userService.verifyKyc(req.body);
+  const userId = req.user.id;
+  await userService.verifyKyc(userId);
   return resSuccess(res, 200, "Berhasil verifikasi KYC");
 }
 
