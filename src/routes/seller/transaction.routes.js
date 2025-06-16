@@ -244,20 +244,24 @@ export default router;
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
- *               - courierId
- *               - trackingNumber
- *               - photoUrl
+ *               - courier_id
+ *               - tracking_number
+ *               - photo
  *             properties:
- *               courierId:
+ *               courier_id:
  *                 type: string
- *               trackingNumber:
+ *                 description: ID kurir pengiriman
+ *               tracking_number:
  *                 type: string
- *               photoUrl:
+ *                 description: Nomor resi pengiriman
+ *               photo:
  *                 type: string
+ *                 format: binary
+ *                 description: Foto bukti pengiriman
  *     responses:
  *       200:
  *         description: Resi berhasil disimpan
@@ -268,6 +272,7 @@ export default router;
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *       404:
  *         description: Transaksi tidak ditemukan
  *       400:
