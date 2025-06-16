@@ -75,7 +75,11 @@ const getAllTransactionsForAdmin = async ({
   const whereClause = {};
 
   if (status) {
-    whereClause.status = status;
+    if (Array.isArray(status)) {
+      whereClause.status = { in: status };
+    } else {
+      whereClause.status = status;
+    }
   }
 
   if (createdFrom && !createdTo) {
@@ -99,26 +103,27 @@ const getAllTransactionsForAdmin = async ({
     ];
   }
 
-  const transactions = await prisma.transaction.findMany({
-    where: whereClause,
-    include: {
-      buyer: { select: { email: true } },
-      seller: { select: { email: true } },
-    },
-    orderBy: {
-      created_at: "desc",
-    },
-    skip,
-    take,
-  });
+  const [transactions, totalCount, fundReleases] = await Promise.all([
+    prisma.transaction.findMany({
+      where: whereClause,
+      include: {
+        buyer: { select: { email: true } },
+        seller: { select: { email: true } },
+      },
+      orderBy: { created_at: "desc" },
+      skip,
+      take,
+    }),
+    prisma.transaction.count({ where: whereClause }),
+    prisma.fundReleaseRequest.findMany(),
+  ]);
 
-  const fundReleases = await prisma.fundReleaseRequest.findMany();
   const frMap = {};
   fundReleases.forEach((fr) => {
     frMap[fr.transaction_id] = fr;
   });
 
-  return transactions
+  const filteredTransactions = transactions
     .filter((txn) => {
       if (!fundReleaseStatus) return true;
       const fr = frMap[txn.id];
@@ -140,6 +145,11 @@ const getAllTransactionsForAdmin = async ({
         fundReleaseStatus: fr?.status || null,
       };
     });
+
+  return {
+    transactions: filteredTransactions,
+    totalCount,
+  };
 };
 
 const updatePaidTransaction = async (
