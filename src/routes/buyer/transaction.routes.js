@@ -134,6 +134,70 @@ export default router;
 
 /**
  * @swagger
+ * /api/buyer/transactions:
+ *   get:
+ *     summary: Mendapatkan daftar transaksi buyer
+ *     tags: [BuyerTransaction]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List transaksi buyer berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   transactionCode:
+ *                     type: string
+ *                   itemName:
+ *                     type: string
+ *                   totalAmount:
+ *                     type: number
+ *                   buyerEmail:
+ *                     type: string
+ *                   virtualAccount:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   paymentDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                   shipmentDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                   currentTimestamp:
+ *                     type: string
+ *                     format: date-time
+ *                   trackingNumber:
+ *                     type: string
+ *                     nullable: true
+ *                   fundReleaseRequest:
+ *                     type: object
+ *                     properties:
+ *                       requested:
+ *                         type: boolean
+ *                       status:
+ *                         type: string
+ *                       requestedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       resolvedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       adminEmail:
+ *                         type: string
+ *                         nullable: true
+ *       404:
+ *         description: Transaksi tidak ditemukan
+ */
+
+/**
+ * @swagger
  * /api/buyer/transactions/{transactionId}/simulate-payment:
  *   post:
  *     summary: Simulasi pembayaran transaksi
