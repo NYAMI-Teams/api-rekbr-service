@@ -166,6 +166,68 @@ export default router;
 
 /**
  * @swagger
+ * /api/seller/transactions:
+ *   get:
+ *     summary: Mendapatkan daftar transaksi seller
+ *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List transaksi seller berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   transactionCode:
+ *                     type: string
+ *                   itemName:
+ *                     type: string
+ *                   totalAmount:
+ *                     type: number
+ *                   buyerEmail:
+ *                     type: string
+ *                   virtualAccount:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   paymentDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                   shipmentDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                   currentTimestamp:
+ *                     type: string
+ *                     format: date-time
+ *                   trackingNumber:
+ *                     type: string
+ *                   fundReleaseRequest:
+ *                     type: object
+ *                     properties:
+ *                       requested:
+ *                         type: boolean
+ *                       status:
+ *                         type: string
+ *                       requestedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       resolvedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       adminEmail:
+ *                         type: string
+ *       404:
+ *         description: Transaksi tidak ditemukan
+ */
+
+/**
+ * @swagger
  * /api/seller/transactions/{transactionId}/shipping:
  *   post:
  *     summary: Input resi pengiriman untuk transaksi seller
@@ -182,20 +244,24 @@ export default router;
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
- *               - courierId
- *               - trackingNumber
- *               - photoUrl
+ *               - courier_id
+ *               - tracking_number
+ *               - photo
  *             properties:
- *               courierId:
+ *               courier_id:
  *                 type: string
- *               trackingNumber:
+ *                 description: ID kurir pengiriman
+ *               tracking_number:
  *                 type: string
- *               photoUrl:
+ *                 description: Nomor resi pengiriman
+ *               photo:
  *                 type: string
+ *                 format: binary
+ *                 description: Foto bukti pengiriman
  *     responses:
  *       200:
  *         description: Resi berhasil disimpan
@@ -206,6 +272,7 @@ export default router;
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *       404:
  *         description: Transaksi tidak ditemukan
  *       400:
@@ -287,68 +354,6 @@ export default router;
  *         description: Transaksi tidak ditemukan atau bukan milik Anda
  *       400:
  *         description: Gagal meminta konfirmasi
- */
-
-/**
- * @swagger
- * /api/seller/transactions:
- *   get:
- *     summary: Mendapatkan daftar transaksi seller
- *     tags: [Seller Transactions]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List transaksi seller berhasil diambil
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   transactionCode:
- *                     type: string
- *                   itemName:
- *                     type: string
- *                   totalAmount:
- *                     type: number
- *                   buyerEmail:
- *                     type: string
- *                   virtualAccount:
- *                     type: string
- *                   status:
- *                     type: string
- *                   paymentDeadline:
- *                     type: string
- *                     format: date-time
- *                   shipmentDeadline:
- *                     type: string
- *                     format: date-time
- *                   currentTimestamp:
- *                     type: string
- *                     format: date-time
- *                   trackingNumber:
- *                     type: string
- *                   fundReleaseRequest:
- *                     type: object
- *                     properties:
- *                       requested:
- *                         type: boolean
- *                       status:
- *                         type: string
- *                       requestedAt:
- *                         type: string
- *                         format: date-time
- *                       resolvedAt:
- *                         type: string
- *                         format: date-time
- *                       adminEmail:
- *                         type: string
- *       404:
- *         description: Transaksi tidak ditemukan
  */
 
 /**

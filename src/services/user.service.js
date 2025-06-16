@@ -149,6 +149,19 @@ const getProfile = async (userId) => {
   return user;
 }
 
+const checkEmail = async ({ email}) => {
+  const user = await userRepository.findUserByEmail(email);
+  
+  if (!user) {
+    throwError("User tidak ditemukan", 400);
+  }
+  return {
+    email: user.email,
+    id: user.id,
+  };
+}
+
+
 export default {
   register,
   login,
@@ -156,4 +169,5 @@ export default {
   verifyEmail,
   getProfile,
   verifyKyc,
+  checkEmail,
 };

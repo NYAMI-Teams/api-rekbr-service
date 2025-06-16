@@ -3,6 +3,7 @@ import transactionRepo from "../../repositories/transaction.repository.js";
 import shipmentRepo from "../../repositories/shipment.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import digitalStorageService from "../digital-storage.service.js";
+import userService from "../user.service.js"
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -131,11 +132,15 @@ const generateVirtualAccountNumber = () => {
 
 const generateTransaction = async ({
   seller_id,
-  buyer_id,
   item_name,
   item_price,
   withdrawal_bank_account_id,
+  email,
 }) => {
+
+  const buyer = await userService.checkEmail({email});
+  const buyer_id = buyer.id;
+
   // plt fee, insurance fee, dan total amount are hardcoded for simplicity
   let platform_fee = 0;
   if (item_price >= 10000 && item_price < 499999) {
