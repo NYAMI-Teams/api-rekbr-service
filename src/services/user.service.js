@@ -1,13 +1,12 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import redisClient from './redisClient.js';
+import redisClient from "./redisClient.js";
 import userRepository from "../repositories/user.repository.js";
 import throwError from "../utils/throwError.js";
 import { sendOtpEmail } from "./email.service.js";
 
-
 const generateAccessToken = async (user) => {
-  const tokenId = Date.now().toString(); 
+  const tokenId = Date.now().toString();
   const userId = user.id;
   const payload = { id: userId, tokenId, isAdmin: user.isAdmin };
 
@@ -15,7 +14,7 @@ const generateAccessToken = async (user) => {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
   });
 
-  await redisClient.set(`access_token:${userId}`, tokenId, { EX: 900 }); 
+  await redisClient.set(`access_token:${userId}`, tokenId, { EX: 60 * 60 });
   const storedTokenId = await redisClient.get(`access_token:${userId}`);
 
   return token;
@@ -37,8 +36,7 @@ const generateOtpCode = async (key) => {
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
   await redisClient.set(key, otpCode, { EX: 3000 });
   return otpCode;
-}
-
+};
 
 const register = async ({ email, password }) => {
   const existingUser = await userRepository.findUserByEmail(email);
@@ -47,13 +45,13 @@ const register = async ({ email, password }) => {
   }
 
   const saltRounds = parseInt(process.env.SALT_ROUNDS);
-  const salt = bcrypt.genSaltSync(saltRounds)
-  const hashedPassword = bcrypt.hashSync(password, salt)
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hashedPassword = bcrypt.hashSync(password, salt);
 
   const user = {
     email,
     password: hashedPassword,
-  }
+  };
 
   await redisClient.set("user:" + email, JSON.stringify(user), { EX: 3000 });
 
@@ -79,10 +77,10 @@ const login = async ({ email, password }) => {
     accessToken,
     refreshToken,
     isAdmin: user.isAdmin,
-  }
+  };
 
   return result;
-}
+};
 
 const resendVerifyEmail = async ({ email }) => {
   const user = await redisClient.get("user:" + email);
@@ -92,7 +90,7 @@ const resendVerifyEmail = async ({ email }) => {
   const otpCode = await generateOtpCode("verifyEmail:" + email);
 
   sendOtpEmail(email, otpCode);
-}
+};
 
 const verifyEmail = async ({ email, otpCode }) => {
   const storedOtpCode = await redisClient.get("verifyEmail:" + email);
@@ -108,7 +106,7 @@ const verifyEmail = async ({ email, otpCode }) => {
 
   const user = await userRepository.createUser({
     email: userObj.email,
-    password: userObj.password
+    password: userObj.password,
   });
 
   await userRepository.updateUserStatus(email, "active");
@@ -121,12 +119,19 @@ const verifyEmail = async ({ email, otpCode }) => {
   const result = {
     accessToken,
     refreshToken,
-  }
+  };
 
   return result;
-}
+};
 
-const verifyKyc = async ({ fullname, birthDate, lastEducation, province, city, businessField }) => {
+const verifyKyc = async ({
+  fullname,
+  birthDate,
+  lastEducation,
+  province,
+  city,
+  businessField,
+}) => {
   const userId = req.user.id;
   const user = await userRepository.findUserById(userId);
   if (!user) {
@@ -138,7 +143,7 @@ const verifyKyc = async ({ fullname, birthDate, lastEducation, province, city, b
   const updatedUser = await userRepository.updateUserKycStatus(userId, {
     kycStatus: "verified",
   });
-}
+};
 
 const getProfile = async (userId) => {
   console.log(userId, "=====>");
@@ -147,11 +152,11 @@ const getProfile = async (userId) => {
     throwError("User tidak ditemukan", 404);
   }
   return user;
-}
+};
 
-const checkEmail = async ({ email}) => {
+const checkEmail = async ({ email }) => {
   const user = await userRepository.findUserByEmail(email);
-  
+
   if (!user) {
     throwError("User tidak ditemukan", 400);
   }
@@ -159,8 +164,7 @@ const checkEmail = async ({ email}) => {
     email: user.email,
     id: user.id,
   };
-}
-
+};
 
 export default {
   register,
