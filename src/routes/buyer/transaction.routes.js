@@ -140,6 +140,13 @@ export default router;
  *     tags: [BuyerTransaction]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - name: status
+ *         in: query
+ *         required: false
+ *         description: Filter transactions by status (e.g., completed, pending_payment, waiting_shipment)
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of buyer transactions
@@ -162,9 +169,9 @@ export default router;
  *                   totalAmount:
  *                     type: number
  *                     description: Total amount for the transaction
- *                   buyerEmail:
+ *                   sellerEmail:
  *                     type: string
- *                     description: Email of the buyer
+ *                     description: Email of the seller
  *                   virtualAccount:
  *                     type: string
  *                     description: Virtual account number for payment

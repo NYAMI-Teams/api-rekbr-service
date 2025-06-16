@@ -217,9 +217,11 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
   });
 };
 
-const getTransactionListForSeller = async (sellerId) => {
+const getTransactionListForSeller = async (sellerId, status=null) => {
   return await prisma.transaction.findMany({
-    where: { seller_id: sellerId },
+    where: { seller_id: sellerId,
+      ...(status ? { status } : {}),
+    },
     orderBy: { created_at: "desc" },
     include: {
       buyer: {
@@ -293,9 +295,11 @@ const updateTransactionBuyerConfirmDeadline = async (
   });
 };
 
-const getTransactionListForBuyer = async (buyerId) => {
+const getTransactionListForBuyer = async (buyerId, status) => {
   return await prisma.transaction.findMany({
-    where: { buyer_id: buyerId },
+    where: { buyer_id: buyerId,
+      ...(status ? { status } : {}),
+     },
     orderBy: { created_at: "desc" },
     include: {
       seller: {
