@@ -63,8 +63,44 @@ const getTransactionDetailByAdmin = async (transactionId) => {
   });
 };
 
-const getAllTransactionsForAdmin = async () => {
-  return await prisma.transaction.findMany({
+const getAllTransactionsForAdmin = async ({
+  status,
+  fundReleaseStatus,
+  createdFrom,
+  createdTo,
+  search,
+  skip = 0,
+  take = 10,
+}) => {
+  const whereClause = {};
+
+  if (status) {
+    whereClause.status = status;
+  }
+
+  if (createdFrom && !createdTo) {
+    const start = new Date(createdFrom);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(createdFrom);
+    end.setHours(23, 59, 59, 999);
+    whereClause.created_at = { gte: start, lte: end };
+  } else if (createdFrom || createdTo) {
+    whereClause.created_at = {};
+    if (createdFrom) whereClause.created_at.gte = new Date(createdFrom);
+    if (createdTo) whereClause.created_at.lte = new Date(createdTo);
+  }
+
+  if (search) {
+    whereClause.OR = [
+      { transaction_code: { contains: search, mode: "insensitive" } },
+      { item_name: { contains: search, mode: "insensitive" } },
+      { buyer: { email: { contains: search, mode: "insensitive" } } },
+      { seller: { email: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  const transactions = await prisma.transaction.findMany({
+    where: whereClause,
     include: {
       buyer: { select: { email: true } },
       seller: { select: { email: true } },
@@ -72,7 +108,38 @@ const getAllTransactionsForAdmin = async () => {
     orderBy: {
       created_at: "desc",
     },
+    skip,
+    take,
   });
+
+  const fundReleases = await prisma.fundReleaseRequest.findMany();
+  const frMap = {};
+  fundReleases.forEach((fr) => {
+    frMap[fr.transaction_id] = fr;
+  });
+
+  return transactions
+    .filter((txn) => {
+      if (!fundReleaseStatus) return true;
+      const fr = frMap[txn.id];
+      if (fundReleaseStatus === "none") return !fr;
+      return fr?.status === fundReleaseStatus;
+    })
+    .map((txn) => {
+      const fr = frMap[txn.id];
+      return {
+        id: txn.id,
+        transactionCode: txn.transaction_code,
+        itemName: txn.item_name,
+        itemPrice: txn.item_price,
+        totalAmount: txn.total_amount,
+        buyerEmail: txn.buyer?.email || null,
+        sellerEmail: txn.seller?.email || null,
+        status: txn.status,
+        createdAt: txn.created_at,
+        fundReleaseStatus: fr?.status || null,
+      };
+    });
 };
 
 const updatePaidTransaction = async (
