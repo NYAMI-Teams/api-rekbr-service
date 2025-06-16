@@ -32,8 +32,24 @@ const confirmReceived = async (req, res) => {
   return resSuccess(res, 200, "Barang berhasil dikonfirmasi diterima", result);
 };
 
+const getTransactionListBuyer = async (req, res) => {
+  const buyerId = req.user.id;
+
+  const data = await buyerTransactionService.getTransactionListByBuyer(
+    buyerId
+  );
+
+  const message =
+    data.length === 0
+      ? "Transaksi tidak ada"
+      : "List transaksi seller berhasil diambil";
+
+  return resSuccess(res, 200, message, data);
+};
+
 export default {
   getTransactionDetailBuyer,
   simulatePayment,
   confirmReceived,
+  getTransactionListBuyer,
 };

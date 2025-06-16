@@ -51,8 +51,8 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           adminEmail: fr.admin?.email || null,
         }
       : { requested: false, status: null, requestedAt: null, resolvedAt: null },
-    buyerConfirmDeadline: txn.buyer_confirm_deadline,
-    buyerConfirmedAt: txn.confirmed_at,
+    buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+    buyerConfirmedAt: txn.confirmed_at || null,
     currentTimestamp: new Date().toISOString(),
   };
 };
@@ -109,8 +109,71 @@ const confirmReceived = async (transactionId, buyerId) => {
   };
 };
 
+const getTransactionListByBuyer = async (buyerId) => {
+  const txn = await transactionRepo.getTransactionListForBuyer(buyerId);
+  // Return empty array if no transactions (no throw)
+  if (!txn || txn.length === 0) {
+    return [];
+  }
+
+  const transactionsWithFR = await Promise.all(
+    txn.map(async (txn) => {
+      const fr =
+        await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+          txn.id
+        );
+
+      return {
+        id: txn.id,
+        transactionCode: txn.transaction_code,
+        itemName: txn.item_name,
+        totalAmount: txn.total_amount,
+        buyerEmail: txn.buyer?.email || "-",
+        virtualAccount: txn.virtual_account_number,
+        status: txn.status,
+        paymentDeadline: txn.payment_deadline,
+        shipmentDeadline: txn.shipment_deadline,
+        currentTimestamp: new Date().toISOString(),
+        shipment: txn.shipment
+        ? {
+            trackingNumber: txn.shipment.tracking_number,
+            courier: txn.shipment.courier?.name || null,
+            shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+          }
+        : {
+            trackingNumber: null,
+            courier: null,
+            shipmentDate: null,
+          },
+        fundReleaseRequest: fr
+          ? {
+              requested: true,
+              status: fr.status,
+              requestedAt: fr.created_at.toISOString(),
+              resolvedAt: fr.resolved_at?.toISOString() || null,
+              adminEmail: fr.admin?.email || null,
+            }
+          : {
+              requested: false,
+              status: null,
+              requestedAt: null,
+              resolvedAt: null,
+              adminEmail: null,
+            },
+            buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+            buyerConfirmedAt: txn.confirmed_at || null,
+            currentTimestamp: new Date().toISOString(),
+      };
+    })
+  );
+
+  return transactionsWithFR;
+};
+
+
 export default {
   getTransactionDetailByBuyer,
   simulatePayment,
   confirmReceived,
+  getTransactionListByBuyer,
 };

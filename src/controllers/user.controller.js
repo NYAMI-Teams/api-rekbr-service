@@ -32,6 +32,11 @@ const getProfile = async (req, res) => {
   return resSuccess(res, 200, "Berhasil mendapatkan profil", user);
 };
 
+const getEmail = async (req, res) => {
+  const result = await userService.checkEmail(req.body);
+  return resSuccess(res, 200, "Berhasil mendapatkan user", result);
+};
+
 export default {
   register,
   login,
@@ -39,4 +44,5 @@ export default {
   verifyEmail,
   verifyKyc,
   getProfile,
+  getEmail,
 };

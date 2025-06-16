@@ -36,7 +36,13 @@ router.post(
   authentication,
   asyncHandler(userController.verifyKyc)
 );
+
 router.get("/profile", authentication, asyncHandler(userController.getProfile));
+
+router.get(
+  "/check-user",
+  asyncHandler(userController.getEmail)
+);
 
 export default router;
 
@@ -45,6 +51,63 @@ export default router;
  * tags:
  *   name: User
  *   description: Endpoints terkait user (registrasi, login, verifikasi, profil, dll)
+ */
+
+/**
+ * @swagger
+ * /api/user/profile:
+ *   get:
+ *     summary: Mendapatkan profil user
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Data profil user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 email:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/user/check-user:
+ *   get:
+ *     summary: Memeriksa keberadaan user berdasarkan email
+ *     tags: [User]
+ *     parameters:
+ *       - in: query
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: email
+ *           example: user@email.com
+ *         description: Email user yang ingin diperiksa
+ *     responses:
+ *       200:
+ *         description: User ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                 id:
+ *                   type: integer
+ *       400:
+ *         description: User tidak ditemukan
  */
 
 /**
@@ -105,10 +168,10 @@ export default router;
  *               email:
  *                 type: string
  *                 format: email
- *                 example: user@email.com
+ *                 example: seller@gmail.com
  *               password:
  *                 type: string
- *                 example: password123
+ *                 example: pass123
  *     responses:
  *       200:
  *         description: Login berhasil, token dikembalikan
@@ -234,30 +297,4 @@ export default router;
  *         description: KYC sudah diverifikasi
  *       404:
  *         description: User tidak ditemukan
- */
-
-/**
- * @swagger
- * /api/user/profile:
- *   get:
- *     summary: Mendapatkan profil user
- *     tags: [User]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Data profil user
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                 email:
- *                   type: string
- *                 status:
- *                   type: string
- *       401:
- *         description: Unauthorized
  */

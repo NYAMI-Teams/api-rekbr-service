@@ -3,6 +3,7 @@ import transactionRepo from "../../repositories/transaction.repository.js";
 import shipmentRepo from "../../repositories/shipment.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import digitalStorageService from "../digital-storage.service.js";
+import userService from "../user.service.js"
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -90,10 +91,23 @@ const getTransactionListBySeller = async (sellerId) => {
         buyerEmail: txn.buyer?.email || "-",
         virtualAccount: txn.virtual_account_number,
         status: txn.status,
+        createdAt: txn.created_at,
         paymentDeadline: txn.payment_deadline,
         shipmentDeadline: txn.shipment_deadline,
         currentTimestamp: new Date().toISOString(),
-        trackingNumber: txn.shipment?.tracking_number || null,
+        shipment: txn.shipment
+        ? {
+            trackingNumber: txn.shipment.tracking_number,
+            courier: txn.shipment.courier?.name || null,
+            shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+            photoUrl: txn.shipment.photo_url || null,
+          }
+        : {
+            trackingNumber: null,
+            courier: null,
+            shipmentDate: null,
+            photoUrl: null,
+          },
         fundReleaseRequest: fr
           ? {
               requested: true,
@@ -109,6 +123,8 @@ const getTransactionListBySeller = async (sellerId) => {
               resolvedAt: null,
               adminEmail: null,
             },
+          buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+          buyerConfirmedAt: txn.confirmed_at || null,
       };
     })
   );
@@ -131,11 +147,15 @@ const generateVirtualAccountNumber = () => {
 
 const generateTransaction = async ({
   seller_id,
-  buyer_id,
   item_name,
   item_price,
   withdrawal_bank_account_id,
+  email,
 }) => {
+
+  const buyer = await userService.checkEmail({email});
+  const buyer_id = buyer.id;
+
   // plt fee, insurance fee, dan total amount are hardcoded for simplicity
   let platform_fee = 0;
   if (item_price >= 10000 && item_price < 499999) {

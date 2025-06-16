@@ -293,6 +293,23 @@ const updateTransactionBuyerConfirmDeadline = async (
   });
 };
 
+const getTransactionListForBuyer = async (buyerId) => {
+  return await prisma.transaction.findMany({
+    where: { buyer_id: buyerId },
+    orderBy: { created_at: "desc" },
+    include: {
+      buyer: {
+        select: { email: true },
+      },
+      shipment: {
+        select: {
+          tracking_number: true,
+        },
+      },
+    },
+  });
+};
+
 export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
@@ -306,4 +323,5 @@ export default {
   cancelTransactionBySeller,
   updateAfterBuyerConfirmation,
   updateTransactionBuyerConfirmDeadline,
+  getTransactionListForBuyer,
 };
