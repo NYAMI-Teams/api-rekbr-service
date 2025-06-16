@@ -67,20 +67,8 @@ const getTransactionDetailByAdmin = async (transactionId) => {
   };
 };
 
-const getAllTransactionsForAdmin = async () => {
-  const txns = await transactionRepo.getAllTransactionsForAdmin();
-  return txns.map((txn) => ({
-    id: txn.id,
-    transactionCode: txn.transaction_code,
-    itemName: txn.item_name,
-    itemPrice: txn.item_price,
-    totalAmount: txn.total_amount,
-    buyerEmail: txn.buyer?.email || null,
-    sellerEmail: txn.seller?.email || null,
-    status: txn.status,
-    createdAt: txn.created_at,
-    fundReleaseStatus: "pending", // mock until table exists
-  }));
+const getAllTransactionsForAdmin = async (filters) => {
+  return await transactionRepo.getAllTransactionsForAdmin(filters);
 };
 
 const updateFundReleaseRequest = async (transactionId, status, adminId) => {

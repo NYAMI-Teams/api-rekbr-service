@@ -11,8 +11,31 @@ const getTransactionDetailById = async (req, res) => {
 };
 
 const getAllTransactions = async (req, res) => {
-  const transactions =
-    await adminTransactionService.getAllTransactionsForAdmin();
+  const {
+    status,
+    fundReleaseStatus,
+    createdFrom,
+    createdTo,
+    search,
+    page = 1,
+    limit = 10,
+  } = req.query;
+
+  const skip = (Number(page) - 1) * Number(limit);
+  const take = Number(limit);
+
+  const transactions = await adminTransactionService.getAllTransactionsForAdmin(
+    {
+      status,
+      fundReleaseStatus,
+      createdFrom,
+      createdTo,
+      search,
+      skip,
+      take,
+    }
+  );
+
   return resSuccess(
     res,
     200,
@@ -23,7 +46,7 @@ const getAllTransactions = async (req, res) => {
 
 const updateFundReleaseRequestStatus = async (req, res) => {
   const { transactionId, action } = req.params;
-  const adminId = req.user.id; 
+  const adminId = req.user.id;
   if (action !== "approve" && action !== "reject") {
     throwError("Aksi tidak valid. Gunakan 'approve' atau 'reject'", 400);
   }
@@ -31,13 +54,13 @@ const updateFundReleaseRequestStatus = async (req, res) => {
   await adminTransactionService.updateFundReleaseRequest(
     transactionId,
     status,
-    adminId,
+    adminId
   );
   return resSuccess(res, 200, "Permintaan rilis dana berhasil diperbarui");
-}
+};
 
 export default {
   getTransactionDetailById,
   getAllTransactions,
-  updateFundReleaseRequestStatus
+  updateFundReleaseRequestStatus,
 };
