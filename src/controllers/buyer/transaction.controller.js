@@ -34,9 +34,11 @@ const confirmReceived = async (req, res) => {
 
 const getTransactionListBuyer = async (req, res) => {
   const buyerId = req.user.id;
+  const status = req.query.status || null;
 
   const data = await buyerTransactionService.getTransactionListByBuyer(
-    buyerId
+    buyerId,
+    status
   );
 
   const message =
