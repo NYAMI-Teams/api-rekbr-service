@@ -136,13 +136,13 @@ export default router;
  * @swagger
  * /api/buyer/transactions:
  *   get:
- *     summary: Mendapatkan daftar transaksi buyer
+ *     summary: Retrieve a list of buyer transactions
  *     tags: [BuyerTransaction]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List transaksi buyer berhasil diambil
+ *         description: Successfully retrieved the list of buyer transactions
  *         content:
  *           application/json:
  *             schema:
@@ -152,48 +152,90 @@ export default router;
  *                 properties:
  *                   id:
  *                     type: string
+ *                     description: Unique identifier for the transaction
  *                   transactionCode:
  *                     type: string
+ *                     description: Code representing the transaction
  *                   itemName:
  *                     type: string
+ *                     description: Name of the item in the transaction
  *                   totalAmount:
  *                     type: number
+ *                     description: Total amount for the transaction
  *                   buyerEmail:
  *                     type: string
+ *                     description: Email of the buyer
  *                   virtualAccount:
  *                     type: string
+ *                     description: Virtual account number for payment
  *                   status:
  *                     type: string
+ *                     description: Current status of the transaction
  *                   paymentDeadline:
  *                     type: string
  *                     format: date-time
+ *                     description: Deadline for payment
  *                   shipmentDeadline:
  *                     type: string
  *                     format: date-time
+ *                     description: Deadline for shipment
  *                   currentTimestamp:
  *                     type: string
  *                     format: date-time
- *                   trackingNumber:
- *                     type: string
+ *                     description: Current timestamp
+ *                   shipment:
+ *                     type: object
  *                     nullable: true
+ *                     description: Shipment details
+ *                     properties:
+ *                       trackingNumber:
+ *                         type: string
+ *                         nullable: true
+ *                         description: Tracking number for shipment
+ *                       courier:
+ *                         type: string
+ *                         nullable: true
+ *                         description: Courier name
+ *                       shipmentDate:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                         description: Shipment date
  *                   fundReleaseRequest:
  *                     type: object
+ *                     description: Details of the fund release request
  *                     properties:
  *                       requested:
  *                         type: boolean
+ *                         description: Indicates if a fund release request was made
  *                       status:
  *                         type: string
+ *                         description: Status of the fund release request
  *                       requestedAt:
  *                         type: string
  *                         format: date-time
+ *                         description: Timestamp when the fund release request was made
  *                       resolvedAt:
  *                         type: string
  *                         format: date-time
+ *                         nullable: true
+ *                         description: Timestamp when the fund release request was resolved
  *                       adminEmail:
  *                         type: string
  *                         nullable: true
+ *                         description: Email of the admin who resolved the request
+ *                   buyerConfirmDeadline:
+ *                     type: string
+ *                     format: date-time
+ *                     nullable: true
+ *                     description: Deadline for buyer confirmation
+ *                   buyerConfirmedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     nullable: true
+ *                     description: Timestamp when the buyer confirmed receipt
  *       404:
- *         description: Transaksi tidak ditemukan
+ *         description: No transactions found for the buyer
  */
 
 /**

@@ -51,8 +51,8 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           adminEmail: fr.admin?.email || null,
         }
       : { requested: false, status: null, requestedAt: null, resolvedAt: null },
-    buyerConfirmDeadline: txn.buyer_confirm_deadline,
-    buyerConfirmedAt: txn.confirmed_at,
+    buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+    buyerConfirmedAt: txn.confirmed_at || null,
     currentTimestamp: new Date().toISOString(),
   };
 };
@@ -134,7 +134,17 @@ const getTransactionListByBuyer = async (buyerId) => {
         paymentDeadline: txn.payment_deadline,
         shipmentDeadline: txn.shipment_deadline,
         currentTimestamp: new Date().toISOString(),
-        trackingNumber: txn.shipment?.tracking_number || null,
+        shipment: txn.shipment
+        ? {
+            trackingNumber: txn.shipment.tracking_number,
+            courier: txn.shipment.courier?.name || null,
+            shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+          }
+        : {
+            trackingNumber: null,
+            courier: null,
+            shipmentDate: null,
+          },
         fundReleaseRequest: fr
           ? {
               requested: true,
@@ -150,6 +160,9 @@ const getTransactionListByBuyer = async (buyerId) => {
               resolvedAt: null,
               adminEmail: null,
             },
+            buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+            buyerConfirmedAt: txn.confirmed_at || null,
+            currentTimestamp: new Date().toISOString(),
       };
     })
   );
