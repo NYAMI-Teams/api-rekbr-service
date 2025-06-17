@@ -284,7 +284,22 @@ const confirmationShipmentRequest = async ({
   if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
   if (txn.status !== "shipped") {
-    throwError("Gagal meminta konfirmasi", 400);
+    throwError("Gagal meminta konfirmasi barang belum dikirim", 400);
+  }
+
+    // Check the latest fund release request for the transaction
+    const latestFundReleaseRequest =
+    await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+      transactionId
+    );
+
+  if (latestFundReleaseRequest) {
+    if (latestFundReleaseRequest.status === "pending") {
+      throwError(
+        "Permintaan konfirmasi pengiriman tidak dapat dibuat karena permintaan sebelumnya belum selesai",
+        400
+      );
+    }
   }
 
   const evidenceUrl = await digitalStorageService.uploadToSpaces(

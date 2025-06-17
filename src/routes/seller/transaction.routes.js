@@ -377,8 +377,7 @@ export default router;
  *               - reason
  *             properties:
  *               evidence:
- *                 type: string
- *                 format: binary
+ *                 type: file
  *               reason:
  *                 type: string
  *     responses:

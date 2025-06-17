@@ -21,6 +21,7 @@ const createFundReleaseRequest = async ({
 const getFundReleaseRequestByTransaction = async (transactionId) => {
   return await prisma.fundReleaseRequest.findFirst({
     where: { transaction_id: transactionId },
+    orderBy: { created_at: "desc" }, //get latest seusai request mas danil
     include: {
       admin: { select: { email: true } },
     },
