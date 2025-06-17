@@ -38,6 +38,7 @@ model User {
 
   fund_release_requests FundReleaseRequest[] @relation("FundReleaseSeller")
   fund_release_admins   FundReleaseRequest[] @relation("FundReleaseAdmin")
+  Complaint             Complaint[]
 }
 
 model DummyAccount {
@@ -98,8 +99,9 @@ model Transaction {
   shipment              Shipment?
   fund_release_requests FundReleaseRequest[]
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  Complaint  Complaint?
 }
 
 model Shipment {
@@ -117,9 +119,10 @@ model Shipment {
 }
 
 model CourierList {
-  id        String     @id @default(uuid())
-  name      String
-  shipments Shipment[]
+  id             String           @id @default(uuid())
+  name           String
+  shipments      Shipment[]
+  ReturnShipment ReturnShipment[]
 }
 
 model FundReleaseRequest {
@@ -135,4 +138,46 @@ model FundReleaseRequest {
   admin_id       String?
   created_at     DateTime    @default(now())
   resolved_at    DateTime?
+}
+
+model Complaint {
+  id             String      @id @default(uuid())
+  transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  transaction_id String      @unique
+
+  buyer    User   @relation(fields: [buyer_id], references: [id])
+  buyer_id String
+
+  type   String
+  status String
+
+  reason               String?
+  buyer_evidence_urls  Json?
+  seller_response      String?
+  seller_evidence_urls Json?
+
+  buyer_requested_confirmation_at DateTime?
+  resolved_at                     DateTime?
+
+  return_shipment ReturnShipment?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model ReturnShipment {
+  id           String    @id @default(uuid())
+  complaint    Complaint @relation(fields: [complaint_id], references: [id])
+  complaint_id String    @unique
+
+  courier    CourierList @relation(fields: [courier_id], references: [id])
+  courier_id String
+
+  tracking_number String
+  shipment_date   DateTime
+  received_date   DateTime?
+  photo_url       String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
