@@ -209,10 +209,7 @@ const generateTransaction = async ({
       ? isInsurance.toLowerCase() === "true"
       : !!isInsurance;
 
-  console.log(typeof insurance, insurance, "this is insurance");
   const insurance_fee = insurance ? 0.002 * item_price : 0;
-
-  console.log(insurance_fee, "this is insurance fee");
 
   // Total amount calculation
   const total_amount = item_price + platform_fee + insurance_fee;
@@ -322,7 +319,22 @@ const confirmationShipmentRequest = async ({
   if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
   if (txn.status !== "shipped") {
-    throwError("Gagal meminta konfirmasi", 400);
+    throwError("Gagal meminta konfirmasi barang belum dikirim", 400);
+  }
+
+  // Check the latest fund release request for the transaction
+  const latestFundReleaseRequest =
+    await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
+      transactionId
+    );
+
+  if (latestFundReleaseRequest) {
+    if (latestFundReleaseRequest.status === "pending") {
+      throwError(
+        "Permintaan konfirmasi pengiriman tidak dapat dibuat karena permintaan sebelumnya belum selesai",
+        400
+      );
+    }
   }
 
   const evidenceUrl = await digitalStorageService.uploadToSpaces(
@@ -343,6 +355,17 @@ const confirmationShipmentRequest = async ({
   await fundReleaseRequestRepository.createFundReleaseRequest(payload);
 };
 
+const courierList = async () => {
+  const couriers = await shipmentRepo.getCourier();
+  if (!couriers || couriers.length === 0) {
+    throwError("Daftar kurir tidak ditemukan", 404);
+  }
+  return couriers.map((courier) => ({
+    id: courier.id,
+    name: courier.name,
+  }));
+};
+
 export default {
   getTransactionDetailBySeller,
   inputShipment,
@@ -352,4 +375,5 @@ export default {
   generateTransaction,
   generateTransactionCode,
   getTransactionListBySeller,
+  courierList,
 };
