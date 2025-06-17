@@ -13,11 +13,11 @@ const getTransactionDetailSeller = async (req, res) => {
 
 const getTransactionListSeller = async (req, res) => {
   const sellerId = req.user.id;
-  const { status } = req.query || null
+  const { isHistory } = req.query || null
 
   const data = await sellerTransactionService.getTransactionListBySeller(
     sellerId,
-    status
+    isHistory
   );
 
   const message =
