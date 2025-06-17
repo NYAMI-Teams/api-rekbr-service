@@ -179,12 +179,12 @@ export default router;
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: status
+ *       - name: isHistory
  *         in: query
  *         required: false
- *         description: Status transaksi (e.g., completed, pending_payment, waiting_shipment)
+ *         description: Filter transaksi berdasarkan riwayat (true untuk transaksi selesai/dibatalkan, false untuk transaksi aktif), kosongkan untuk semua transaksi
  *         schema:
- *           type: string
+ *           type: boolean
  *     responses:
  *       200:
  *         description: List transaksi seller berhasil diambil

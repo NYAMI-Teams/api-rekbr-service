@@ -99,6 +99,14 @@ const getAllUsers = async ({
   return { users, totalCount };
 };
 
+const getUserDetailById = async (id) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  return user ? toCamelCase(user) : null;
+};
+
 export default {
   createUser,
   findUserByEmail,
@@ -106,4 +114,5 @@ export default {
   updateUserStatus,
   updateUserKycStatus,
   getAllUsers,
+  getUserDetailById,
 };

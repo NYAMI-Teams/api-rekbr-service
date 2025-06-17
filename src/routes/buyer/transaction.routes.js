@@ -141,12 +141,12 @@ export default router;
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: status
+ *       - name: isHistory
  *         in: query
  *         required: false
- *         description: Filter transactions by status (e.g., completed, pending_payment, waiting_shipment)
+ *         description: Filter transactions by history (true for completed/canceled transactions, false for active transactions)
  *         schema:
- *           type: string
+ *           type: boolean
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of buyer transactions
