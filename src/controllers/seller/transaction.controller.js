@@ -29,7 +29,7 @@ const getTransactionListSeller = async (req, res) => {
 };
 
 const generateTransaction = async (req, res) => {
-  const { email, item_name, item_price, withdrawal_bank_account_id } =
+  const { email, item_name, item_price, withdrawal_bank_account_id, isInsurance } =
     req.body;
   const seller_id = req.user.id;
 
@@ -39,6 +39,7 @@ const generateTransaction = async (req, res) => {
     item_price,
     withdrawal_bank_account_id,
     email,
+    isInsurance,
   });
 
   return resSuccess(res, 201, "Transaksi berhasil dibuat", newTransaction);

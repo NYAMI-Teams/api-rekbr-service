@@ -378,22 +378,27 @@ export default router;
  *           schema:
  *             type: object
  *             required:
- *               - buyer_id
+ *               - email
  *               - item_name
  *               - item_price
- *               - virtual_account_number
  *               - withdrawal_bank_account_id
+ *               - isInsurance
  *             properties:
- *               buyer_id:
+ *               email:
  *                 type: string
+ *                 description: Email pembeli
  *               item_name:
  *                 type: string
+ *                 description: Nama item yang dijual
  *               item_price:
  *                 type: number
- *               virtual_account_number:
- *                 type: string
+ *                 description: Harga item yang dijual
  *               withdrawal_bank_account_id:
  *                 type: string
+ *                 description: ID rekening penarikan
+ *               isInsurance:
+ *                 type: boolean
+ *                 description: Apakah transaksi menggunakan asuransi (true atau false)
  *     responses:
  *       201:
  *         description: Transaksi berhasil dibuat
@@ -404,14 +409,19 @@ export default router;
  *               properties:
  *                 id:
  *                   type: string
+ *                   description: ID transaksi
  *                 transactionCode:
  *                   type: string
+ *                   description: Kode transaksi
  *                 itemName:
  *                   type: string
+ *                   description: Nama item
  *                 totalAmount:
  *                   type: number
+ *                   description: Total jumlah transaksi
  *                 status:
  *                   type: string
+ *                   description: Status transaksi
  *       400:
- *         description: Transaksi aktif sudah ada untuk seller dan buyer ini
+ *         description: Validasi gagal atau transaksi aktif sudah ada
  */
