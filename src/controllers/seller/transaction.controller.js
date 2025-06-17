@@ -93,6 +93,11 @@ const confirmationShipmentRequest = async (req, res) => {
   );
 };
 
+const getCourierList = async (req, res) => {
+  const couriers = await sellerTransactionService.courierList()
+  return resSuccess(res, 200, "List kurir berhasil diambil", couriers);
+}
+
 export default {
   getTransactionDetailSeller,
   getTransactionListSeller,
@@ -100,4 +105,5 @@ export default {
   generateTransaction,
   cancelTransactionBySeller,
   inputShipment,
+  getCourierList
 };
