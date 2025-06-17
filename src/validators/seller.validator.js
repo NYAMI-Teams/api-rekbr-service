@@ -13,6 +13,10 @@ const createTransactionValidation = [
   body("withdrawal_bank_account_id")
     .notEmpty()
     .withMessage("Rekening penarikan wajib diisi"),
+
+  body("isInsurance")
+    .isBoolean()
+    .withMessage("isInsurance harus berupa boolean (true atau false)"),
 ];
 
 export default {
