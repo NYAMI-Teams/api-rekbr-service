@@ -1,6 +1,7 @@
 import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
+import { transactionQueue } from "../../queues/transaction.queue.js";
 
 const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   const txn = await transactionRepo.getTransactionDetailByBuyer(
@@ -70,6 +71,8 @@ const simulatePayment = async (transactionId, buyerId) => {
   if (updated.count === 0)
     throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
+  await transactionQueue.remove(`cancel:${transactionId}`);
+
   return {
     transactionCode: transactionId,
     status: "waiting_shipment",
@@ -109,7 +112,7 @@ const confirmReceived = async (transactionId, buyerId) => {
   };
 };
 
-const getTransactionListByBuyer = async (buyerId, status=null) => {
+const getTransactionListByBuyer = async (buyerId, status = null) => {
   const txn = await transactionRepo.getTransactionListForBuyer(buyerId, status);
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
