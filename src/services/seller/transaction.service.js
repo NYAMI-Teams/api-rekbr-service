@@ -3,7 +3,8 @@ import transactionRepo from "../../repositories/transaction.repository.js";
 import shipmentRepo from "../../repositories/shipment.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import digitalStorageService from "../digital-storage.service.js";
-import userService from "../user.service.js"
+import userService from "../user.service.js";
+import { transactionQueue } from "../../queues/transaction.queue.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -101,18 +102,18 @@ const getTransactionListBySeller = async (sellerId, isHistory=null) => {
         shipmentDeadline: txn.shipment_deadline,
         currentTimestamp: new Date().toISOString(),
         shipment: txn.shipment
-        ? {
-            trackingNumber: txn.shipment.tracking_number,
-            courier: txn.shipment.courier?.name || null,
-            shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
-            photoUrl: txn.shipment.photo_url || null,
-          }
-        : {
-            trackingNumber: null,
-            courier: null,
-            shipmentDate: null,
-            photoUrl: null,
-          },
+          ? {
+              trackingNumber: txn.shipment.tracking_number,
+              courier: txn.shipment.courier?.name || null,
+              shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+              photoUrl: txn.shipment.photo_url || null,
+            }
+          : {
+              trackingNumber: null,
+              courier: null,
+              shipmentDate: null,
+              photoUrl: null,
+            },
         fundReleaseRequest: fr
           ? {
               requested: true,
@@ -128,8 +129,8 @@ const getTransactionListBySeller = async (sellerId, isHistory=null) => {
               resolvedAt: null,
               adminEmail: null,
             },
-          buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
-          buyerConfirmedAt: txn.confirmed_at || null,
+        buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
+        buyerConfirmedAt: txn.confirmed_at || null,
       };
     })
   );
@@ -150,6 +151,37 @@ const generateVirtualAccountNumber = () => {
   return `${prefix}${randomNumber}`;
 };
 
+const scheduleAutoCancelTransaction = async (
+  transactionId,
+  paymentDeadline
+) => {
+  const deadlineTime = new Date(paymentDeadline).getTime();
+  const now = Date.now();
+  const delay = deadlineTime - now;
+
+  if (isNaN(deadlineTime) || delay <= 0) {
+    console.warn(
+      `⚠️ Tidak dapat menjadwalkan auto-cancel: deadline tidak valid atau telah lewat.`
+    );
+    return;
+  }
+
+  await transactionQueue.add(
+    "auto-cancel-payment",
+    { transactionId },
+    {
+      delay,
+      jobId: `cancel:${transactionId}`, // ✅ pakai backtick
+      removeOnComplete: true,
+      removeOnFail: true,
+    }
+  );
+
+  console.log(
+    `📌 Job auto-cancel transaksi ${transactionId} dijadwalkan dalam ${delay} ms`
+  );
+};
+
 const generateTransaction = async ({
   seller_id,
   item_name,
@@ -158,8 +190,7 @@ const generateTransaction = async ({
   email,
   isInsurance,
 }) => {
-
-  const buyer = await userService.checkEmail({email});
+  const buyer = await userService.checkEmail({ email });
   const buyer_id = buyer.id;
 
   // plt fee, insurance fee, dan total amount are hardcoded for simplicity
@@ -174,13 +205,12 @@ const generateTransaction = async ({
     throwError("Harga item tidak valid untuk transaksi", 400);
   }
 
-  
   // Insurance fee calculation
   const insurance =
-  typeof isInsurance === "string"
-    ? isInsurance.toLowerCase() === "true"
-    : !!isInsurance;
-  
+    typeof isInsurance === "string"
+      ? isInsurance.toLowerCase() === "true"
+      : !!isInsurance;
+
   const insurance_fee = insurance ? 0.002 * item_price : 0;
 
   // Total amount calculation
@@ -200,7 +230,7 @@ const generateTransaction = async ({
   });
   if (existingTransaction) {
     throwError(
-      `Transaksi aktif sudah ada untuk seller dan buyer ini dengan ID ${existingTransaction.transactionCode}`,
+      "Transaksi aktif sudah ada untuk seller dan buyer ini dengan ID ${existingTransaction.transactionCode}",
       400
     );
   }
@@ -221,6 +251,8 @@ const generateTransaction = async ({
     withdrawal_bank_account_id,
     created_at,
   });
+
+  await scheduleAutoCancelTransaction(newTransaction.id, payment_deadline);
 
   return newTransaction;
 };
@@ -292,8 +324,8 @@ const confirmationShipmentRequest = async ({
     throwError("Gagal meminta konfirmasi barang belum dikirim", 400);
   }
 
-    // Check the latest fund release request for the transaction
-    const latestFundReleaseRequest =
+  // Check the latest fund release request for the transaction
+  const latestFundReleaseRequest =
     await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
       transactionId
     );
@@ -328,13 +360,13 @@ const confirmationShipmentRequest = async ({
 const courierList = async () => {
   const couriers = await shipmentRepo.getCourier();
   if (!couriers || couriers.length === 0) {
-    throwError("Daftar kurir tidak ditemukan", 404)
+    throwError("Daftar kurir tidak ditemukan", 404);
   }
-  return couriers.map(courier => ({
+  return couriers.map((courier) => ({
     id: courier.id,
     name: courier.name,
-  }))
-}
+  }));
+};
 
 export default {
   getTransactionDetailBySeller,

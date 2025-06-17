@@ -6,6 +6,22 @@ import authorization from "../../middlewares/authorization.js";
 
 const router = Router();
 
+router.get(
+  "/",
+  authentication,
+  authorization,
+  asyncHandler(adminUserController.getAllUsers)
+);
+
+router.get(
+  "/:userId",
+  authentication,
+  authorization,
+  asyncHandler(adminUserController.getUserDetail)
+);
+
+export default router;
+
 /**
  * @swagger
  * tags:
@@ -92,11 +108,45 @@ const router = Router();
  *         description: No users found
  */
 
-router.get(
-  "/",
-  authentication,
-  authorization,
-  asyncHandler(adminUserController.getAllUsers)
-);
-
-export default router;
+/**
+ * @swagger
+ * /api/admin/users/{userId}:
+ *   get:
+ *     summary: Retrieve user details by ID
+ *     tags: [AdminUser]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 kycStatus:
+ *                   type: string
+ *                 isAdmin:
+ *                   type: boolean
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: User not found
+ */

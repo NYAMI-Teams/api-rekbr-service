@@ -30,4 +30,16 @@ const getAllUsers = async (req, res) => {
   });
 };
 
-export default { getAllUsers };
+const getUserDetail = async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await adminUserService.getUserDetailForAdmin(userId);
+  if (!user) {
+    return res.status(404).json({ message: "User tidak ditemukan" });
+  }
+  console.log("💬 user:", user);
+
+  return resSuccess(res, 200, "Detail user berhasil diambil", user);
+};
+
+export default { getAllUsers, getUserDetail };
