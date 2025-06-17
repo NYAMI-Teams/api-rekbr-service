@@ -151,6 +151,7 @@ const generateTransaction = async ({
   item_price,
   withdrawal_bank_account_id,
   email,
+  isInsurance,
 }) => {
 
   const buyer = await userService.checkEmail({email});
@@ -167,7 +168,21 @@ const generateTransaction = async ({
   } else {
     throwError("Harga item tidak valid untuk transaksi", 400);
   }
-  const insurance_fee = 0.002 * item_price;
+
+  
+  // Insurance fee calculation
+  const insurance =
+  typeof isInsurance === "string"
+    ? isInsurance.toLowerCase() === "true"
+    : !!isInsurance;
+  
+  console.log(typeof insurance, insurance, 'this is insurance');
+  const insurance_fee = insurance ? 0.002 * item_price : 0;
+
+  console.log(insurance_fee, 'this is insurance fee');
+  
+
+  // Total amount calculation
   const total_amount = item_price + platform_fee + insurance_fee;
 
   //payment deadline also hardocdeed
