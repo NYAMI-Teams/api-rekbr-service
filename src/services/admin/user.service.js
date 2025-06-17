@@ -15,4 +15,20 @@ const getAllUsersForAdmin = async (filters) => {
   return { users: formatted, totalCount };
 };
 
-export default { getAllUsersForAdmin };
+const getUserDetailForAdmin = async (userId) => {
+  const user = await userRepo.getUserDetailById(userId);
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    email: user.email,
+    status: user.status,
+    kycStatus: user.kycStatus,
+    isAdmin: user.isAdmin,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+};
+
+export default { getAllUsersForAdmin, getUserDetailForAdmin };
