@@ -176,11 +176,7 @@ const generateTransaction = async ({
     ? isInsurance.toLowerCase() === "true"
     : !!isInsurance;
   
-  console.log(typeof insurance, insurance, 'this is insurance');
   const insurance_fee = insurance ? 0.002 * item_price : 0;
-
-  console.log(insurance_fee, 'this is insurance fee');
-  
 
   // Total amount calculation
   const total_amount = item_price + platform_fee + insurance_fee;
@@ -309,6 +305,17 @@ const confirmationShipmentRequest = async ({
   await fundReleaseRequestRepository.createFundReleaseRequest(payload);
 };
 
+const courierList = async () => {
+  const couriers = await shipmentRepo.getCourier();
+  if (!couriers || couriers.length === 0) {
+    throwError("Daftar kurir tidak ditemukan", 404)
+  }
+  return couriers.map(courier => ({
+    id: courier.id,
+    name: courier.name,
+  }))
+}
+
 export default {
   getTransactionDetailBySeller,
   inputShipment,
@@ -318,4 +325,5 @@ export default {
   generateTransaction,
   generateTransactionCode,
   getTransactionListBySeller,
+  courierList,
 };

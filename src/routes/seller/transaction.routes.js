@@ -50,6 +50,12 @@ router.post(
   asyncHandler(sellerTransactionController.generateTransaction)
 );
 
+router.get(
+  "/courier-list",
+  authentication,
+  asyncHandler(sellerTransactionController.getCourierList)
+);
+
 export default router;
 
 /**
@@ -231,6 +237,34 @@ export default router;
  *                         type: string
  *       404:
  *         description: Transaksi tidak ditemukan
+ */
+
+/**
+ * @swagger
+ * /api/seller/courier-list:
+ *   get:
+ *     summary: Mendapatkan daftar kurir
+ *     tags: [Seller Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List kurir berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     description: ID kurir
+ *                   name:
+ *                     type: string
+ *                     description: Nama kurir
+ *       404:
+ *         description: Daftar kurir tidak ditemukan
  */
 
 /**
