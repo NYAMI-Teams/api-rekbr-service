@@ -11,7 +11,7 @@ const getTransactionDetailById = async (req, res) => {
 };
 
 const getAllTransactions = async (req, res) => {
-  const {
+  let {
     status,
     fundReleaseStatus,
     createdFrom,
@@ -20,6 +20,10 @@ const getAllTransactions = async (req, res) => {
     page = 1,
     limit = 10,
   } = req.query;
+
+  if (typeof status === "string") {
+    status = status.split(",");
+  }
 
   const skip = (Number(page) - 1) * Number(limit);
   const take = Number(limit);
