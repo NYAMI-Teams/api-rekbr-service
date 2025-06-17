@@ -17,6 +17,17 @@ const createShipment = async ({
   });
 };
 
+const getCourier = async () => {
+  return await prisma.courierList.findMany({
+    orderBy: { name: "asc"},
+    select: {
+      id: true,
+      name: true,
+    }
+  })
+}
+
 export default {
   createShipment,
+  getCourier,
 };
