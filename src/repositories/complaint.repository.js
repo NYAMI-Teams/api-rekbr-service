@@ -10,6 +10,13 @@ const sellerResponseUpdate = async (transaction_id, status) => {
   });
 };
 
+const getComplaintByTransactionId = async (transaction_id) => {
+    return await prisma.complaint.findFirst({
+        where: { transaction_id },
+    })
+}
+
 export default {
     sellerResponseUpdate,
+    getComplaintByTransactionId,
 }

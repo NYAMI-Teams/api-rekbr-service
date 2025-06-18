@@ -15,7 +15,15 @@ if (transaction.status !== "shipped") {
     throwError("Transaksi tidak dalam status 'shipped'", 400);
   }
 
-//check if complaint already exists
+//check if complaint already exists and ongoing
+const existingComplaint = await complaintRepo.getComplaintByTransactionId(transactionId);
+
+console.log(!["completed", "rejected_by_seller", "rejected_by_admin", "cancelled_by_buyer"].includes(existingComplaint.status));
+
+
+if (existingComplaint && ["completed", "rejected_by_seller", "rejected_by_admin", "cancelled_by_buyer"].includes(existingComplaint.status)) {
+    throwError("Komplain sudah termin harap membuat complaint baru", 400);
+  }
 
 if (status.toLowerCase() !== "return_requested" && status.toLowerCase() !== "rejected_by_seller") {
     throwError("Status tidak sesuai", 400);
