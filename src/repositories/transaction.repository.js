@@ -304,7 +304,8 @@ const updateTransactionBuyerConfirmDeadline = async (
 
 const getTransactionListForBuyer = async (buyerId, isHistory) => {
   return await prisma.transaction.findMany({
-    where: { buyer_id: buyerId, 
+    where: {
+      buyer_id: buyerId,
       ...(isHistory === true
         ? { status: { in: ["completed", "refunded", "canceled"] } }
         : isHistory === false
@@ -317,8 +318,8 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
         select: { email: true },
       },
       shipment: {
-        select: {
-          tracking_number: true,
+        include: {
+          courier: true,
         },
       },
     },
