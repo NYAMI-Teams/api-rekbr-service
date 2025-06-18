@@ -91,7 +91,7 @@ const updateFundReleaseRequest = async (transactionId, status, adminId) => {
   if (status === "approved") {
     const resolvedAt = new Date();
     const buyerConfirmDeadline = new Date(
-      resolvedAt.getTime() + 2 * 24 * 60 * 60 * 1000
+      resolvedAt.getTime() + 1 * 24 * 60 * 60 * 1000
     );
     await transactionRepo.updateTransactionBuyerConfirmDeadline(
       transactionId,

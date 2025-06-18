@@ -9,11 +9,7 @@ const patchSellerResponse = async ({status, photo, seller_response_reason, compl
     complaintId
   );
 
-  if (
-    [
-      "return_requested",
-    ].includes(existingComplaint.status)
-  ) {
+  if (["return_requested"].includes(existingComplaint.status)) {
     throwError("Komplain sedang dalam progress", 400);
   }
 
@@ -78,15 +74,15 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
   }
 
 // check current status of complaint
-//   if (
-//     existingComplaint.status.toLowerCase() !== "awaiting_seller_confirmation"
-//   ) {
-//     throwError("Status complaint tidak sesuai", 400);
-//   }
+  if (
+    existingComplaint.status.toLowerCase() !== "awaiting_seller_confirmation"
+  ) {
+    throwError("Status complaint tidak sesuai", 400);
+  }
 
-//   if ( status.toLowerCase() !== "approved") {
-//     throwError("Status tidak sesuai", 400);
-//   }
+  if ( status.toLowerCase() !== "approved") {
+    throwError("Status tidak sesuai", 400);
+  }
 
 
   // Update the complaint status to 'item_received'

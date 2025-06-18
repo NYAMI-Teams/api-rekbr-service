@@ -117,6 +117,14 @@ const complaintTransactionUpdate = async (complaintId, refundAmount) => {
     });
 
 }
+const updateReturnShipment = async (complaintId, data) => {
+  return await prisma.returnShipment.create({
+    data: {
+      complaint_id: complaintId,
+      ...data,
+    },
+  });
+};
 
 export default {
   createComplaint,
@@ -129,4 +137,5 @@ export default {
   getComplaintByTransactionId,
   sellerItemReceiveUpdate,
   complaintTransactionUpdate,
+  updateReturnShipment,
 };
