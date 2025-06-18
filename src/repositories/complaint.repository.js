@@ -94,6 +94,16 @@ const sellerItemReceiveUpdate = async (transaction_id, status) => {
     data: {},
   });
 };
+
+const updateReturnShipment = async (complaintId, data) => {
+  return await prisma.returnShipment.create({
+    data: {
+      complaint_id: complaintId,
+      ...data,
+    },
+  });
+};
+
 export default {
   createComplaint,
   findComplaintByTransaction,
@@ -103,4 +113,6 @@ export default {
   getComplaintDetail,
   sellerResponseUpdate,
   getComplaintByTransactionId,
+  sellerItemReceiveUpdate,
+  updateReturnShipment,
 };
