@@ -3,36 +3,11 @@ import complaintRepo from "../../repositories/complaint.repository.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import digitalStorageService from "../digital-storage.service.js";
 
-const patchSellerResponse = async (transactionId, status, sellerId, photo, seller_response_reason) => {
-  //check if transaction exists
-  const transaction = await transactionRepo.getTransactionDetailBySeller(
-    transactionId,
-    sellerId
+const patchSellerResponse = async ({status, photo, seller_response_reason, complaintId}) => {
+  
+  const existingComplaint = await complaintRepo.findComplaintById(
+    complaintId
   );
-  if (!transaction) {
-    throwError("Transaksi tidak ditemukan", 404);
-  }
-
-  //check if transaction is in shipped status
-  if (transaction.status !== "shipped") {
-    throwError("Transaksi tidak dalam status 'shipped'", 400);
-  }
-
-  //check if complaint already exists and ongoing
-  const existingComplaint = await complaintRepo.getComplaintByTransactionId(
-    transactionId
-  );
-
-  if (
-    [
-      "completed",
-      "rejected_by_seller",
-      "rejected_by_admin",
-      "cancelled_by_buyer",
-    ].includes(existingComplaint.status)
-  ) {
-    throwError("Komplain sudah termin harap membuat complaint baru", 400);
-  }
 
   if (
     [
@@ -67,7 +42,7 @@ const patchSellerResponse = async (transactionId, status, sellerId, photo, selle
   }
 
   const updatedComplaint = await complaintRepo.sellerResponseUpdate(
-    transactionId,
+    complaintId,
     status,
     photoUrl,
     seller_response_reason
@@ -79,6 +54,68 @@ const patchSellerResponse = async (transactionId, status, sellerId, photo, selle
   return updatedComplaint;
 };
 
+const patchSellerItemReceive = async (complaintId, status, sellerId) => {
+  // Check if complaint exists
+  const existingComplaint = await complaintRepo.getComplaintDetail(complaintId);
+  if (!existingComplaint) {
+    throwError("Komplain tidak ditemukan", 404);
+  }
+
+  // Check if complaint is already completed or rejected
+  if (
+    ["completed", "rejected_by_seller", "rejected_by_admin"].includes(
+      existingComplaint.status
+    )
+  ) {
+    throwError("Komplain sudah termin harap membuat complaint baru", 400);
+  }
+
+  // check if complaint is approved by admin (will implement later)
+  if (
+    existingComplaint.request_confirmation_status.toLowerCase() !== "approved"
+  ) {
+    throwError("Admin menolak complaint", 400);
+  }
+
+// check current status of complaint
+//   if (
+//     existingComplaint.status.toLowerCase() !== "awaiting_seller_confirmation"
+//   ) {
+//     throwError("Status complaint tidak sesuai", 400);
+//   }
+
+//   if ( status.toLowerCase() !== "approved") {
+//     throwError("Status tidak sesuai", 400);
+//   }
+
+
+  // Update the complaint status to 'item_received'
+  const updatedComplaint = await complaintRepo.sellerItemReceiveUpdate(
+    complaintId,
+    status
+  );
+
+  // After complaint updated
+const transactionId = existingComplaint.transaction_id;
+
+const txnDetail = await transactionRepo.getTransactionDetailBySeller(transactionId, sellerId)
+
+const refundAmount =
+  Number(txnDetail.total_amount) -
+  Number(txnDetail.platform_fee || 0) -
+  Number(txnDetail.insurance_fee || 0);
+
+
+  // After complaint updated — also update transaction table
+  const updatedTransaction = await complaintRepo.complaintTransactionUpdate(complaintId, refundAmount);
+
+  return {
+    updatedComplaint,
+    updatedTransaction,
+  };
+}
+
 export default {
   patchSellerResponse,
+  patchSellerItemReceive,
 };
