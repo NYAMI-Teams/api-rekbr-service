@@ -28,4 +28,6 @@ jobs:
           cd api-rekbr-service
           git pull origin main
           npm i
+          npx prisma generate
           pm2 restart rekbr-app worker
+          
