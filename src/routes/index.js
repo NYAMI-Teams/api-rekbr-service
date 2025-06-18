@@ -5,6 +5,8 @@ import sellerTransactionRoutes from "./seller/transaction.routes.js";
 import buyerTransactionRoutes from "./buyer/transaction.routes.js";
 import adminTransactionRoutes from "./admin/transaction.routes.js";
 import adminUserRoutes from "./admin/user.routes.js";
+import buyerComplaintRoutes from "./buyer/complaint.routes.js";
+import sellerComplaintRoutes from "./seller/complaint.routes.js";
 
 const router = Router();
 
@@ -17,7 +19,9 @@ router.get("/", (req, res) => {
 router.use("/bank", bankRoutes);
 router.use("/user", userRoutes);
 router.use("/buyer", buyerTransactionRoutes);
+router.use("/buyer", buyerComplaintRoutes);
 router.use("/seller", sellerTransactionRoutes);
+router.use("/seller", sellerComplaintRoutes);
 router.use("/admin/transactions", adminTransactionRoutes);
 router.use("/admin/users", adminUserRoutes);
 

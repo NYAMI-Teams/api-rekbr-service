@@ -38,7 +38,9 @@ model User {
 
   fund_release_requests FundReleaseRequest[] @relation("FundReleaseSeller")
   fund_release_admins   FundReleaseRequest[] @relation("FundReleaseAdmin")
-  Complaint             Complaint[]
+
+  Complaint                   Complaint[]
+  request_confirmation_admins Complaint[] @relation("RequestConfirmationAdmin")
 }
 
 model DummyAccount {
@@ -99,9 +101,9 @@ model Transaction {
   shipment              Shipment?
   fund_release_requests FundReleaseRequest[]
 
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
-  Complaint  Complaint?
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  Complaint  Complaint[]
 }
 
 model Shipment {
@@ -143,22 +145,25 @@ model FundReleaseRequest {
 model Complaint {
   id             String      @id @default(uuid())
   transaction    Transaction @relation(fields: [transaction_id], references: [id])
-  transaction_id String      @unique
+  transaction_id String
 
   buyer    User   @relation(fields: [buyer_id], references: [id])
   buyer_id String
 
-  type   String
-  status String
+  type   String //   DAMAGED, LOST, NOT_AS_DESCRIBED
+  status String //  WAITING_SELLER_APPROVAL, RETURN_REQUESTED, RETURN_IN_TRANSIT, AWAITING_SELLER_CONFIRMATION, COMPLETED, UNDER_INVESTIGATION, APPROVED_BY_SELLER, APPROVED_BY_ADMIN, REJECTED_BY_SELLER, REJECTED_BY_ADMIN, CANCELED_BY_BUYER
 
-  reason               String?
-  buyer_evidence_urls  Json?
-  seller_response      String?
-  seller_evidence_urls Json?
+  buyer_reason           String?
+  buyer_evidence_urls    Json?
+  seller_response_reason String?
+  seller_evidence_urls   Json?
 
   buyer_requested_confirmation_at            DateTime?
   buyer_requested_confirmation_reason        String?
   buyer_requested_confirmation_evidence_urls Json?
+  request_confirmation_status                String? // enum: pending, approved, rejected (admin)
+  request_confirmation_admin                 User?     @relation("RequestConfirmationAdmin", fields: [request_confirmation_admin_id], references: [id])
+  request_confirmation_admin_id              String?
   seller_confirm_deadline                    DateTime?
 
   resolved_at DateTime?

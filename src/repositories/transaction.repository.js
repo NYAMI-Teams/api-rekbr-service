@@ -16,11 +16,6 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           courier: true,
         },
       },
-      shipment: {
-        include: {
-          courier: true,
-        },
-      },
     },
   });
 };
@@ -226,8 +221,8 @@ const getTransactionListForSeller = async (sellerId, isHistory = null) => {
       ...(isHistory === true
         ? { status: { in: ["completed", "refunded", "canceled"] } }
         : isHistory === false
-        ? { status: { notIn: ["completed", "refunded", "canceled"] } }
-        : {}), // No status filter if isHistory is null or undefined
+          ? { status: { notIn: ["completed", "refunded", "canceled"] } }
+          : {}), // No status filter if isHistory is null or undefined
     },
     orderBy: { created_at: "desc" },
     include: {
@@ -309,8 +304,8 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
       ...(isHistory === true
         ? { status: { in: ["completed", "refunded", "canceled"] } }
         : isHistory === false
-        ? { status: { notIn: ["completed", "refunded", "canceled"] } }
-        : {}), // No status filter if isHistory is null or undefined
+          ? { status: { notIn: ["completed", "refunded", "canceled"] } }
+          : {}), // No status filter if isHistory is null or undefined
     },
     orderBy: { created_at: "desc" },
     include: {
@@ -323,6 +318,32 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
         },
       },
     },
+  });
+};
+
+const findTransactionById = async (transactionId) => {
+  return await prisma.transaction.findUnique({
+    where: { id: transactionId },
+  });
+};
+
+const updateStatusAndClearConfirmDeadline = async (
+  transactionId,
+  newStatus
+) => {
+  return await prisma.transaction.update({
+    where: { id: transactionId },
+    data: {
+      status: newStatus,
+      buyer_confirm_deadline: null,
+    },
+  });
+};
+
+const updateStatus = async (transactionId, status) => {
+  return await prisma.transaction.update({
+    where: { id: transactionId },
+    data: { status },
   });
 };
 
@@ -340,4 +361,7 @@ export default {
   updateAfterBuyerConfirmation,
   updateTransactionBuyerConfirmDeadline,
   getTransactionListForBuyer,
+  findTransactionById,
+  updateStatusAndClearConfirmDeadline,
+  updateStatus,
 };

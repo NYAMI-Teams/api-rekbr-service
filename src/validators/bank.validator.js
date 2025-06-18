@@ -1,10 +1,6 @@
 import { body } from "express-validator";
 
 const createAccountValidation = [
-  body("user_id")
-    .notEmpty()
-    .withMessage("User ID wajib diisi"),
-
   body("bank_id")
     .notEmpty()
     .withMessage("Bank ID wajib diisi"),

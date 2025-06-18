@@ -168,3 +168,60 @@ main()
   .finally(() => {
     prisma.$disconnect();
   });
+
+await prisma.complaint.createMany({
+  data: [
+    {
+      transaction_id: "37a70b2d-7dac-4d3e-a8c5-c9415d33f47f",
+      buyer_id: "dd1964c4-5bf2-4414-87d1-0853bf02f14e",
+      type: "DAMAGED", // example type
+      status: "WAITING_SELLER_APPROVAL",   // example status
+      buyer_evidence_urls: JSON.stringify(["https://example.com/buyer-evidence-1.jpg"]),
+      seller_evidence_urls: JSON.stringify(["https://example.com/seller-evidence-1.jpg"]),
+      buyer_requested_confirmation_at: new Date("2025-06-18T06:48:27.832Z"),
+      resolved_at: null,
+      created_at: new Date("2025-06-18T03:48:27.877Z"),
+      updated_at: new Date("2025-06-18T03:48:27.877Z"),
+      buyer_requested_confirmation_evidence_urls: JSON.stringify(["https://example.com/buyer-confirm-evidence-1.jpg"]),
+      buyer_requested_confirmation_reason: null,
+      seller_confirm_deadline: new Date("2025-06-19T03:48:27.877Z"),
+      buyer_reason: "Salah Barang coooo",
+      seller_response_reason: null,
+    },
+    {
+      transaction_id: "786348ae-9944-4bc0-afb6-d628710542f8",
+      buyer_id: "c75b850d-dbaa-4f96-a337-1fa0f25bf45d",
+      type: "NOT_AS_DESCRIBED",
+      status: "WAITING_SELLER_APPROVAL",
+      buyer_evidence_urls: JSON.stringify(["https://example.com/buyer-evidence-2.jpg"]),
+      seller_evidence_urls: JSON.stringify(["https://example.com/seller-evidence-2.jpg"]),
+      buyer_requested_confirmation_at: new Date("2025-06-18T06:53:24.022Z"),
+      resolved_at: null,
+      created_at: new Date("2025-06-18T03:53:24.213Z"),
+      updated_at: new Date("2025-06-18T03:53:24.213Z"),
+      buyer_requested_confirmation_evidence_urls: JSON.stringify(["https://example.com/buyer-confirm-evidence-2.jpg"]),
+      buyer_requested_confirmation_reason: null,
+      seller_confirm_deadline: new Date("2025-06-19T03:53:24.213Z"),
+      buyer_reason: "ini barang apaan cooooo",
+      seller_response_reason: null,
+    },
+    {
+      transaction_id: "786348ae-9944-4bc0-afb6-d628710542f8",
+      buyer_id: "755a349b-04bb-4264-ab7b-f9256d1e6654",
+      type: "NOT_AS_DESCRIBED",
+      status: "WAITING_SELLER_APPROVAL",
+      buyer_evidence_urls: JSON.stringify(["https://example.com/buyer-evidence-2.jpg"]),
+      seller_evidence_urls: JSON.stringify(["https://example.com/seller-evidence-2.jpg"]),
+      buyer_requested_confirmation_at: new Date("2025-06-18T06:53:24.022Z"),
+      resolved_at: null,
+      created_at: new Date("2025-06-18T03:53:24.213Z"),
+      updated_at: new Date("2025-06-18T03:53:24.213Z"),
+      buyer_requested_confirmation_evidence_urls: JSON.stringify(["https://example.com/buyer-confirm-evidence-2.jpg"]),
+      buyer_requested_confirmation_reason: null,
+      seller_confirm_deadline: new Date("2025-06-19T03:53:24.213Z"),
+      buyer_reason: "Duplicate charge",
+      seller_response_reason: "Refund processed",
+    },
+  ],
+  skipDuplicates: true,
+});
