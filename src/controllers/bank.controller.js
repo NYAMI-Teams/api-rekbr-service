@@ -29,7 +29,7 @@ const postAccount = async (req, res) => {
 
 const getAccounts = async (req, res) => {
   console.log("getAccounts called with query:", req.query);
-  const { user_id } = req.user.id;
+  const user_id = req.user.id;
   const result = await backService.showAccount(user_id);
   return resSuccess(res, 200, "Daftar akun berhasil diambil", result);
 };
