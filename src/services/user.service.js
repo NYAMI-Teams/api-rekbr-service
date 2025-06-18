@@ -38,7 +38,7 @@ const generateOtpCode = async (key) => {
   return otpCode;
 };
 
-const requestVerifyEmail = async ({ email }) => {
+const requestVerifyEmail = async ( email ) => {
   const otpCode = await generateOtpCode("verifyEmail:" + email);
   sendOtpEmail(email, otpCode);
 }  
