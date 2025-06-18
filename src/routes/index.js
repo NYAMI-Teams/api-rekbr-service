@@ -5,6 +5,7 @@ import sellerTransactionRoutes from "./seller/transaction.routes.js";
 import buyerTransactionRoutes from "./buyer/transaction.routes.js";
 import adminTransactionRoutes from "./admin/transaction.routes.js";
 import adminUserRoutes from "./admin/user.routes.js";
+import complaintRoutes from "./seller/complaint.routes.js";
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.use("/bank", bankRoutes);
 router.use("/user", userRoutes);
 router.use("/buyer", buyerTransactionRoutes);
 router.use("/seller", sellerTransactionRoutes);
+router.use("/seller", complaintRoutes);
 router.use("/admin/transactions", adminTransactionRoutes);
 router.use("/admin/users", adminUserRoutes);
 
