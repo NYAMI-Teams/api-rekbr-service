@@ -11,15 +11,19 @@ const router = Router();
 
 const upload = multer();
 
+router.patch(
+  "/complaints/:complaintId/respond",
+  authentication,
+  upload.array("photo"),
+  asyncHandler(complaintController.patchSellerResponse)
+);
 
 router.patch(
-    "/complaints/:transactionId/respond",
-    authentication,
-    upload.array("photo"),  
-    asyncHandler(complaintController.patchSellerResponse)
-  );
-  
-  export default router;
+  "/complaints/:complaintId/confirm-return",
+  authentication,
+  asyncHandler(complaintController.patchSellerItemReceive)
+);
+export default router;
 
 /**
  * @swagger

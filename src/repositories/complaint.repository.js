@@ -64,13 +64,15 @@ const getComplaintDetail = async (complaintId) => {
 };
 
 const sellerResponseUpdate = async (
-  transaction_id,
+  complaintId,
   status,
   photo,
   seller_response_reason
 ) => {
+    console.log(status, "ini status");
+    
   return await prisma.complaint.update({
-    where: { transaction_id },
+    where: { id: complaintId },
     data: {
       status: status,
       seller_evidence_urls: photo && photo.length > 0 ? photo : [],
@@ -88,13 +90,33 @@ const getComplaintByTransactionId = async (transaction_id) => {
   });
 };
 
-const sellerItemReceiveUpdate = async (transaction_id, status) => {
+const sellerItemReceiveUpdate = async (complaintId, status) => {
   return await prisma.complaint.update({
-    where: { transaction_id },
-    data: {},
+    where: { id: complaintId },
+    data: {
+      status,
+      resolved_at: new Date(),
+    },
   });
 };
 
+const complaintTransactionUpdate = async (complaintId, refundAmount) => {
+    const complaint = await findComplaintById(complaintId);
+    if (!complaint) {
+        throw new Error("Complaint not found");
+    }
+
+    return await prisma.transaction.update({
+        where: { id: complaint.transaction_id },
+        data: {
+            status: "refunded",
+            refund_amount: refundAmount,
+            refund_reason: complaint.buyer_reason,
+            refunded_at: new Date(),
+        },
+    });
+
+}
 const updateReturnShipment = async (complaintId, data) => {
   return await prisma.returnShipment.create({
     data: {
@@ -114,5 +136,6 @@ export default {
   sellerResponseUpdate,
   getComplaintByTransactionId,
   sellerItemReceiveUpdate,
+  complaintTransactionUpdate,
   updateReturnShipment,
 };
