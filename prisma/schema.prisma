@@ -148,13 +148,13 @@ model Complaint {
   buyer    User   @relation(fields: [buyer_id], references: [id])
   buyer_id String
 
-  type   String
-  status String
+  type   String //   DAMAGED, LOST, NOT_AS_DESCRIBED
+  status String //  WAITING_SELLER_APPROVAL, RETURN_REQUESTED, RETURN_IN_TRANSIT, AWAITING_SELLER_CONFIRMATION, COMPLETED, UNDER_INVESTIGATION, APPROVED, REJECTED_BY_SELLER, REJECTED_BY_ADMIN, CANCELED_BY_BUYER
 
-  reason               String?
-  buyer_evidence_urls  Json?
-  seller_response      String?
-  seller_evidence_urls Json?
+  buyer_reason           String?
+  buyer_evidence_urls    Json?
+  seller_response_reason String?
+  seller_evidence_urls   Json?
 
   buyer_requested_confirmation_at            DateTime?
   buyer_requested_confirmation_reason        String?
