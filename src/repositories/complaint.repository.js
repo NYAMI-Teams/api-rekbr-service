@@ -1,5 +1,4 @@
 import prisma from "../prisma/client.js";
-import prisma from "../prisma/client.js";
 import toCamelCase from "../utils/camelCaseResponse.js";
 
 const createComplaint = async (payload) => {
@@ -95,6 +94,16 @@ const sellerItemReceiveUpdate = async (transaction_id, status) => {
     data: {},
   });
 };
+
+const updateReturnShipment = async (complaintId, data) => {
+  return await prisma.returnShipment.create({
+    data: {
+      complaint_id: complaintId,
+      ...data,
+    },
+  });
+};
+
 export default {
   createComplaint,
   findComplaintByTransaction,
@@ -104,4 +113,6 @@ export default {
   getComplaintDetail,
   sellerResponseUpdate,
   getComplaintByTransactionId,
+  sellerItemReceiveUpdate,
+  updateReturnShipment,
 };

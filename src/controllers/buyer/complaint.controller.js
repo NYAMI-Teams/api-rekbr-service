@@ -48,9 +48,27 @@ const getComplaintDetail = async (req, res) => {
   return resSuccess(res, 200, "Detail komplain berhasil diambil", complaint);
 };
 
+const submitReturnShipment = async (req, res) => {
+  const { complaintId } = req.params;
+  const buyerId = req.user.id;
+  const { courierId, trackingNumber } = req.body;
+  const photo = req.file;
+
+  const result = await buyerComplaintService.submitReturnShipment({
+    complaintId,
+    buyerId,
+    courierId,
+    trackingNumber,
+    photo,
+  });
+
+  return resSuccess(res, 200, "Pengiriman retur berhasil dikirim", result);
+};
+
 export default {
   createComplaint,
   cancelComplaint,
   getComplaintList,
   getComplaintDetail,
+  submitReturnShipment,
 };
