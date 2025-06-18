@@ -112,13 +112,16 @@ const confirmReceived = async (transactionId, buyerId) => {
   };
 };
 
-const getTransactionListByBuyer = async (buyerId, isHistory=null) => {
-    // Convert isHistory to a boolean if it's a string
+const getTransactionListByBuyer = async (buyerId, isHistory = null) => {
+  // Convert isHistory to a boolean if it's a string
   if (typeof isHistory === "string") {
     isHistory = isHistory.toLowerCase() === "true";
   }
-  
-  const txn = await transactionRepo.getTransactionListForBuyer(buyerId, isHistory);
+
+  const txn = await transactionRepo.getTransactionListForBuyer(
+    buyerId,
+    isHistory
+  );
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
     return [];
@@ -147,6 +150,7 @@ const getTransactionListByBuyer = async (buyerId, isHistory=null) => {
               trackingNumber: txn.shipment.tracking_number,
               courier: txn.shipment.courier?.name || null,
               shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
+              photoUrl: txn.shipment.photo_url || null,
             }
           : {
               trackingNumber: null,

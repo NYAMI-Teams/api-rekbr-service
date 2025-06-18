@@ -156,8 +156,12 @@ model Complaint {
   seller_response      String?
   seller_evidence_urls Json?
 
-  buyer_requested_confirmation_at DateTime?
-  resolved_at                     DateTime?
+  buyer_requested_confirmation_at            DateTime?
+  buyer_requested_confirmation_reason        String?
+  buyer_requested_confirmation_evidence_urls Json?
+  seller_confirm_deadline                    DateTime?
+
+  resolved_at DateTime?
 
   return_shipment ReturnShipment?
 
