@@ -3,7 +3,13 @@ import complaintRepo from "../../repositories/complaint.repository.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import digitalStorageService from "../digital-storage.service.js";
 
-const patchSellerResponse = async (transactionId, status, sellerId, photo, seller_response_reason) => {
+const patchSellerResponse = async (
+  transactionId,
+  status,
+  sellerId,
+  photo,
+  seller_response_reason
+) => {
   //check if transaction exists
   const transaction = await transactionRepo.getTransactionDetailBySeller(
     transactionId,
@@ -34,11 +40,7 @@ const patchSellerResponse = async (transactionId, status, sellerId, photo, selle
     throwError("Komplain sudah termin harap membuat complaint baru", 400);
   }
 
-  if (
-    [
-      "return_requested",
-    ].includes(existingComplaint.status)
-  ) {
+  if (["return_requested"].includes(existingComplaint.status)) {
     throwError("Komplain sedang dalam progress", 400);
   }
 

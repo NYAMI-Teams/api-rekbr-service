@@ -32,4 +32,11 @@ router.get(
   asyncHandler(complaintController.getComplaintDetail)
 );
 
+router.post(
+  "/complaints/:complaintId/return",
+  authentication,
+  upload.single("photo"),
+  asyncHandler(complaintController.submitReturnShipment)
+);
+
 export default router;

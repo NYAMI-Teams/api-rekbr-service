@@ -166,6 +166,43 @@ const getComplaintDetail = async (complaintId, buyerId) => {
   };
 };
 
+const submitReturnShipment = async ({
+  complaintId,
+  buyerId,
+  courierId,
+  trackingNumber,
+  photo,
+}) => {
+  const complaint = await complaintRepo.getComplaintDetail(complaintId);
+  if (!complaint || complaint.buyer_id !== buyerId) {
+    throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
+  }
+
+  if (complaint.status !== "return_requested") {
+    throwError("Komplain tidak dalam status pengembalian", 400);
+  }
+
+  let photoUrl = null;
+  if (photo) {
+    photoUrl = await digitalStorageService.uploadToSpaces(
+      photo.buffer,
+      photo.originalname,
+      photo.mimetype
+    );
+  }
+
+  const returnShipment = await complaintRepo.updateReturnShipment(complaintId, {
+    courier_id: courierId,
+    tracking_number: trackingNumber,
+    shipment_date: new Date(),
+    photo_url: photoUrl,
+  });
+
+  await complaintRepo.updateComplaintStatus(complaintId, "return_in_transit");
+
+  return returnShipment;
+};
+
 const generateStatusLabel = (status) => {
   switch (status) {
     case "waiting_seller_approval":
@@ -190,4 +227,5 @@ export default {
   cancelComplaint,
   getComplaintListByBuyer,
   getComplaintDetail,
+  submitReturnShipment,
 };
