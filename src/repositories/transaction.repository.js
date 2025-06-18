@@ -326,6 +326,32 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
   });
 };
 
+const findTransactionById = async (transactionId) => {
+  return await prisma.transaction.findUnique({
+    where: { id: transactionId },
+  });
+};
+
+const updateStatusAndClearConfirmDeadline = async (
+  transactionId,
+  newStatus
+) => {
+  return await prisma.transaction.update({
+    where: { id: transactionId },
+    data: {
+      status: newStatus,
+      buyer_confirm_deadline: null,
+    },
+  });
+};
+
+const updateStatus = async (transactionId, status) => {
+  return await prisma.transaction.update({
+    where: { id: transactionId },
+    data: { status },
+  });
+};
+
 export default {
   getTransactionDetailByBuyer,
   getTransactionDetailBySeller,
@@ -340,4 +366,7 @@ export default {
   updateAfterBuyerConfirmation,
   updateTransactionBuyerConfirmDeadline,
   getTransactionListForBuyer,
+  findTransactionById,
+  updateStatusAndClearConfirmDeadline,
+  updateStatus,
 };
