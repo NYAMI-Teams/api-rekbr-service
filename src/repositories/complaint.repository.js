@@ -21,6 +21,14 @@ const getComplaintByTransactionId = async (transaction_id) => {
     });
   };
 
+const sellerItemReceiveUpdate = async (transaction_id, status) => {
+    return await prisma.complaint.update({
+        where: { transaction_id},
+        data: {
+            
+        }
+    })
+}
 export default {
     sellerResponseUpdate,
     getComplaintByTransactionId,
