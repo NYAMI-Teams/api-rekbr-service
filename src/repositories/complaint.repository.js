@@ -1,5 +1,4 @@
 import prisma from "../prisma/client.js";
-import prisma from "../prisma/client.js";
 import toCamelCase from "../utils/camelCaseResponse.js";
 
 const createComplaint = async (payload) => {

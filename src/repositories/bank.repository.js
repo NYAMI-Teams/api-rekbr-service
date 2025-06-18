@@ -14,7 +14,7 @@ const getAllBanks = async () => {
 };
 
 const getDummyAccount = async (account_number, bank_id) => {
-  const accounts = await prisma.dummyAccount.findMany({
+  const account = await prisma.dummyAccount.findFirst({
     where: {
       account_number,
       bank_id,
@@ -23,10 +23,11 @@ const getDummyAccount = async (account_number, bank_id) => {
       id: true,
       bank_id: true,
       account_number: true,
+      account_name: true,
     },
   });
 
-  return accounts.map((account) => toCamelCase(account));
+ return account ? toCamelCase(account) : null;
 };
 
 const findAccount = async ({ user_id, bank_id, account_number }) => {

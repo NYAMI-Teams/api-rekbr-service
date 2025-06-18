@@ -38,6 +38,11 @@ const generateOtpCode = async (key) => {
   return otpCode;
 };
 
+const requestVerifyEmail = async ({ email }) => {
+  const otpCode = await generateOtpCode("verifyEmail:" + email);
+  sendOtpEmail(email, otpCode);
+}  
+
 const register = async ({ email, password }) => {
   const existingUser = await userRepository.findUserByEmail(email);
   if (existingUser) {
@@ -55,9 +60,7 @@ const register = async ({ email, password }) => {
 
   await redisClient.set("user:" + email, JSON.stringify(user), { EX: 3000 });
 
-  const otpCode = await generateOtpCode("verifyEmail:" + email);
-
-  sendOtpEmail(email, otpCode);
+  requestVerifyEmail(email);
 };
 
 const login = async ({ email, password }) => {
@@ -87,9 +90,7 @@ const resendVerifyEmail = async ({ email }) => {
   if (!user) {
     throwError("User tidak ditemukan", 404);
   }
-  const otpCode = await generateOtpCode("verifyEmail:" + email);
-
-  sendOtpEmail(email, otpCode);
+  requestVerifyEmail(email);
 };
 
 const verifyEmail = async ({ email, otpCode }) => {
@@ -136,7 +137,6 @@ const verifyKyc = async (userId) => {
 };
 
 const getProfile = async (userId) => {
-  console.log(userId, "=====>");
   const user = await userRepository.findUserById(userId);
   if (!user) {
     throwError("User tidak ditemukan", 404);
