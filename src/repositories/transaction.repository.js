@@ -16,6 +16,15 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           courier: true,
         },
       },
+      Complaint: {
+        include: {
+          return_shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        }
+      }
     },
   });
 };
