@@ -138,6 +138,7 @@ const getAllComplaintList = async (filters = {}) => {
       buyer: { select: { email: true } },
       transaction: {
         select: {
+          status: true,
           transaction_code: true,
           item_name: true,
           insurance_fee: true,

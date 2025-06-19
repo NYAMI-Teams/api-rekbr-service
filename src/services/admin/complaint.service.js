@@ -1,7 +1,8 @@
 import complaintRepository from "../../repositories/complaint.repository.js";
+import transactionRepository from "../../repositories/transaction.repository.js";
 import throwError from "../../utils/throwError.js";
 
-const getAllComplaintList =  async (type, status) => {
+const getAllComplaintList = async (type, status) => {
     const filters = {};
     if (type) filters.type = type;
     if (status) filters.status = status;
@@ -29,6 +30,11 @@ const responseComplaint = async (id, status) => {
     if (!updatedComplaint) {
         throwError("Gagal memperbarui status pengaduan", 500);
     }
+    const updatedTransaction = await complaintRepository.complaintTransactionUpdate(
+        id,
+        complaint.transaction.item_price
+    );
+
 }
 
 export default {
