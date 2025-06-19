@@ -12,7 +12,7 @@ const patchSellerResponse = async ({
 }) => {
   const existingComplaint = await complaintRepo.findComplaintById(complaintId);
 
-  if (["return_requested"].includes(existingComplaint.status)) {
+  if (["return_requested"].includes(existingComplaint?.status)) {
     throwError("Komplain sedang dalam progress", 400);
   }
 
