@@ -175,7 +175,7 @@ const getTransactionListByBuyer = async (buyerId, statusArray) => {
         currentTimestamp: new Date().toISOString(),
         shipment: txn.shipment
           ? {
-              trackingNumber: txn.shipment.tracking_number,
+              trackingNumber: txn.shipment.tracking_number || null,
               courier: txn.shipment.courier?.name || null,
               shipmentDate: txn.shipment.shipment_date?.toISOString() || null,
               photoUrl: txn.shipment.photo_url || null,
@@ -207,9 +207,9 @@ const getTransactionListByBuyer = async (buyerId, statusArray) => {
               status: latestComplaint.status,
               returnShipment: latestComplaint.return_shipment,
               createdAt: latestComplaint.created_at,
-              sellerConfirmDeadline: latestComplaint.seller_confirm_deadline
+              returnShipment: latestComplaint.return_shipment
                 ? {
-                    trackingNumber: latestComplaint.return_shipment.tracking_number,
+                    trackingNumber: latestComplaint.return_shipment.tracking_number || null,
                     courierName: latestComplaint.return_shipment.courier?.name || null,
                     shipmentDate: latestComplaint.return_shipment.shipment_date?.toISOString() || null,
                     createdAt: latestComplaint.return_shipment.created_at,
