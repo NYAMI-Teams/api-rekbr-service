@@ -232,15 +232,13 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
   });
 };
 
-const getTransactionListForSeller = async (sellerId, isHistory = null) => {
+const getTransactionListForSeller = async (sellerId, statusArray) => {
   return await prisma.transaction.findMany({
     where: {
       seller_id: sellerId,
-      ...(isHistory === true
-        ? { status: { in: ["completed", "refunded", "canceled"] } }
-        : isHistory === false
-        ? { status: { notIn: ["completed", "refunded", "canceled"] } }
-        : {}), // No status filter if isHistory is null or undefined
+      ...(statusArray && statusArray.length > 0
+        ? { status: { in: statusArray } }
+        : {}),
     },
     orderBy: { created_at: "desc" },
     include: {
@@ -315,15 +313,13 @@ const updateTransactionBuyerConfirmDeadline = async (
   });
 };
 
-const getTransactionListForBuyer = async (buyerId, isHistory) => {
+const getTransactionListForBuyer = async (buyerId, statusArray) => {
   return await prisma.transaction.findMany({
     where: {
       buyer_id: buyerId,
-      ...(isHistory === true
-        ? { status: { in: ["completed", "refunded", "canceled"] } }
-        : isHistory === false
-        ? { status: { notIn: ["completed", "refunded", "canceled"] } }
-        : {}), // No status filter if isHistory is null or undefined
+      ...(statusArray && statusArray.length > 0
+        ? { status: { in: statusArray } }
+        : {}),
     },
     orderBy: { created_at: "desc" },
     include: {
@@ -335,7 +331,7 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
           courier: true,
         },
       },
-      complaint: true
+      Complaint: true
     },
   });
 };

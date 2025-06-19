@@ -34,11 +34,15 @@ const confirmReceived = async (req, res) => {
 
 const getTransactionListBuyer = async (req, res) => {
   const buyerId = req.user.id;
-  const { isHistory } = req.query || null
+  const statusArray = req.params.status
+    ? Array.isArray(req.params.status)
+      ? req.params.status
+      : [req.params.status]
+    : null;
 
   const data = await buyerTransactionService.getTransactionListByBuyer(
     buyerId,
-    isHistory
+    statusArray
   );
 
   const message =

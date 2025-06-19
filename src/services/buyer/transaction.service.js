@@ -142,15 +142,10 @@ const confirmReceived = async (transactionId, buyerId) => {
   };
 };
 
-const getTransactionListByBuyer = async (buyerId, isHistory = null) => {
-  // Convert isHistory to a boolean if it's a string
-  if (typeof isHistory === "string") {
-    isHistory = isHistory.toLowerCase() === "true";
-  }
-
+const getTransactionListByBuyer = async (buyerId, statusArray) => {
   const txn = await transactionRepo.getTransactionListForBuyer(
     buyerId,
-    isHistory
+    statusArray
   );
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {

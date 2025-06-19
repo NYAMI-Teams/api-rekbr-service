@@ -100,13 +100,9 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
-const getTransactionListBySeller = async (sellerId, isHistory=null) => {
-  // Convert isHistory to a boolean if it's a string
-  if (typeof isHistory === "string") {
-    isHistory = isHistory.toLowerCase() === "true";
-  }
-  
-  const txn = await transactionRepo.getTransactionListForSeller(sellerId, isHistory);
+const getTransactionListBySeller = async (sellerId, statusArray) => {
+  const txn = await transactionRepo.getTransactionListForSeller(sellerId, statusArray);
+
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
     return [];
