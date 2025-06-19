@@ -6,15 +6,12 @@ import validateRequest from "../../middlewares/validateRequest.js";
 import authentication from "../../middlewares/authentication.js";
 import uploadImage from "../../middlewares/uploadImage.js";
 import shipmentValidator from "../../validators/shipment.validator.js";
-import multer from "multer";
 const router = Router();
-
-const upload = multer();
 
 router.patch(
   "/complaints/:complaintId/respond",
   authentication,
-  upload.array("photo"),
+  uploadImage.array("photo", 5, 10),
   asyncHandler(complaintController.patchSellerResponse)
 );
 
