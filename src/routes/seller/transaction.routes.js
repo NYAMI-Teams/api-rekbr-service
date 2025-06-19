@@ -17,7 +17,7 @@ router.get(
 router.post(
   "/transactions/:transactionId/shipping",
   authentication,
-  uploadImage("photo"),
+  uploadImage.single("photo", 2),
   shipmentValidator.inputShipmentValidator,
   validateRequest,
   asyncHandler(sellerTransactionController.inputShipment)
@@ -32,7 +32,7 @@ router.post(
 router.post(
   "/transaction/:transactionId/request-confirmation-shipment",
   authentication,
-  uploadImage("evidence"),
+  uploadImage.single("evidence", 2),
   asyncHandler(sellerTransactionController.confirmationShipmentRequest)
 );
 

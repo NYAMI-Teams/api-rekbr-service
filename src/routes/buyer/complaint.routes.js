@@ -1,17 +1,15 @@
 import { Router } from "express";
 import authentication from "../../middlewares/authentication.js";
 import asyncHandler from "../../middlewares/asyncHandler.js";
-import multer from "multer";
 import complaintController from "../../controllers/buyer/complaint.controller.js";
-
+import uploadImage from "../../middlewares/uploadImage.js";
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
 router.post(
   "/transactions/:transactionId/complaint",
   authentication,
-  upload.array("evidence"),
+  uploadImage.array("evidence", 5, 10),
   asyncHandler(complaintController.createComplaint)
 );
 
@@ -36,14 +34,14 @@ router.get(
 router.post(
   "/complaints/:complaintId/return",
   authentication,
-  upload.single("photo"),
+  uploadImage.single("photo", 2),
   asyncHandler(complaintController.submitReturnShipment)
 );
 
 router.post(
   "/complaints/:complaintId/request-confirmation",
   authentication,
-  upload.single("evidence"),
+  uploadImage.single("evidence", 2),
   asyncHandler(complaintController.requestBuyerConfirmation)
 );
 
@@ -372,4 +370,3 @@ export default router;
  *       404:
  *         description: Komplain tidak ditemukan atau bukan milik Anda
  */
-
