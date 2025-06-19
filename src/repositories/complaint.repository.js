@@ -69,8 +69,8 @@ const sellerResponseUpdate = async (
   photo,
   seller_response_reason
 ) => {
-    console.log(status, "ini status");
-    
+  console.log(status, "ini status");
+
   return await prisma.complaint.update({
     where: { id: complaintId },
     data: {
@@ -101,20 +101,20 @@ const sellerItemReceiveUpdate = async (complaintId, status) => {
 };
 
 const complaintTransactionUpdate = async (complaintId, refundAmount) => {
-    const complaint = await findComplaintById(complaintId);
-    if (!complaint) {
-        throw new Error("Complaint not found");
-    }
+  const complaint = await findComplaintById(complaintId);
+  if (!complaint) {
+    throw new Error("Complaint not found");
+  }
 
-    return await prisma.transaction.update({
-        where: { id: complaint.transaction_id },
-        data: {
-            status: "refunded",
-            refund_amount: refundAmount,
-            refund_reason: complaint.buyer_reason,
-            refunded_at: new Date(),
-        },
-    });
+  return await prisma.transaction.update({
+    where: { id: complaint.transaction_id },
+    data: {
+      status: "refunded",
+      refund_amount: refundAmount,
+      refund_reason: complaint.buyer_reason,
+      refunded_at: new Date(),
+    },
+  });
 
 }
 const updateReturnShipment = async (complaintId, data) => {
@@ -123,6 +123,33 @@ const updateReturnShipment = async (complaintId, data) => {
       complaint_id: complaintId,
       ...data,
     },
+  });
+};
+
+const getAllComplaintList = async (filters = {}) => {
+  return await prisma.complaint.findMany({
+    where: filters,
+    orderBy: { created_at: "desc" },
+    select: {
+      id: true,
+      type: true,
+      status: true,
+      created_at: true,
+      buyer: { select: { email: true } },
+      transaction: {
+        select: {
+          transaction_code: true,
+          item_name: true,
+          insurance_fee: true,
+          shipment: {
+            select: {
+              tracking_number: true,
+              courier: { select: { name: true } }
+            }
+          }
+        }
+      }
+    }
   });
 };
 
@@ -138,4 +165,5 @@ export default {
   sellerItemReceiveUpdate,
   complaintTransactionUpdate,
   updateReturnShipment,
+  getAllComplaintList,
 };
