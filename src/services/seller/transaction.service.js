@@ -88,6 +88,7 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           trackingNumber: c.return_shipment.tracking_number,
           courierName: c.return_shipment.courier?.name || null,
           shipmentDate: c.return_shipment.shipment_date?.toISOString() || null,
+          receivedDate: c.return_shipment.received_date?.toISOString() || null,
         } : null,
         returnShipmentTrackingNumber: c.return_shipment_tracking_number,
         createdAt: c.created_at,
@@ -100,13 +101,9 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   };
 };
 
-const getTransactionListBySeller = async (sellerId, isHistory=null) => {
-  // Convert isHistory to a boolean if it's a string
-  if (typeof isHistory === "string") {
-    isHistory = isHistory.toLowerCase() === "true";
-  }
-  
-  const txn = await transactionRepo.getTransactionListForSeller(sellerId, isHistory);
+const getTransactionListBySeller = async (sellerId, statusArray) => {
+  const txn = await transactionRepo.getTransactionListForSeller(sellerId, statusArray);
+
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
     return [];
@@ -118,6 +115,8 @@ const getTransactionListBySeller = async (sellerId, isHistory=null) => {
         await fundReleaseRequestRepository.getFundReleaseRequestByTransaction(
           txn.id
         );
+      
+      const latestComplaint = txn.Complaint?.[0] || null;
 
       return {
         id: txn.id,
@@ -159,6 +158,20 @@ const getTransactionListBySeller = async (sellerId, isHistory=null) => {
               resolvedAt: null,
               adminEmail: null,
             },
+        complaint: latestComplaint
+          ? {
+              id: latestComplaint.id,
+              type: latestComplaint.type,
+              status: latestComplaint.status,
+              returnShipment: latestComplaint.return_shipment
+                ? {
+                    trackingNumber: latestComplaint.return_shipment.tracking_number,
+                    courierName: latestComplaint.return_shipment.courier?.name || null,
+                    shipmentDate: latestComplaint.return_shipment.shipment_date?.toISOString() || null,
+                  }
+                : null,
+            }
+          : null,
         buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
         buyerConfirmedAt: txn.confirmed_at || null,
       };

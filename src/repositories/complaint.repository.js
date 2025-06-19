@@ -116,12 +116,69 @@ const complaintTransactionUpdate = async (complaintId, refundAmount) => {
     },
   });
 };
+
+const complaintShipmentReceived = async (complaintId) => {
+    const complaint = await findComplaintById(complaintId);
+    if (!complaint) {
+      throw new Error("Complaint not found");
+    }
+  
+    return await prisma.returnShipment.update({
+      where: { complaint_id: complaintId},
+      data: {
+        received_date: new Date(),
+      },
+    });
+  };
+
 const updateReturnShipment = async (complaintId, data) => {
   return await prisma.returnShipment.create({
     data: {
       complaint_id: complaintId,
       ...data,
     },
+  });
+};
+
+const getAllComplaintList = async (filters = {}) => {
+  return await prisma.complaint.findMany({
+    where: filters,
+    orderBy: { created_at: "desc" },
+    select: {
+      id: true,
+      type: true,
+      status: true,
+      created_at: true,
+      buyer: { select: { email: true } },
+      transaction: {
+        select: {
+          status: true,
+          transaction_code: true,
+          item_name: true,
+          insurance_fee: true,
+          shipment: {
+            select: {
+              tracking_number: true,
+              courier: { select: { name: true } }
+            }
+          }
+        }
+      }
+    }
+  });
+};
+
+const getComplaintById = async (complaintId) => {
+  return await prisma.complaint.findUnique({
+    where: { id: complaintId },
+    include: {
+      transaction: {
+        include: {
+          shipment: true
+        }
+      },
+      return_shipment: true,
+    }
   });
 };
 
@@ -154,5 +211,8 @@ export default {
   sellerItemReceiveUpdate,
   complaintTransactionUpdate,
   updateReturnShipment,
+  getAllComplaintList,
+  getComplaintById,
   updateComplaintWithBuyerConfirmRequest,
+  complaintShipmentReceived,
 };
