@@ -23,8 +23,28 @@ const getComplaintById = async (req, res) => {
     return resSuccess(res, 200, "Pengaduan berhasil diambil", complaint);
 }
 
+const responseComplaint = async (req, res) => {
+    const { id, action } = req.params;
+    let status = "";
+
+    const validActions = ["approve", "reject"];
+    if (!validActions.includes(action)) {
+        throwError(`Invalid action parameter. Allowed values are [${validActions.join(" or ")}].`, 400);
+    }
+
+    if (action === "approve") {
+        status = "approved_by_admin";
+    } else if (action === "reject") {
+        status = "rejected_by_admin";
+    }
+
+    await complaintService.responseComplaint(id, status);
+    return resSuccess(res, 200, `Pengaduan berhasil ${action == "approve" ? "disetujui" : "ditolak"} oleh admin`);
+}
+
 
 export default {
     getAllComplaintList,
-    getComplaintById
+    getComplaintById,
+    responseComplaint
 }

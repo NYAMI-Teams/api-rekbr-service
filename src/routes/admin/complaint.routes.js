@@ -6,6 +6,7 @@ const router = Router();
 
 router.get("/", asyncHandler(complaintController.getAllComplaintList))
 router.get("/:id", asyncHandler(complaintController.getComplaintById));
+router.post("/:id/:action", asyncHandler(complaintController.responseComplaint));
 
 export default router;
 
@@ -298,6 +299,40 @@ export default router;
  *                         updated_at:
  *                           type: string
  *                           format: date-time
+ *       404:
+ *         description: Pengaduan tidak ditemukan
+ */
+
+/**
+ * @swagger
+ * /api/admin/complaints/{id}/{action}:
+ *   post:
+ *     summary: Admin merespon pengaduan (approve/reject)
+ *     tags: [AdminComplaint]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID pengaduan
+ *       - in: path
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [approve, reject]
+ *         description: Aksi admin terhadap pengaduan (approve atau reject)
+ *     responses:
+ *       200:
+ *         description: Pengaduan berhasil direspon oleh admin
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: Pengaduan berhasil disetujui oleh admin
+ *       400:
+ *         description: Parameter action tidak valid
  *       404:
  *         description: Pengaduan tidak ditemukan
  */
