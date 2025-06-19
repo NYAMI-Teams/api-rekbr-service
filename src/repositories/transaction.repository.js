@@ -16,6 +16,15 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           courier: true,
         },
       },
+      Complaint: {
+        include: {
+          return_shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        }
+      }
     },
   });
 };
@@ -36,6 +45,15 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           courier: true,
         },
       },
+      Complaint: {
+        include: {
+          return_shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        }
+      }
     },
   });
 };
@@ -317,6 +335,7 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
           courier: true,
         },
       },
+      complaint: true
     },
   });
 };
