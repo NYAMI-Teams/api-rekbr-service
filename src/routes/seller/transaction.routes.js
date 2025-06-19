@@ -86,86 +86,7 @@ export default router;
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 transactionCode:
- *                   type: string
- *                 status:
- *                   type: string
- *                 itemName:
- *                   type: string
- *                 itemPrice:
- *                   type: number
- *                 insuranceFee:
- *                   type: number
- *                 platformFee:
- *                   type: number
- *                 totalAmount:
- *                   type: number
- *                 virtualAccount:
- *                   type: string
- *                 buyerEmail:
- *                   type: string
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                 paidAt:
- *                   type: string
- *                   format: date-time
- *                 paymentDeadline:
- *                   type: string
- *                   format: date-time
- *                 shipmentDeadline:
- *                   type: string
- *                   format: date-time
- *                 shipment:
- *                   type: object
- *                   nullable: true
- *                   properties:
- *                     trackingNumber:
- *                       type: string
- *                     courier:
- *                       type: string
- *                     shipmentDate:
- *                       type: string
- *                       format: date-time
- *                     photoUrl:
- *                       type: string
- *                 fundReleaseRequest:
- *                   type: object
- *                   properties:
- *                     requested:
- *                       type: boolean
- *                     status:
- *                       type: string
- *                     requestedAt:
- *                       type: string
- *                       format: date-time
- *                     resolvedAt:
- *                       type: string
- *                       format: date-time
- *                     adminEmail:
- *                       type: string
- *                 rekeningSeller:
- *                   type: object
- *                   properties:
- *                     bankName:
- *                       type: string
- *                     accountNumber:
- *                       type: string
- *                     logoUrl:
- *                       type: string
- *                 buyerConfirmedAt:
- *                   type: string
- *                   format: date-time
- *                 buyerConfirmDeadline:
- *                   type: string
- *                   format: date-time
- *                 currentTimestamp:
- *                   type: string
- *                   format: date-time
+ *               $ref: '#/components/schemas/TransactionDetail'
  *       404:
  *         description: Transaksi tidak ditemukan atau bukan milik Anda
  */
@@ -179,12 +100,15 @@ export default router;
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: isHistory
+ *       - name: status
  *         in: query
  *         required: false
- *         description: Filter transaksi berdasarkan riwayat (true untuk transaksi selesai/dibatalkan, false untuk transaksi aktif), kosongkan untuk semua transaksi
+ *         description: Filter transaksi berdasarkan status (aktif, selesai, dibatalkan, dll.)
  *         schema:
- *           type: boolean
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["pending_payment", "waiting_shipment"]
  *     responses:
  *       200:
  *         description: List transaksi seller berhasil diambil
@@ -193,78 +117,34 @@ export default router;
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   transactionCode:
- *                     type: string
- *                   itemName:
- *                     type: string
- *                   totalAmount:
- *                     type: number
- *                   buyerEmail:
- *                     type: string
- *                   virtualAccount:
- *                     type: string
- *                   status:
- *                     type: string
- *                   paymentDeadline:
- *                     type: string
- *                     format: date-time
- *                   shipmentDeadline:
- *                     type: string
- *                     format: date-time
- *                   currentTimestamp:
- *                     type: string
- *                     format: date-time
- *                   trackingNumber:
- *                     type: string
- *                   fundReleaseRequest:
- *                     type: object
- *                     properties:
- *                       requested:
- *                         type: boolean
- *                       status:
- *                         type: string
- *                       requestedAt:
- *                         type: string
- *                         format: date-time
- *                       resolvedAt:
- *                         type: string
- *                         format: date-time
- *                       adminEmail:
- *                         type: string
+ *                 $ref: '#/components/schemas/TransactionListItem'
  *       404:
  *         description: Transaksi tidak ditemukan
  */
 
 /**
  * @swagger
- * /api/seller/courier-list:
- *   get:
- *     summary: Mendapatkan daftar kurir
+ * /api/seller/transactions:
+ *   post:
+ *     summary: Membuat transaksi baru oleh seller
  *     tags: [Seller Transactions]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateTransactionRequest'
  *     responses:
- *       200:
- *         description: List kurir berhasil diambil
+ *       201:
+ *         description: Transaksi berhasil dibuat
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     description: ID kurir
- *                   name:
- *                     type: string
- *                     description: Nama kurir
- *       404:
- *         description: Daftar kurir tidak ditemukan
+ *               $ref: '#/components/schemas/TransactionDetail'
+ *       400:
+ *         description: Validasi gagal atau transaksi aktif sudah ada
  */
 
 /**
@@ -287,22 +167,7 @@ export default router;
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             required:
- *               - courier_id
- *               - tracking_number
- *               - photo
- *             properties:
- *               courier_id:
- *                 type: string
- *                 description: ID kurir pengiriman
- *               tracking_number:
- *                 type: string
- *                 description: Nomor resi pengiriman
- *               photo:
- *                 type: string
- *                 format: binary
- *                 description: Foto bukti pengiriman
+ *             $ref: '#/components/schemas/InputShipmentRequest'
  *     responses:
  *       200:
  *         description: Resi berhasil disimpan
@@ -371,15 +236,7 @@ export default router;
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             required:
- *               - evidence
- *               - reason
- *             properties:
- *               evidence:
- *                 type: file
- *               reason:
- *                 type: string
+ *             $ref: '#/components/schemas/ConfirmationShipmentRequest'
  *     responses:
  *       200:
  *         description: Permintaan konfirmasi pengiriman berhasil dibuat
@@ -398,63 +255,214 @@ export default router;
 
 /**
  * @swagger
- * /api/seller/transactions:
- *   post:
- *     summary: Membuat transaksi baru oleh seller
+ * /api/seller/courier-list:
+ *   get:
+ *     summary: Mendapatkan daftar kurir
  *     tags: [Seller Transactions]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - item_name
- *               - item_price
- *               - withdrawal_bank_account_id
- *               - isInsurance
- *             properties:
- *               email:
- *                 type: string
- *                 description: Email pembeli
- *               item_name:
- *                 type: string
- *                 description: Nama item yang dijual
- *               item_price:
- *                 type: number
- *                 description: Harga item yang dijual
- *               withdrawal_bank_account_id:
- *                 type: string
- *                 description: ID rekening penarikan
- *               isInsurance:
- *                 type: boolean
- *                 description: Apakah transaksi menggunakan asuransi (true atau false)
  *     responses:
- *       201:
- *         description: Transaksi berhasil dibuat
+ *       200:
+ *         description: List kurir berhasil diambil
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   description: ID transaksi
- *                 transactionCode:
- *                   type: string
- *                   description: Kode transaksi
- *                 itemName:
- *                   type: string
- *                   description: Nama item
- *                 totalAmount:
- *                   type: number
- *                   description: Total jumlah transaksi
- *                 status:
- *                   type: string
- *                   description: Status transaksi
- *       400:
- *         description: Validasi gagal atau transaksi aktif sudah ada
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Courier'
+ *       404:
+ *         description: Daftar kurir tidak ditemukan
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     TransactionDetail:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         transactionCode:
+ *           type: string
+ *         status:
+ *           type: string
+ *         itemName:
+ *           type: string
+ *         itemPrice:
+ *           type: number
+ *         insuranceFee:
+ *           type: number
+ *         platformFee:
+ *           type: number
+ *         totalAmount:
+ *           type: number
+ *         virtualAccount:
+ *           type: string
+ *         buyerEmail:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         paidAt:
+ *           type: string
+ *           format: date-time
+ *         paymentDeadline:
+ *           type: string
+ *           format: date-time
+ *         shipmentDeadline:
+ *           type: string
+ *           format: date-time
+ *         shipment:
+ *           type: object
+ *           nullable: true
+ *           properties:
+ *             trackingNumber:
+ *               type: string
+ *             courier:
+ *               type: string
+ *             shipmentDate:
+ *               type: string
+ *               format: date-time
+ *             photoUrl:
+ *               type: string
+ *         fundReleaseRequest:
+ *           type: object
+ *           properties:
+ *             requested:
+ *               type: boolean
+ *             status:
+ *               type: string
+ *             requestedAt:
+ *               type: string
+ *               format: date-time
+ *             resolvedAt:
+ *               type: string
+ *               format: date-time
+ *             adminEmail:
+ *               type: string
+ *         rekeningSeller:
+ *           type: object
+ *           properties:
+ *             bankName:
+ *               type: string
+ *             accountNumber:
+ *               type: string
+ *             logoUrl:
+ *               type: string
+ *         buyerConfirmedAt:
+ *           type: string
+ *           format: date-time
+ *         buyerConfirmDeadline:
+ *           type: string
+ *           format: date-time
+ *         currentTimestamp:
+ *           type: string
+ *           format: date-time
+ *     TransactionListItem:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         transactionCode:
+ *           type: string
+ *         itemName:
+ *           type: string
+ *         totalAmount:
+ *           type: number
+ *         buyerEmail:
+ *           type: string
+ *         virtualAccount:
+ *           type: string
+ *         status:
+ *           type: string
+ *         paymentDeadline:
+ *           type: string
+ *           format: date-time
+ *         shipmentDeadline:
+ *           type: string
+ *           format: date-time
+ *         currentTimestamp:
+ *           type: string
+ *           format: date-time
+ *         trackingNumber:
+ *           type: string
+ *         fundReleaseRequest:
+ *           type: object
+ *           properties:
+ *             requested:
+ *               type: boolean
+ *             status:
+ *               type: string
+ *             requestedAt:
+ *               type: string
+ *               format: date-time
+ *             resolvedAt:
+ *               type: string
+ *               format: date-time
+ *             adminEmail:
+ *               type: string
+ *     CreateTransactionRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - item_name
+ *         - item_price
+ *         - withdrawal_bank_account_id
+ *         - isInsurance
+ *       properties:
+ *         email:
+ *           type: string
+ *           description: Email pembeli
+ *         item_name:
+ *           type: string
+ *           description: Nama item yang dijual
+ *         item_price:
+ *           type: number
+ *           description: Harga item yang dijual
+ *         withdrawal_bank_account_id:
+ *           type: string
+ *           description: ID rekening penarikan
+ *         isInsurance:
+ *           type: boolean
+ *           description: Apakah transaksi menggunakan asuransi (true atau false)
+ *     InputShipmentRequest:
+ *       type: object
+ *       required:
+ *         - courier_id
+ *         - tracking_number
+ *         - photo
+ *       properties:
+ *         courier_id:
+ *           type: string
+ *           description: ID kurir pengiriman
+ *         tracking_number:
+ *           type: string
+ *           description: Nomor resi pengiriman
+ *         photo:
+ *           type: string
+ *           format: binary
+ *           description: Foto bukti pengiriman
+ *     ConfirmationShipmentRequest:
+ *       type: object
+ *       required:
+ *         - evidence
+ *         - reason
+ *       properties:
+ *         evidence:
+ *           type: string
+ *           format: binary
+ *           description: Bukti pengiriman
+ *         reason:
+ *           type: string
+ *           description: Alasan permintaan konfirmasi
+ *     Courier:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: ID kurir
+ *         name:
+ *           type: string
+ *           description: Nama kurir
  */
