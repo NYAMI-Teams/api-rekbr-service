@@ -65,10 +65,32 @@ const submitReturnShipment = async (req, res) => {
   return resSuccess(res, 200, "Pengiriman retur berhasil dikirim", result);
 };
 
+const requestBuyerConfirmation = async (req, res) => {
+  const { complaintId } = req.params;
+  const buyerId = req.user.id;
+  const { reason } = req.body;
+  const file = req.file;
+
+  const result = await buyerComplaintService.requestBuyerConfirmation({
+    complaintId,
+    buyerId,
+    reason,
+    file,
+  });
+
+  return resSuccess(
+    res,
+    200,
+    "Permintaan konfirmasi ke admin berhasil dikirim",
+    result
+  );
+};
+
 export default {
   createComplaint,
   cancelComplaint,
   getComplaintList,
   getComplaintDetail,
   submitReturnShipment,
+  requestBuyerConfirmation,
 };

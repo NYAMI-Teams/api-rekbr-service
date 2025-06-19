@@ -115,8 +115,22 @@ const complaintTransactionUpdate = async (complaintId, refundAmount) => {
       refunded_at: new Date(),
     },
   });
+};
 
-}
+const complaintShipmentReceived = async (complaintId) => {
+    const complaint = await findComplaintById(complaintId);
+    if (!complaint) {
+      throw new Error("Complaint not found");
+    }
+  
+    return await prisma.returnShipment.update({
+      where: { complaint_id: complaintId},
+      data: {
+        received_date: new Date(),
+      },
+    });
+  };
+
 const updateReturnShipment = async (complaintId, data) => {
   return await prisma.returnShipment.create({
     data: {
@@ -168,6 +182,23 @@ const getComplaintById = async (complaintId) => {
   });
 };
 
+const updateComplaintWithBuyerConfirmRequest = async (
+  complaintId,
+  reason,
+  evidenceUrl
+) => {
+  return await prisma.complaint.update({
+    where: { id: complaintId },
+    data: {
+      buyer_requested_confirmation_at: new Date(),
+      buyer_requested_confirmation_reason: reason,
+      buyer_requested_confirmation_evidence_urls: [evidenceUrl],
+      request_confirmation_status: "pending",
+      status: "awaiting_admin_confirmation",
+    },
+  });
+};
+
 export default {
   createComplaint,
   findComplaintByTransaction,
@@ -182,4 +213,6 @@ export default {
   updateReturnShipment,
   getAllComplaintList,
   getComplaintById,
+  updateComplaintWithBuyerConfirmRequest,
+  complaintShipmentReceived,
 };
