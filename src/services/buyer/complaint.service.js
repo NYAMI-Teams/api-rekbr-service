@@ -222,10 +222,43 @@ const generateStatusLabel = (status) => {
   }
 };
 
+const requestBuyerConfirmation = async ({
+  complaintId,
+  buyerId,
+  reason,
+  file,
+}) => {
+  const complaint = await complaintRepo.getComplaintDetail(complaintId);
+
+  if (!complaint || complaint.buyer_id !== buyerId) {
+    throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
+  }
+
+  if (complaint.status !== "return_in_transit") {
+    throwError("Komplain belum dalam proses pengembalian", 400);
+  }
+
+  let uploadedUrl = null;
+  if (file) {
+    uploadedUrl = await digitalStorageService.uploadToSpaces(
+      file.buffer,
+      file.originalname,
+      file.mimetype
+    );
+  }
+
+  return await complaintRepo.updateComplaintWithBuyerConfirmRequest(
+    complaintId,
+    reason,
+    uploadedUrl
+  );
+};
+
 export default {
   createComplaint,
   cancelComplaint,
   getComplaintListByBuyer,
   getComplaintDetail,
   submitReturnShipment,
+  requestBuyerConfirmation,
 };

@@ -34,14 +34,14 @@ const generateRefreshToken = async (user) => {
 
 const generateOtpCode = async (key) => {
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  await redisClient.set(key, otpCode, { EX: 3000 });
+  await redisClient.set(key, otpCode, { EX: 300 });
   return otpCode;
 };
 
-const requestVerifyEmail = async ( email ) => {
+const requestVerifyEmail = async (email) => {
   const otpCode = await generateOtpCode("verifyEmail:" + email);
   sendOtpEmail(email, otpCode);
-}  
+};
 
 const register = async ({ email, password }) => {
   const existingUser = await userRepository.findUserByEmail(email);
@@ -141,6 +141,10 @@ const getProfile = async (userId) => {
   if (!user) {
     throwError("User tidak ditemukan", 404);
   }
+
+  delete user.id; // Hapus id dari response
+  delete user.password; // Hapus password dari response
+
   return user;
 };
 
@@ -156,6 +160,56 @@ const checkEmail = async ({ email }) => {
   };
 };
 
+const changePassword = async (userId, oldPassword, newPassword) => {
+  const user = await userRepository.findUserById(userId);
+  if (!user) throwError("User tidak ditemukan", 404);
+
+  const isMatch = bcrypt.compareSync(oldPassword, user.password);
+  if (!isMatch) throwError("Password lama salah", 400);
+
+  if (oldPassword === newPassword) {
+    throwError("Password baru tidak boleh sama dengan password lama", 400);
+  }
+
+  const saltRounds = parseInt(process.env.SALT_ROUNDS);
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hashedNewPassword = bcrypt.hashSync(newPassword, salt);
+
+  await userRepository.updateUserPassword(userId, hashedNewPassword);
+};
+
+const forgotPassword = async (email) => {
+  const user = await userRepository.findUserByEmail(email);
+  if (!user) throwError("Email tidak ditemukan", 404);
+
+  const otpCode = await generateOtpCode("resetPassword:" + email);
+  await sendOtpEmail(email, otpCode);
+};
+
+const verifyResetOtp = async (email, otpCode) => {
+  const storedOtp = await redisClient.get("resetPassword:" + email);
+  if (!storedOtp || storedOtp !== otpCode) {
+    throwError("Kode OTP tidak valid atau sudah kadaluarsa", 400);
+  }
+
+  await redisClient.set("resetPassword:verified:" + email, "true", { EX: 600 });
+  await redisClient.del("resetPassword:" + email);
+};
+
+const resetPassword = async (email, newPassword) => {
+  const isVerified = await redisClient.get("resetPassword:verified:" + email);
+  if (!isVerified) throwError("OTP belum diverifikasi", 400);
+
+  const user = await userRepository.findUserByEmail(email);
+  if (!user) throwError("User tidak ditemukan", 404);
+
+  const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUNDS));
+  const hashedPassword = bcrypt.hashSync(newPassword, salt);
+
+  await userRepository.updateUserPassword(user.id, hashedPassword);
+  await redisClient.del("resetPassword:verified:" + email);
+};
+
 export default {
   register,
   login,
@@ -164,4 +218,8 @@ export default {
   getProfile,
   verifyKyc,
   checkEmail,
+  changePassword,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword,
 };

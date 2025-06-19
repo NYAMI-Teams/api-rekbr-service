@@ -32,10 +32,6 @@ const findUserByEmail = async (email) => {
 const findUserById = async (id) => {
   const user = await prisma.user.findUnique({
     where: { id },
-    omit: {
-      id: true, // Omit id from the response
-      password: true, // Omit password from the response
-    },
   });
   return user ? toCamelCase(user) : null;
 };
@@ -107,6 +103,13 @@ const getUserDetailById = async (id) => {
   return user ? toCamelCase(user) : null;
 };
 
+const updateUserPassword = async (userId, hashedPassword) => {
+  return await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
+  });
+};
+
 export default {
   createUser,
   findUserByEmail,
@@ -115,4 +118,5 @@ export default {
   updateUserKycStatus,
   getAllUsers,
   getUserDetailById,
+  updateUserPassword,
 };

@@ -11,15 +11,19 @@ const router = Router();
 
 const upload = multer();
 
+router.patch(
+  "/complaints/:complaintId/respond",
+  authentication,
+  upload.array("photo"),
+  asyncHandler(complaintController.patchSellerResponse)
+);
 
 router.patch(
-    "/complaints/:transactionId/respond",
-    authentication,
-    upload.array("photo"),  
-    asyncHandler(complaintController.patchSellerResponse)
-  );
-  
-  export default router;
+  "/complaints/:complaintId/confirm-return",
+  authentication,
+  asyncHandler(complaintController.patchSellerItemReceive)
+);
+export default router;
 
 /**
  * @swagger
@@ -30,7 +34,7 @@ router.patch(
 
 /**
  * @swagger
- * /complaints/{transactionId}/respond:
+ * /api/seller/complaints/{complaintId}/respond:
  *   patch:
  *     summary: Mengupdate respons komplain oleh seller
  *     tags: [SellerComplaint]
@@ -38,11 +42,11 @@ router.patch(
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: transactionId
+ *         name: complaintId
  *         required: true
  *         schema:
  *           type: string
- *         description: ID transaksi terkait komplain
+ *         description: ID komplain
  *     requestBody:
  *       required: true
  *       content:
@@ -95,9 +99,9 @@ router.patch(
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Komplain sudah termin harap membuat complaint baru"
+ *                   example: "Komplain sedang dalam progress"
  *       404:
- *         description: Transaksi tidak ditemukan
+ *         description: Komplain tidak ditemukan
  *         content:
  *           application/json:
  *             schema:
@@ -108,7 +112,7 @@ router.patch(
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Transaksi tidak ditemukan"
+ *                   example: "Komplain tidak ditemukan"
  *       500:
  *         description: Terjadi kesalahan pada server
  *         content:
@@ -122,4 +126,90 @@ router.patch(
  *                 message:
  *                   type: string
  *                   example: "Gagal memperbarui respons penjual"
+ */
+
+/**
+ * @swagger
+ * /api/seller/complaints/{complaintId}/confirm-return:
+ *   patch:
+ *     summary: Konfirmasi penerimaan barang yang dikembalikan
+ *     tags: [SellerComplaint]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: complaintId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID komplain
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [completed]
+ *                 description: Status penerimaan barang
+ *     responses:
+ *       200:
+ *         description: Status penerimaan barang berhasil diperbarui
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Berhasil memperbarui status penerimaan barang"
+ *                 data:
+ *                   type: object
+ *                   description: Detail komplain yang diperbarui
+ *       400:
+ *         description: Permintaan tidak valid atau melanggar aturan bisnis
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Status complaint tidak sesuai"
+ *       404:
+ *         description: Komplain tidak ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Komplain tidak ditemukan"
+ *       500:
+ *         description: Terjadi kesalahan pada server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Gagal memperbarui status penerimaan barang"
  */
