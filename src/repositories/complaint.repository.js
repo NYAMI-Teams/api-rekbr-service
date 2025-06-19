@@ -69,8 +69,8 @@ const sellerResponseUpdate = async (
   photo,
   seller_response_reason
 ) => {
-    console.log(status, "ini status");
-    
+  console.log(status, "ini status");
+
   return await prisma.complaint.update({
     where: { id: complaintId },
     data: {
@@ -101,27 +101,43 @@ const sellerItemReceiveUpdate = async (complaintId, status) => {
 };
 
 const complaintTransactionUpdate = async (complaintId, refundAmount) => {
-    const complaint = await findComplaintById(complaintId);
-    if (!complaint) {
-        throw new Error("Complaint not found");
-    }
+  const complaint = await findComplaintById(complaintId);
+  if (!complaint) {
+    throw new Error("Complaint not found");
+  }
 
-    return await prisma.transaction.update({
-        where: { id: complaint.transaction_id },
-        data: {
-            status: "refunded",
-            refund_amount: refundAmount,
-            refund_reason: complaint.buyer_reason,
-            refunded_at: new Date(),
-        },
-    });
-
-}
+  return await prisma.transaction.update({
+    where: { id: complaint.transaction_id },
+    data: {
+      status: "refunded",
+      refund_amount: refundAmount,
+      refund_reason: complaint.buyer_reason,
+      refunded_at: new Date(),
+    },
+  });
+};
 const updateReturnShipment = async (complaintId, data) => {
   return await prisma.returnShipment.create({
     data: {
       complaint_id: complaintId,
       ...data,
+    },
+  });
+};
+
+const updateComplaintWithBuyerConfirmRequest = async (
+  complaintId,
+  reason,
+  evidenceUrl
+) => {
+  return await prisma.complaint.update({
+    where: { id: complaintId },
+    data: {
+      buyer_requested_confirmation_at: new Date(),
+      buyer_requested_confirmation_reason: reason,
+      buyer_requested_confirmation_evidence_urls: [evidenceUrl],
+      request_confirmation_status: "pending",
+      status: "awaiting_admin_confirmation",
     },
   });
 };
@@ -138,4 +154,5 @@ export default {
   sellerItemReceiveUpdate,
   complaintTransactionUpdate,
   updateReturnShipment,
+  updateComplaintWithBuyerConfirmRequest,
 };

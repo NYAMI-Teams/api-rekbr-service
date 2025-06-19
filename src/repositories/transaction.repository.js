@@ -221,8 +221,8 @@ const getTransactionListForSeller = async (sellerId, isHistory = null) => {
       ...(isHistory === true
         ? { status: { in: ["completed", "refunded", "canceled"] } }
         : isHistory === false
-          ? { status: { notIn: ["completed", "refunded", "canceled"] } }
-          : {}), // No status filter if isHistory is null or undefined
+        ? { status: { notIn: ["completed", "refunded", "canceled"] } }
+        : {}), // No status filter if isHistory is null or undefined
     },
     orderBy: { created_at: "desc" },
     include: {
@@ -244,7 +244,7 @@ const findActiveTransaction = async ({ seller_id, buyer_id }) => {
       seller_id,
       buyer_id,
       status: {
-        notIn: ["completed", "canceled"],
+        notIn: ["completed", "canceled", "refunded"],
       },
     },
   });
@@ -304,8 +304,8 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
       ...(isHistory === true
         ? { status: { in: ["completed", "refunded", "canceled"] } }
         : isHistory === false
-          ? { status: { notIn: ["completed", "refunded", "canceled"] } }
-          : {}), // No status filter if isHistory is null or undefined
+        ? { status: { notIn: ["completed", "refunded", "canceled"] } }
+        : {}), // No status filter if isHistory is null or undefined
     },
     orderBy: { created_at: "desc" },
     include: {

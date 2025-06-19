@@ -39,4 +39,11 @@ router.post(
   asyncHandler(complaintController.submitReturnShipment)
 );
 
+router.post(
+  "/complaints/:complaintId/request-confirmation",
+  authentication,
+  upload.single("evidence"),
+  asyncHandler(complaintController.requestBuyerConfirmation)
+);
+
 export default router;
