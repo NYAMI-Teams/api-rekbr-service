@@ -36,6 +36,7 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
           courier: true,
         },
       },
+      Complaint: true,
     },
   });
 };
@@ -317,6 +318,7 @@ const getTransactionListForBuyer = async (buyerId, isHistory) => {
           courier: true,
         },
       },
+      complaint: true
     },
   });
 };
