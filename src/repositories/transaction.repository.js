@@ -250,6 +250,19 @@ const getTransactionListForSeller = async (sellerId, statusArray) => {
           courier: true,
         },
       },
+      Complaint: {
+        take: 1, // 1 most recent complaint
+        orderBy: {
+          created_at: "desc",
+        },
+        include: {
+          return_shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        }
+      }
     },
   });
 };
@@ -331,7 +344,19 @@ const getTransactionListForBuyer = async (buyerId, statusArray) => {
           courier: true,
         },
       },
-      Complaint: true
+      Complaint: {
+        take: 1, // 1 most recent complaint
+        orderBy: {
+          created_at: "desc",
+        },
+        include: {
+          return_shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        }
+      }
     },
   });
 };

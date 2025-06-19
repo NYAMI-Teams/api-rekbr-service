@@ -34,12 +34,14 @@ const confirmReceived = async (req, res) => {
 
 const getTransactionListBuyer = async (req, res) => {
   const buyerId = req.user.id;
-  const statusArray = req.params.status
-    ? Array.isArray(req.params.status)
-      ? req.params.status
-      : [req.params.status]
+  const statusArray = req.query.status
+    ? Array.isArray(req.query.status)
+      ? req.qeury.status
+      : [req.query.status]
     : null;
 
+  console.log(statusArray, "ini status array");
+  
   const data = await buyerTransactionService.getTransactionListByBuyer(
     buyerId,
     statusArray
