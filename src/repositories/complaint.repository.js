@@ -153,6 +153,20 @@ const getAllComplaintList = async (filters = {}) => {
   });
 };
 
+const getComplaintById = async (complaintId) => {
+  return await prisma.complaint.findUnique({
+    where: { id: complaintId },
+    include: {
+      transaction: {
+        include: {
+          shipment: true
+        }
+      },
+      return_shipment: true,
+    }
+  });
+};
+
 export default {
   createComplaint,
   findComplaintByTransaction,
@@ -166,4 +180,5 @@ export default {
   complaintTransactionUpdate,
   updateReturnShipment,
   getAllComplaintList,
+  getComplaintById,
 };

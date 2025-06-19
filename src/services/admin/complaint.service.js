@@ -12,6 +12,15 @@ const getAllComplaintList =  async (type, status) => {
     return complaints
 }
 
+const getComplaintById = async (id) => {
+    const complaint = await complaintRepository.getComplaintById(id);
+    if (!complaint) {
+        throwError("Pengaduan tidak ditemukan", 404);
+    }
+    return complaint;
+}
+
 export default {
     getAllComplaintList,
+    getComplaintById
 }

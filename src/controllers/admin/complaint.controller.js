@@ -17,6 +17,14 @@ const getAllComplaintList = async (req, res) => {
     return resSuccess(res, 200, "Daftar pengaduan berhasil diambil", complaints);   
 }
 
+const getComplaintById = async (req, res) => {
+    const { id } = req.params;
+    const complaint = await complaintService.getComplaintById(id);
+    return resSuccess(res, 200, "Pengaduan berhasil diambil", complaint);
+}
+
+
 export default {
     getAllComplaintList,
+    getComplaintById
 }
