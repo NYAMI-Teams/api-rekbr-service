@@ -199,6 +199,16 @@ const updateComplaintWithBuyerConfirmRequest = async (
   });
 };
 
+const updateComplaint = async (complaintId, data) => {
+  return await prisma.complaint.update({
+    where: { id: complaintId },
+    data: {
+      ...data,
+    },
+  });
+}
+
+
 export default {
   createComplaint,
   findComplaintByTransaction,
@@ -215,4 +225,5 @@ export default {
   getComplaintById,
   updateComplaintWithBuyerConfirmRequest,
   complaintShipmentReceived,
+  updateComplaint,
 };
