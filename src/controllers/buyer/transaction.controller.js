@@ -36,12 +36,12 @@ const getTransactionListBuyer = async (req, res) => {
   const buyerId = req.user.id;
   const statusArray = req.query.status
     ? Array.isArray(req.query.status)
-      ? req.qeury.status
+      ? req.query.status
       : [req.query.status]
     : null;
 
   console.log(statusArray, "ini status array");
-  
+
   const data = await buyerTransactionService.getTransactionListByBuyer(
     buyerId,
     statusArray
