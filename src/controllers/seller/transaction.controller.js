@@ -13,11 +13,17 @@ const getTransactionDetailSeller = async (req, res) => {
 
 const getTransactionListSeller = async (req, res) => {
   const sellerId = req.user.id;
-  const { isHistory } = req.query || null
+  // const { isHistory } = req.query || null
+
+  const statusArray = req.query.status
+    ? Array.isArray(req.query.status)
+      ? req.query.status
+      : [req.query.status]
+    : null;
 
   const data = await sellerTransactionService.getTransactionListBySeller(
     sellerId,
-    isHistory
+    statusArray
   );
 
   const message =
@@ -29,8 +35,13 @@ const getTransactionListSeller = async (req, res) => {
 };
 
 const generateTransaction = async (req, res) => {
-  const { email, item_name, item_price, withdrawal_bank_account_id, isInsurance } =
-    req.body;
+  const {
+    email,
+    item_name,
+    item_price,
+    withdrawal_bank_account_id,
+    isInsurance,
+  } = req.body;
   const seller_id = req.user.id;
 
   const newTransaction = await sellerTransactionService.generateTransaction({
@@ -94,9 +105,9 @@ const confirmationShipmentRequest = async (req, res) => {
 };
 
 const getCourierList = async (req, res) => {
-  const couriers = await sellerTransactionService.courierList()
+  const couriers = await sellerTransactionService.courierList();
   return resSuccess(res, 200, "List kurir berhasil diambil", couriers);
-}
+};
 
 export default {
   getTransactionDetailSeller,
@@ -105,5 +116,5 @@ export default {
   generateTransaction,
   cancelTransactionBySeller,
   inputShipment,
-  getCourierList
+  getCourierList,
 };
