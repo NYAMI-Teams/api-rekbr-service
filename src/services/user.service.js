@@ -14,7 +14,9 @@ const generateAccessToken = async (user) => {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
   });
 
-  await redisClient.set(`access_token:${userId}`, tokenId, { EX: 60 * 60 });
+  await redisClient.set(`access_token:${userId}`, tokenId, {
+    EX: 30 * 24 * 60 * 60,
+  }); // 30 hari
   const storedTokenId = await redisClient.get(`access_token:${userId}`);
 
   return token;
