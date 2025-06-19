@@ -82,7 +82,14 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
         requestConfirmationAdminId: c.request_confirmation_admin_id,
         sellerConfirmDeadline: c.seller_confirm_deadline,
         resolvedAt: c.resolved_at,
-        returnShipment: c.return_shipment,
+        returnShipment: c.return_shipment
+        ? {
+          id: c.return_shipment.id,
+          trackingNumber: c.return_shipment.tracking_number,
+          courierName: c.return_shipment.courier?.name || null,
+          shipmentDate: c.return_shipment.shipment_date?.toISOString() || null,
+        } : null,
+        returnShipmentTrackingNumber: c.return_shipment_tracking_number,
         createdAt: c.created_at,
         updatedAt: c.updated_at,
       }))
