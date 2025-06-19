@@ -7,6 +7,10 @@ import adminTransactionRoutes from "./admin/transaction.routes.js";
 import adminUserRoutes from "./admin/user.routes.js";
 import buyerComplaintRoutes from "./buyer/complaint.routes.js";
 import sellerComplaintRoutes from "./seller/complaint.routes.js";
+import adminComplaintRoutes from "./admin/complaint.routes.js";
+import { sendOtpEmail } from "../services/email.service.js";
+import authentication from "../middlewares/authentication.js";
+import authorization from "../middlewares/authorization.js";
 
 const router = Router();
 
@@ -24,5 +28,6 @@ router.use("/seller", sellerTransactionRoutes);
 router.use("/seller", sellerComplaintRoutes);
 router.use("/admin/transactions", adminTransactionRoutes);
 router.use("/admin/users", adminUserRoutes);
+router.use("/admin/complaints", authentication, authorization, adminComplaintRoutes);
 
 export default router;
