@@ -42,7 +42,7 @@ const generateOtpCode = async (key) => {
 
 const requestVerifyEmail = async (email) => {
   const otpCode = await generateOtpCode("verifyEmail:" + email);
-  sendOtpEmail(email, otpCode);
+  await sendOtpEmail(email, otpCode, "verify");
 };
 
 const register = async ({ email, password }) => {
@@ -185,7 +185,7 @@ const forgotPassword = async (email) => {
   if (!user) throwError("Email tidak ditemukan", 404);
 
   const otpCode = await generateOtpCode("resetPassword:" + email);
-  await sendOtpEmail(email, otpCode);
+  await sendOtpEmail(email, otpCode, "reset");
 };
 
 const verifyResetOtp = async (email, otpCode) => {
