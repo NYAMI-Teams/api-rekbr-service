@@ -42,6 +42,30 @@ const getEmail = async (req, res) => {
   return resSuccess(res, 200, "Berhasil mendapatkan user", result);
 };
 
+const changePassword = async (req, res) => {
+  const userId = req.user.id;
+  const { oldPassword, newPassword } = req.body;
+  await userService.changePassword(userId, oldPassword, newPassword);
+  return resSuccess(res, 200, "Berhasil mengubah password");
+};
+
+const forgotPassword = async (req, res) => {
+  await userService.forgotPassword(req.body.email);
+  return resSuccess(res, 200, "OTP reset password berhasil dikirim ke email");
+};
+
+const verifyResetOtp = async (req, res) => {
+  const { email, otpCode } = req.body;
+  await userService.verifyResetOtp(email, otpCode);
+  return resSuccess(res, 200, "OTP berhasil diverifikasi");
+};
+
+const resetPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+  await userService.resetPassword(email, newPassword);
+  return resSuccess(res, 200, "Password berhasil direset");
+};
+
 export default {
   register,
   login,
@@ -50,4 +74,8 @@ export default {
   verifyKyc,
   getProfile,
   getEmail,
+  changePassword,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword,
 };
