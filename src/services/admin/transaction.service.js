@@ -93,10 +93,14 @@ const updateFundReleaseRequest = async (transactionId, status, adminId) => {
     const buyerConfirmDeadline = new Date(
       resolvedAt.getTime() + 1 * 24 * 60 * 60 * 1000
     );
-    await transactionRepo.updateTransactionBuyerConfirmDeadline(
+    const res = await transactionRepo.updateTransactionBuyerConfirmDeadline(
       transactionId,
       buyerConfirmDeadline
     );
+
+    if (!res) {
+      throwError("Gagal memperbarui transaksi dengan deadline konfirmasi pembeli", 500);
+    }
   }
 };
 
