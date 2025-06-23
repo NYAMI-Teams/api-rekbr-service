@@ -30,7 +30,7 @@ const cancelComplaint = async (req, res) => {
   return resSuccess(res, 200, "Komplain berhasil dibatalkan", result);
 };
 
-const getComplaintList = async (req, res) => {
+const getComplaintListBuyer = async (req, res) => {
   const buyerId = req.user.id;
   const complaints = await buyerComplaintService.getComplaintListByBuyer(
     buyerId
@@ -38,10 +38,10 @@ const getComplaintList = async (req, res) => {
   return resSuccess(res, 200, "Daftar komplain berhasil diambil", complaints);
 };
 
-const getComplaintDetail = async (req, res) => {
+const getComplaintDetailBuyer = async (req, res) => {
   const { complaintId } = req.params;
   const buyerId = req.user.id;
-  const complaint = await buyerComplaintService.getComplaintDetail(
+  const complaint = await buyerComplaintService.getComplaintDetailByBuyer(
     complaintId,
     buyerId
   );
@@ -89,8 +89,8 @@ const requestBuyerConfirmation = async (req, res) => {
 export default {
   createComplaint,
   cancelComplaint,
-  getComplaintList,
-  getComplaintDetail,
+  getComplaintListBuyer,
+  getComplaintDetailBuyer,
   submitReturnShipment,
   requestBuyerConfirmation,
 };

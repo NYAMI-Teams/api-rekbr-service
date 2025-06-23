@@ -22,13 +22,13 @@ router.post(
 router.get(
   "/complaints",
   authentication,
-  asyncHandler(complaintController.getComplaintList)
+  asyncHandler(complaintController.getComplaintListBuyer)
 );
 
 router.get(
   "/complaints/:complaintId",
   authentication,
-  asyncHandler(complaintController.getComplaintDetail)
+  asyncHandler(complaintController.getComplaintDetailBuyer)
 );
 
 router.post(

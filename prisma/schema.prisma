@@ -150,22 +150,36 @@ model Complaint {
   buyer    User   @relation(fields: [buyer_id], references: [id])
   buyer_id String
 
-  type   String //   DAMAGED, LOST, NOT_AS_DESCRIBED
-  status String //  WAITING_SELLER_APPROVAL, RETURN_REQUESTED, RETURN_IN_TRANSIT, AWAITING_SELLER_CONFIRMATION, AWAITING_ADMIN_APPROVAL, COMPLETED, UNDER_INVESTIGATION, APPROVED_BY_SELLER, APPROVED_BY_ADMIN, REJECTED_BY_SELLER, REJECTED_BY_ADMIN, CANCELED_BY_BUYER, 
+  type   String // DAMAGED, LOST, NOT_AS_DESCRIBED
+  status String // WAITING_SELLER_APPROVAL, RETURN_REQUESTED, RETURN_IN_TRANSIT, AWAITING_SELLER_CONFIRMATION, AWAITING_ADMIN_APPROVAL, COMPLETED, UNDER_INVESTIGATION, APPROVED_BY_ADMIN, REJECTED_BY_ADMIN, CANCELED_BY_BUYER
 
-  buyer_reason           String?
-  buyer_evidence_urls    Json?
+  // Alasan & bukti dari buyer
+  buyer_reason        String?
+  buyer_evidence_urls Json?
+
+  // Tanggapan dari seller
   seller_response_reason String?
   seller_evidence_urls   Json?
+  seller_decision        String? // "approved" | "rejected"
+  seller_responded_at    DateTime?
 
+  // Permintaan buyer ke admin agar seller konfirmasi barang retur
   buyer_requested_confirmation_at            DateTime?
   buyer_requested_confirmation_reason        String?
   buyer_requested_confirmation_evidence_urls Json?
-  request_confirmation_status                String? // enum: pending, approved, rejected (admin)
-  request_confirmation_admin                 User?     @relation("RequestConfirmationAdmin", fields: [request_confirmation_admin_id], references: [id])
-  request_confirmation_admin_id              String?
-  seller_confirm_deadline                    DateTime?
 
+  // Respons admin atas permintaan konfirmasi tersebut
+  request_confirmation_status    String? // "pending" | "approved" | "rejected"
+  request_confirmation_admin     User?     @relation("RequestConfirmationAdmin", fields: [request_confirmation_admin_id], references: [id])
+  request_confirmation_admin_id  String?
+  admin_approved_confirmation_at DateTime?
+  seller_confirm_deadline        DateTime?
+  seller_confirmed_return_at     DateTime?
+
+  // Waktu admin merespons komplain
+  admin_responded_at DateTime?
+
+  // Resolusi akhir komplain
   resolved_at DateTime?
 
   return_shipment ReturnShipment?

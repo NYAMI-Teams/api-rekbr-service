@@ -20,6 +20,19 @@ router.patch(
   authentication,
   asyncHandler(complaintController.patchSellerItemReceive)
 );
+
+router.get(
+  "/complaints",
+  authentication,
+  asyncHandler(complaintController.getComplaintListBySeller)
+);
+
+router.get(
+  "/complaints/:complaintId",
+  authentication,
+  asyncHandler(complaintController.getComplaintDetailBySeller)
+);
+
 export default router;
 
 /**
