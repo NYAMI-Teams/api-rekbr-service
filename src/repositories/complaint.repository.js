@@ -34,6 +34,11 @@ const getComplaintsByBuyer = async (buyerId) => {
     where: { buyer_id: buyerId },
     orderBy: { created_at: "desc" },
     include: {
+      return_shipment: {
+        include: {
+          courier: true,
+        },
+      },
       transaction: {
         include: {
           seller: { select: { email: true } },
@@ -52,6 +57,11 @@ const getComplaintDetail = async (complaintId) => {
         include: {
           seller: { select: { email: true } },
           shipment: { include: { courier: true } },
+        },
+      },
+      return_shipment: {
+        include: {
+          courier: true,
         },
       },
     },
@@ -79,10 +89,14 @@ const sellerResponseUpdate = async (
   photo,
   seller_response_reason
 ) => {
+  let status =
+    sellerDecision === "approved"
+      ? "return_requested"
+      : "awaiting_admin_approval";
   return await prisma.complaint.update({
     where: { id: complaintId },
     data: {
-      status: "awaiting_admin_approval",
+      status,
       seller_decision: sellerDecision,
       seller_evidence_urls: photo && photo.length > 0 ? photo : [],
       seller_response_reason,
@@ -103,6 +117,7 @@ const sellerItemReceiveUpdate = async (complaintId, status) => {
     where: { id: complaintId },
     data: {
       status,
+      seller_confirmed_return_at: new Date(),
       resolved_at: new Date(),
     },
   });

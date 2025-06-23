@@ -105,6 +105,14 @@ const getComplaintListByBuyer = async (buyerId) => {
     type: c.type,
     status: c.status,
     createdAt: c.created_at,
+    buyerDeadlineInputShipment: c.buyer_deadline_input_shipment,
+    sellerConfirmDeadline: c.seller_confirm_deadline,
+    returnShipment: c.return_shipment
+      ? {
+          trackingNumber: c.return_shipment.tracking_number,
+          courierName: c.return_shipment.courier?.name || null,
+        }
+      : null,
     transaction: {
       id: c.transaction.id,
       transactionCode: c.transaction.transaction_code,
@@ -126,29 +134,239 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
     throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
   }
 
-  const timeline = [
-    { label: "Pengajuan Komplain", timestamp: complaint.created_at },
-  ];
+  let timeline = [];
 
-  if (complaint.seller_responded_at) {
-    timeline.push({
-      label: "Respon Seller",
-      timestamp: complaint.seller_responded_at,
-    });
-  }
+  if (complaint.type === "lost") {
+    // Timeline untuk komplain LOST
+    if (complaint.created_at) {
+      timeline.push({
+        label: "Investigasi pada barang kamu",
+        timestamp: complaint.created_at,
+      });
+    }
+    if (complaint.admin_responded_at) {
+      let message = "";
+      if (complaint.admin_decision === "approved") {
+        message = "Admin menyetujui komplain. Dana akan direfund ke buyer.";
+      } else if (complaint.admin_decision === "rejected") {
+        message =
+          "Sayangnya, kami tidak bisa memproses klaim barang hilang karena pengiriman sudah terkonfirmasi sukses oleh kurir.";
+      } else {
+        message = "Admin telah merespon komplain.";
+      }
+      timeline.push({
+        label: complaint.admin_decision
+          ? complaint.admin_decision === "approved"
+            ? "Admin menyetujui komplain. Dana akan direfund ke buyer."
+            : "Admin menolak atas komplain kamu"
+          : "Respon Admin",
+        message,
+        timestamp: complaint.admin_responded_at,
+        decision: complaint.admin_decision || null,
+      });
+    }
+    if (
+      complaint.status === "completed" ||
+      complaint.status === "approved_by_admin" ||
+      complaint.status === "rejected_by_admin"
+    ) {
+      timeline.push({
+        label: "Komplain Selesai",
+        message: "Proses komplain telah selesai.",
+      });
+    }
+  } else if (complaint.type === "damaged") {
+    // Timeline untuk komplain DAMAGED
+    if (complaint.created_at) {
+      timeline.push({
+        label: "Pengajuan Komplain Buyer",
+        message:
+          "Buyer mau ngembaliin barang yang bermasalah. Dana rekber bakal dikembalikan setelah komplain disetujui, ya!",
+        reason: complaint.buyer_reason || null,
+        evidence: complaint.buyer_evidence_urls || null,
+        timestamp: complaint.created_at,
+      });
+    }
+    if (complaint.seller_responded_at) {
+      let message = "";
+      if (complaint.seller_decision === "approved") {
+        message =
+          "Seller mau nerima barang kembaliin agar dapat ditukar, kirim bukti Refund";
+      } else if (complaint.seller_decision === "rejected") {
+        message =
+          "Penolakan dikarenakan bukti buyer belum cukup kuat dan tidak ada alasan menerima hal seperti itu";
+      } else {
+        message = "Seller telah merespon komplain.";
+      }
+      timeline.push({
+        label: complaint.seller_decision
+          ? complaint.seller_decision === "approved"
+            ? "Persetujuan komplain seller"
+            : "Penolakan komplain seller"
+          : "Respon Seller",
+        message,
+        reason: complaint.seller_response_reason || null,
+        evidence: complaint.seller_evidence_urls || null,
+        timestamp: complaint.seller_responded_at,
+        decision: complaint.seller_decision || null,
+      });
+    }
 
-  if (complaint.admin_responded_at) {
-    timeline.push({
-      label: "Respon Admin",
-      timestamp: complaint.admin_responded_at,
-    });
-  }
+    if (complaint.admin_responded_at) {
+      let message = "";
+      if (complaint.admin_decision === "approved") {
+        message =
+          "Setelah tinjau bukti yang kamu kirim, komplain dinyatakan valid. Refund akan diproses meski seller menolak, sesuai ketentuan yang berlaku.";
+      } else if (complaint.admin_decision === "rejected") {
+        message =
+          "Setelah bukti ditinjau, pengajuan tidak memenuhi syarat. Komplain dinyatakan tidak valid dan dana tetap diteruskan ke seller.";
+      } else {
+        message = "Admin telah merespon komplain.";
+      }
+      timeline.push({
+        label:
+          complaint.admin_decision === "approved"
+            ? "Admin setuju dan dana sudah dikembalikan"
+            : "Admin menolak atas komplain kamu",
+        message,
+        timestamp: complaint.admin_responded_at,
+        decision: complaint.admin_decision || null,
+      });
+    }
 
-  if (complaint.resolved_at) {
-    timeline.push({
-      label: "Komplain Selesai",
-      timestamp: complaint.resolved_at,
-    });
+    // Timeline pengembalian barang oleh buyer (input resi)
+    if (
+      complaint.return_shipment.tracking_number &&
+      complaint.return_shipment.courier_id
+    ) {
+      timeline.push({
+        label: "Pengembalian Barang oleh Buyer",
+        message: "Buyer telah menginput resi pengembalian barang.",
+        trackingNumber: complaint.return_shipment.tracking_number,
+        courier: complaint.return_shipment.courier.name,
+        timestamp: complaint.return_shipment.shipment_date,
+      });
+    }
+
+    if (complaint.request_confirmation_status === "pending") {
+      timeline.push({
+        label: "Permintaan Konfirmasi Buyer",
+        message: "Melalui resi harusnya barang sudah sampai di seller",
+        reason: complaint.buyer_requested_confirmation_reason || null,
+        evidence: complaint.buyer_requested_confirmation_evidence_urls || null,
+        timestamp: complaint.buyer_requested_confirmation_at,
+      });
+    }
+
+    if (complaint.request_confirmation_status === "approved") {
+      let maxSellerConfirmDeadline = null;
+      if (complaint.seller_confirm_deadline) {
+        maxSellerConfirmDeadline = new Date(
+          complaint.seller_confirm_deadline
+        ).toISOString();
+      }
+      timeline.push({
+        label: "Permintaan Konfirmasi Buyer",
+        message: "Admin menyetujui permintaan konfirmasi buyer",
+        timestamp: complaint.admin_approved_confirmation_at,
+        maxSellerConfirmDeadline,
+      });
+    }
+
+    if (complaint.request_confirmation_status === "rejected") {
+      timeline.push({
+        label: "Permintaan Konfirmasi Buyer",
+        message: "Admin menolak permintaan konfirmasi buyer",
+        timestamp: complaint.admin_rejected_confirmation_at,
+      });
+    }
+
+    // seller confirmation at
+    if (complaint.seller_confirmed_return_at) {
+      timeline.push({
+        label: "Konfirmasi seller dan dana berhasil dikembalikan",
+        message: "Seller mengkonfirmasi barang retur telah diterima.",
+        timestamp: complaint.seller_confirmed_return_at,
+      });
+    }
+
+    if (
+      complaint.status === "completed" ||
+      complaint.status === "approved_by_admin" ||
+      complaint.status === "rejected_by_admin"
+    ) {
+      timeline.push({
+        label: "Komplain Selesai",
+        message: "Proses komplain telah selesai.",
+        timestamp: complaint.resolved_at,
+      });
+    }
+  } else {
+    // Default timeline untuk type lain
+    if (complaint.created_at)
+      timeline.push({
+        label: "Pengajuan Komplain Buyer",
+        message: "Buyer mengajukan komplain.",
+        reason: complaint.buyer_reason || null,
+        evidence: complaint.buyer_evidence_urls || null,
+        timestamp: complaint.created_at,
+      });
+    if (complaint.seller_responded_at) {
+      let message = "";
+      if (complaint.seller_decision === "approved") {
+        message = "Seller menyetujui komplain.";
+      } else if (complaint.seller_decision === "rejected") {
+        message = "Seller menolak komplain.";
+      } else {
+        message = "Seller telah merespon komplain.";
+      }
+      timeline.push({
+        label: `Respon Seller${
+          complaint.seller_decision
+            ? ` (${
+                complaint.seller_decision === "approved"
+                  ? "Disetujui"
+                  : "Ditolak"
+              })`
+            : ""
+        }`,
+        message,
+        reason: complaint.seller_response_reason || null,
+        evidence: complaint.seller_evidence_urls || null,
+        timestamp: complaint.seller_responded_at,
+        decision: complaint.seller_decision || null,
+      });
+    }
+    if (complaint.admin_responded_at) {
+      let message = "";
+      if (complaint.admin_decision === "approved") {
+        message = "Admin menyetujui komplain.";
+      } else if (complaint.admin_decision === "rejected") {
+        message = "Admin menolak komplain.";
+      } else {
+        message = "Admin telah merespon komplain.";
+      }
+      timeline.push({
+        label: `Respon Admin${
+          complaint.admin_decision
+            ? ` (${
+                complaint.admin_decision === "approved"
+                  ? "Disetujui"
+                  : "Ditolak"
+              })`
+            : ""
+        }`,
+        message,
+        timestamp: complaint.admin_responded_at,
+        decision: complaint.admin_decision || null,
+      });
+    }
+    if (complaint.resolved_at)
+      timeline.push({
+        label: "Komplain Selesai",
+        message: "Proses komplain telah selesai.",
+        timestamp: complaint.resolved_at,
+      });
   }
 
   return {
@@ -159,12 +377,21 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
     buyer_evidence_urls: complaint.buyer_evidence_urls,
     seller_response_reason: complaint.seller_response_reason,
     seller_evidence_urls: complaint.seller_evidence_urls,
+    seller_decision: complaint.seller_decision,
+    seller_responded_at: complaint.seller_responded_at,
+    admin_decision: complaint.admin_decision,
+    admin_responded_at: complaint.admin_responded_at,
+    buyer_deadline_input_shipment: complaint.buyer_deadline_input_shipment,
+    seller_confirm_deadline: complaint.seller_confirm_deadline,
+    request_confirmation_status: complaint.request_confirmation_status,
+    admin_approved_confirmation_at: complaint.admin_approved_confirmation_at,
+    admin_rejected_confirmation_at: complaint.admin_rejected_confirmation_at,
+    seller_confirmed_return_at: complaint.seller_confirmed_return_at,
     buyer_requested_confirmation_at: complaint.buyer_requested_confirmation_at,
     buyer_requested_confirmation_reason:
       complaint.buyer_requested_confirmation_reason,
     buyer_requested_confirmation_evidence_urls:
       complaint.buyer_requested_confirmation_evidence_urls,
-    seller_confirm_deadline: complaint.seller_confirm_deadline,
     resolved_at: complaint.resolved_at,
     created_at: complaint.created_at,
     updated_at: complaint.updated_at,
@@ -173,14 +400,87 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
       transactionCode: complaint.transaction.transaction_code,
       itemName: complaint.transaction.item_name,
       totalAmount: complaint.transaction.total_amount,
+      itemPrice: complaint.transaction.item_price,
+      platformFee: complaint.transaction.platform_fee,
+      insuranceFee: complaint.transaction.insurance_fee,
       virtualAccount: complaint.transaction.virtual_account_number,
+      status: complaint.transaction.status,
       sellerEmail: complaint.transaction.seller?.email || null,
-      courier: {
-        name: complaint.transaction.shipment?.courier?.name || null,
+      shipment: {
+        trackingNumber: complaint.transaction.shipment?.tracking_number || null,
+        courier: complaint.transaction.shipment?.courier?.name || null,
       },
-      trackingNumber: complaint.transaction.shipment?.tracking_number || null,
     },
   };
+};
+
+const submitReturnShipment = async ({
+  complaintId,
+  buyerId,
+  courierId,
+  trackingNumber,
+  photo,
+}) => {
+  const complaint = await complaintRepo.getComplaintDetail(complaintId);
+  if (!complaint || complaint.buyer_id !== buyerId) {
+    throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
+  }
+
+  if (complaint.status !== "return_requested") {
+    throwError("Komplain tidak dalam status pengembalian", 400);
+  }
+
+  let photoUrl = null;
+  if (photo) {
+    photoUrl = await digitalStorageService.uploadToSpaces(
+      photo.buffer,
+      photo.originalname,
+      photo.mimetype
+    );
+  }
+
+  const returnShipment = await complaintRepo.updateReturnShipment(complaintId, {
+    courier_id: courierId,
+    tracking_number: trackingNumber,
+    shipment_date: new Date(),
+    photo_url: photoUrl,
+  });
+
+  await complaintRepo.updateComplaintStatus(complaintId, "return_in_transit");
+
+  return returnShipment;
+};
+
+const requestBuyerConfirmation = async ({
+  complaintId,
+  buyerId,
+  reason,
+  file,
+}) => {
+  const complaint = await complaintRepo.getComplaintDetail(complaintId);
+
+  if (!complaint || complaint.buyer_id !== buyerId) {
+    throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
+  }
+
+  if (complaint.status !== "return_in_transit") {
+    throwError("Komplain belum dalam proses pengembalian", 400);
+  }
+
+  let uploadedUrl = null;
+  if (file) {
+    uploadedUrl = await digitalStorageService.uploadToSpaces(
+      file.buffer,
+      file.originalname,
+      file.mimetype
+    );
+  }
+
+  return await complaintRepo.updateComplaintWithBuyerConfirmRequest(
+    complaintId,
+    reason,
+    uploadedUrl
+  );
 };
 
 export default {
@@ -188,4 +488,6 @@ export default {
   cancelComplaint,
   getComplaintListByBuyer,
   getComplaintDetailByBuyer,
+  submitReturnShipment,
+  requestBuyerConfirmation,
 };

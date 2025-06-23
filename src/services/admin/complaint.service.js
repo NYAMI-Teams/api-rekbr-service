@@ -41,6 +41,8 @@ const responseComplaint = async (id, action, adminId) => {
     return await complaintRepo.updateComplaint(id, {
       status,
       admin_responded_at: new Date(),
+      resolved_at: new Date(),
+      admin_decision: action === "approve" ? "approved" : "rejected",
     });
   }
 
@@ -55,8 +57,9 @@ const responseComplaint = async (id, action, adminId) => {
 
     return await complaintRepo.updateComplaint(id, {
       status,
-      seller_decision: complaint.seller_decision,
       admin_responded_at: new Date(),
+      admin_decision: action === "approve" ? "approved" : "rejected",
+      buyer_deadline_input_shipment: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
   }
 
@@ -69,11 +72,14 @@ const responseComplaint = async (id, action, adminId) => {
 
     return await complaintRepo.updateComplaint(id, {
       status,
-      request_confirmation_status: action,
+      request_confirmation_status:
+        action === "approve" ? "approved" : "rejected",
       request_confirmation_admin_id: adminId,
       admin_responded_at: new Date(),
       admin_approved_confirmation_at:
         action === "approve" ? new Date() : undefined,
+      admin_rejected_confirmation_at:
+        action === "reject" ? new Date() : undefined,
       seller_confirm_deadline:
         action === "approve"
           ? new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
