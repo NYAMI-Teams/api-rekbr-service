@@ -3,6 +3,16 @@ import complaintRepo from "../../repositories/complaint.repository.js";
 import digitalStorageService from "../../services/digital-storage.service.js";
 import throwError from "../../utils/throwError.js";
 
+const ACTIVE_STATUSES = [
+  "waiting_seller_approval",
+  "under_investigation",
+  "return_requested",
+  "return_in_transit",
+  "awaiting_seller_confirmation",
+  "awaiting_admin_approval",
+  "awaiting_admin_confirmation",
+];
+
 const createComplaint = async ({
   transactionId,
   buyerId,
@@ -17,7 +27,7 @@ const createComplaint = async ({
 
   if (transaction.status !== "shipped") {
     throwError(
-      "Hanya transaksi dengan status 'shipped' yang dapat diajukan komplain",
+      "Hanya transaksi dengan status 'shipped' yang dapat dikomplain",
       400
     );
   }
@@ -25,40 +35,25 @@ const createComplaint = async ({
   const existingComplaint = await complaintRepo.findComplaintByTransaction(
     transactionId
   );
-
-  const ACTIVE_STATUSES = [
-    "waiting_seller_approval",
-    "under_investigation",
-    "return_requested",
-    "return_in_transit",
-    "awaiting_seller_confirmation",
-  ];
-
   if (existingComplaint && ACTIVE_STATUSES.includes(existingComplaint.status)) {
-    throwError("Komplain masih aktif untuk transaksi ini", 400);
+    throwError("Masih ada komplain aktif pada transaksi ini", 400);
   }
 
-  if (type !== "lost" && (!files || files.length === 0)) {
-    throwError("Bukti harus disertakan untuk tipe komplain ini", 400);
-  }
+  let uploadedUrls = [];
+  if (type !== "lost") {
+    if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);
+    if (files.length > 5) throwError("Maksimal 5 file bukti", 400);
 
-  if (type === "lost" && files && files.length > 0) {
-    throwError("Tidak perlu mengunggah bukti untuk komplain tipe 'lost'", 400);
-  }
-
-  if (type !== "lost" && files.length > 5) {
-    throwError("Maksimal 5 file bukti yang dapat diunggah", 400);
-  }
-
-  const uploadedUrls = await Promise.all(
-    files.map((file) =>
-      digitalStorageService.uploadToSpaces(
-        file.buffer,
-        file.originalname,
-        file.mimetype
+    uploadedUrls = await Promise.all(
+      files.map((file) =>
+        digitalStorageService.uploadToSpaces(
+          file.buffer,
+          file.originalname,
+          file.mimetype
+        )
       )
-    )
-  );
+    );
+  }
 
   const initialStatus =
     type === "lost" ? "under_investigation" : "waiting_seller_approval";
@@ -86,9 +81,13 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
     throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
   }
 
-  const forbiddenStatus = ["completed", "approved", "rejected_by_admin"];
-  if (forbiddenStatus.includes(complaint.status)) {
-    throwError("Komplain tidak dapat dibatalkan pada status ini", 400);
+  const forbiddenStatuses = [
+    "completed",
+    "approved_by_admin",
+    "rejected_by_admin",
+  ];
+  if (forbiddenStatuses.includes(complaint.status)) {
+    throwError("Komplain tidak bisa dibatalkan pada status ini", 400);
   }
 
   await transactionRepo.updateStatus(complaint.transaction_id, "shipped");
@@ -101,42 +100,60 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
 
 const getComplaintListByBuyer = async (buyerId) => {
   const complaints = await complaintRepo.getComplaintsByBuyer(buyerId);
-
   return complaints.map((c) => ({
-    complaintId: c.id,
-    transactionId: c.transaction_id,
-    itemName: c.transaction.item_name,
-    price: c.transaction.total_amount,
-    sellerEmail: c.transaction.seller?.email || null,
-    trackingNumber: c.transaction.shipment?.tracking_number || null,
-    courier: c.transaction.shipment?.courier?.name || null,
-    complaintType: c.type,
-    complaintStatus: c.status,
+    id: c.id,
+    type: c.type,
+    status: c.status,
+    createdAt: c.created_at,
+    transaction: {
+      id: c.transaction.id,
+      transactionCode: c.transaction.transaction_code,
+      itemName: c.transaction.item_name,
+      totalAmount: c.transaction.total_amount,
+      status: c.transaction.status,
+      sellerEmail: c.transaction.seller?.email || null,
+      shipment: {
+        trackingNumber: c.transaction.shipment?.tracking_number || null,
+        courier: c.transaction.shipment?.courier?.name || null,
+      },
+    },
   }));
 };
 
-const getComplaintDetail = async (complaintId, buyerId) => {
+const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
   const complaint = await complaintRepo.getComplaintDetail(complaintId);
   if (!complaint || complaint.buyer_id !== buyerId) {
     throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
   }
 
-  const timeline = [];
-  if (complaint.created_at)
+  const timeline = [
+    { label: "Pengajuan Komplain", timestamp: complaint.created_at },
+  ];
+
+  if (complaint.seller_responded_at) {
     timeline.push({
-      label: "Pengajuan komplain buyer",
-      timestamp: complaint.created_at,
+      label: "Respon Seller",
+      timestamp: complaint.seller_responded_at,
     });
-  if (complaint.updated_at && complaint.updated_at !== complaint.created_at)
+  }
+
+  if (complaint.admin_responded_at) {
     timeline.push({
-      label: "Persetujuan komplain seller",
-      timestamp: complaint.updated_at,
+      label: "Respon Admin",
+      timestamp: complaint.admin_responded_at,
     });
+  }
+
+  if (complaint.resolved_at) {
+    timeline.push({
+      label: "Komplain Selesai",
+      timestamp: complaint.resolved_at,
+    });
+  }
 
   return {
     id: complaint.id,
     status: complaint.status,
-    status_label: generateStatusLabel(complaint.status),
     type: complaint.type,
     buyer_reason: complaint.buyer_reason,
     buyer_evidence_urls: complaint.buyer_evidence_urls,
@@ -157,7 +174,7 @@ const getComplaintDetail = async (complaintId, buyerId) => {
       itemName: complaint.transaction.item_name,
       totalAmount: complaint.transaction.total_amount,
       virtualAccount: complaint.transaction.virtual_account_number,
-      sellerEmail: complaint.transaction.seller.email,
+      sellerEmail: complaint.transaction.seller?.email || null,
       courier: {
         name: complaint.transaction.shipment?.courier?.name || null,
       },
@@ -166,99 +183,9 @@ const getComplaintDetail = async (complaintId, buyerId) => {
   };
 };
 
-const submitReturnShipment = async ({
-  complaintId,
-  buyerId,
-  courierId,
-  trackingNumber,
-  photo,
-}) => {
-  const complaint = await complaintRepo.getComplaintDetail(complaintId);
-  if (!complaint || complaint.buyer_id !== buyerId) {
-    throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
-  }
-
-  if (complaint.status !== "return_requested") {
-    throwError("Komplain tidak dalam status pengembalian", 400);
-  }
-
-  let photoUrl = null;
-  if (photo) {
-    photoUrl = await digitalStorageService.uploadToSpaces(
-      photo.buffer,
-      photo.originalname,
-      photo.mimetype
-    );
-  }
-
-  const returnShipment = await complaintRepo.updateReturnShipment(complaintId, {
-    courier_id: courierId,
-    tracking_number: trackingNumber,
-    shipment_date: new Date(),
-    photo_url: photoUrl,
-  });
-
-  await complaintRepo.updateComplaintStatus(complaintId, "return_in_transit");
-
-  return returnShipment;
-};
-
-const generateStatusLabel = (status) => {
-  switch (status) {
-    case "waiting_seller_approval":
-      return "Menunggu Persetujuan Seller";
-    case "return_requested":
-      return "Menunggu Pengembalian Barang";
-    case "under_investigation":
-      return "Investigasi Pengiriman";
-    case "approved":
-      return "Komplain Disetujui";
-    case "rejected_by_seller":
-      return "Ditolak Seller";
-    case "canceled_by_buyer":
-      return "Komplain Dibatalkan";
-    default:
-      return status;
-  }
-};
-
-const requestBuyerConfirmation = async ({
-  complaintId,
-  buyerId,
-  reason,
-  file,
-}) => {
-  const complaint = await complaintRepo.getComplaintDetail(complaintId);
-
-  if (!complaint || complaint.buyer_id !== buyerId) {
-    throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
-  }
-
-  if (complaint.status !== "return_in_transit") {
-    throwError("Komplain belum dalam proses pengembalian", 400);
-  }
-
-  let uploadedUrl = null;
-  if (file) {
-    uploadedUrl = await digitalStorageService.uploadToSpaces(
-      file.buffer,
-      file.originalname,
-      file.mimetype
-    );
-  }
-
-  return await complaintRepo.updateComplaintWithBuyerConfirmRequest(
-    complaintId,
-    reason,
-    uploadedUrl
-  );
-};
-
 export default {
   createComplaint,
   cancelComplaint,
   getComplaintListByBuyer,
-  getComplaintDetail,
-  submitReturnShipment,
-  requestBuyerConfirmation,
+  getComplaintDetailByBuyer,
 };

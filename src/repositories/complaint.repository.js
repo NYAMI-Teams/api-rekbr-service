@@ -1,10 +1,9 @@
+// complaint.repository.js
 import prisma from "../prisma/client.js";
 import toCamelCase from "../utils/camelCaseResponse.js";
 
 const createComplaint = async (payload) => {
-  return await prisma.complaint.create({
-    data: payload,
-  });
+  return await prisma.complaint.create({ data: payload });
 };
 
 const findComplaintByTransaction = async (transactionId) => {
@@ -38,9 +37,7 @@ const getComplaintsByBuyer = async (buyerId) => {
       transaction: {
         include: {
           seller: { select: { email: true } },
-          shipment: {
-            include: { courier: true },
-          },
+          shipment: { include: { courier: true } },
         },
       },
     },
@@ -54,9 +51,22 @@ const getComplaintDetail = async (complaintId) => {
       transaction: {
         include: {
           seller: { select: { email: true } },
-          shipment: {
-            include: { courier: true },
-          },
+          shipment: { include: { courier: true } },
+        },
+      },
+    },
+  });
+};
+
+const getComplaintsBySeller = async (sellerId) => {
+  return await prisma.complaint.findMany({
+    where: { transaction: { seller_id: sellerId } },
+    orderBy: { created_at: "desc" },
+    include: {
+      transaction: {
+        include: {
+          buyer: { select: { email: true } },
+          shipment: { include: { courier: true } },
         },
       },
     },
@@ -65,18 +75,18 @@ const getComplaintDetail = async (complaintId) => {
 
 const sellerResponseUpdate = async (
   complaintId,
-  status,
+  sellerDecision,
   photo,
   seller_response_reason
 ) => {
-  console.log(status, "ini status");
-
   return await prisma.complaint.update({
     where: { id: complaintId },
     data: {
-      status: status,
+      status: "awaiting_admin_approval",
+      seller_decision: sellerDecision,
       seller_evidence_urls: photo && photo.length > 0 ? photo : [],
       seller_response_reason,
+      seller_responded_at: new Date(),
     },
   });
 };
@@ -84,9 +94,7 @@ const sellerResponseUpdate = async (
 const getComplaintByTransactionId = async (transaction_id) => {
   return await prisma.complaint.findFirst({
     where: { transaction_id },
-    orderBy: {
-      created_at: "desc",
-    },
+    orderBy: { created_at: "desc" },
   });
 };
 
@@ -118,18 +126,13 @@ const complaintTransactionUpdate = async (complaintId, refundAmount) => {
 };
 
 const complaintShipmentReceived = async (complaintId) => {
-    const complaint = await findComplaintById(complaintId);
-    if (!complaint) {
-      throw new Error("Complaint not found");
-    }
-  
-    return await prisma.returnShipment.update({
-      where: { complaint_id: complaintId},
-      data: {
-        received_date: new Date(),
-      },
-    });
-  };
+  return await prisma.returnShipment.update({
+    where: { complaint_id: complaintId },
+    data: {
+      received_date: new Date(),
+    },
+  });
+};
 
 const updateReturnShipment = async (complaintId, data) => {
   return await prisma.returnShipment.create({
@@ -159,12 +162,12 @@ const getAllComplaintList = async (filters = {}) => {
           shipment: {
             select: {
               tracking_number: true,
-              courier: { select: { name: true } }
-            }
-          }
-        }
-      }
-    }
+              courier: { select: { name: true } },
+            },
+          },
+        },
+      },
+    },
   });
 };
 
@@ -172,13 +175,9 @@ const getComplaintById = async (complaintId) => {
   return await prisma.complaint.findUnique({
     where: { id: complaintId },
     include: {
-      transaction: {
-        include: {
-          shipment: true
-        }
-      },
+      transaction: { include: { shipment: true } },
       return_shipment: true,
-    }
+    },
   });
 };
 
@@ -202,12 +201,9 @@ const updateComplaintWithBuyerConfirmRequest = async (
 const updateComplaint = async (complaintId, data) => {
   return await prisma.complaint.update({
     where: { id: complaintId },
-    data: {
-      ...data,
-    },
+    data: { ...data },
   });
-}
-
+};
 
 export default {
   createComplaint,
@@ -226,4 +222,5 @@ export default {
   updateComplaintWithBuyerConfirmRequest,
   complaintShipmentReceived,
   updateComplaint,
+  getComplaintsBySeller,
 };
