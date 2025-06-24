@@ -109,6 +109,20 @@ export default router;
  *           items:
  *             type: string
  *           example: ["pending_payment", "waiting_shipment"]
+ *       - name: offset
+ *         in: query
+ *         required: false
+ *         description: Offset untuk pagination (default: 0)
+ *         schema:
+ *           type: integer
+ *           example: 0
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: Jumlah data per halaman (default: 100)
+ *         schema:
+ *           type: integer
+ *           example: 20
  *     responses:
  *       200:
  *         description: List transaksi seller berhasil diambil
@@ -313,6 +327,16 @@ export default router;
  *         shipmentDeadline:
  *           type: string
  *           format: date-time
+ *         cancelledAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         cancelledBy:
+ *           type: string
+ *           nullable: true
+ *         cancelledReason:
+ *           type: string
+ *           nullable: true
  *         shipment:
  *           type: object
  *           nullable: true
@@ -350,6 +374,11 @@ export default router;
  *               type: string
  *             logoUrl:
  *               type: string
+ *         Complaint:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Complaint'
+ *           nullable: true
  *         buyerConfirmedAt:
  *           type: string
  *           format: date-time
@@ -376,6 +405,9 @@ export default router;
  *           type: string
  *         status:
  *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
  *         paymentDeadline:
  *           type: string
  *           format: date-time
@@ -385,8 +417,19 @@ export default router;
  *         currentTimestamp:
  *           type: string
  *           format: date-time
- *         trackingNumber:
- *           type: string
+ *         shipment:
+ *           type: object
+ *           nullable: true
+ *           properties:
+ *             trackingNumber:
+ *               type: string
+ *             courier:
+ *               type: string
+ *             shipmentDate:
+ *               type: string
+ *               format: date-time
+ *             photoUrl:
+ *               type: string
  *         fundReleaseRequest:
  *           type: object
  *           properties:
@@ -402,6 +445,17 @@ export default router;
  *               format: date-time
  *             adminEmail:
  *               type: string
+ *         complaint:
+ *           $ref: '#/components/schemas/Complaint'
+ *           nullable: true
+ *         buyerConfirmDeadline:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         buyerConfirmedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
  *     CreateTransactionRequest:
  *       type: object
  *       required:
@@ -465,4 +519,86 @@ export default router;
  *         name:
  *           type: string
  *           description: Nama kurir
+ *     Complaint:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         transactionId:
+ *           type: string
+ *         buyerId:
+ *           type: string
+ *         type:
+ *           type: string
+ *         status:
+ *           type: string
+ *         buyerReason:
+ *           type: string
+ *           nullable: true
+ *         buyerEvidenceUrls:
+ *           type: array
+ *           items:
+ *             type: string
+ *         sellerResponseReason:
+ *           type: string
+ *           nullable: true
+ *         sellerEvidenceUrls:
+ *           type: array
+ *           items:
+ *             type: string
+ *         buyerRequestedConfirmationAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         buyerRequestedConfirmationReason:
+ *           type: string
+ *           nullable: true
+ *         buyerRequestedConfirmationEvidenceUrls:
+ *           type: array
+ *           items:
+ *             type: string
+ *         requestConfirmationStatus:
+ *           type: string
+ *           nullable: true
+ *         requestConfirmationAdminId:
+ *           type: string
+ *           nullable: true
+ *         sellerConfirmDeadline:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         resolvedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         returnShipment:
+ *           $ref: '#/components/schemas/ReturnShipment'
+ *           nullable: true
+ *         returnShipmentTrackingNumber:
+ *           type: string
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     ReturnShipment:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         trackingNumber:
+ *           type: string
+ *         courierName:
+ *           type: string
+ *           nullable: true
+ *         shipmentDate:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         receivedDate:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
  */

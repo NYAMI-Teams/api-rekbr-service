@@ -4,9 +4,12 @@ import asyncHandler from "../../middlewares/asyncHandler.js";
 
 const router = Router();
 
-router.get("/", asyncHandler(complaintController.getAllComplaintList))
+router.get("/", asyncHandler(complaintController.getAllComplaintList));
 router.get("/:id", asyncHandler(complaintController.getComplaintById));
-router.post("/:id/:action", asyncHandler(complaintController.responseComplaint));
+router.post(
+  "/:id/:action",
+  asyncHandler(complaintController.responseComplaint)
+);
 
 export default router;
 
@@ -332,8 +335,20 @@ export default router;
  *               success: true
  *               message: Pengaduan berhasil disetujui oleh admin
  *       400:
- *         description: Parameter action tidak valid
+ *         description: Parameter action tidak valid atau pengaduan tidak dalam status yang dapat direspon
+ *         content:
+ *           application/json:
+ *             examples:
+ *               invalidAction:
+ *                 summary: Action tidak valid
+ *                 value:
+ *                   success: false
+ *                   message: Parameter action tidak valid
+ *               invalidStatus:
+ *                 summary: Status pengaduan tidak valid
+ *                 value:
+ *                   success: false
+ *                   message: Pengaduan tidak dalam status yang dapat direspon
  *       404:
  *         description: Pengaduan tidak ditemukan
  */
-
