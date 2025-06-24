@@ -2,6 +2,8 @@ import transactionRepo from "../../repositories/transaction.repository.js";
 import complaintRepo from "../../repositories/complaint.repository.js";
 import digitalStorageService from "../../services/digital-storage.service.js";
 import throwError from "../../utils/throwError.js";
+import { complaintQueue } from "../../queues/complaint.queue.js";
+import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
 
 const ACTIVE_STATUSES = [
   "waiting_seller_approval",
@@ -389,6 +391,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
     resolved_at: complaint.resolved_at,
     created_at: complaint.created_at,
     updated_at: complaint.updated_at,
+    canceled_by_buyer_at: complaint.canceled_by_buyer_at,
     timeline,
     transaction: {
       transactionCode: complaint.transaction.transaction_code,
@@ -406,13 +409,13 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
       },
     },
     returnShipment: complaint.return_shipment
-    ? {
-        trackingNumber: complaint.return_shipment.tracking_number,
-        courierName: complaint.return_shipment.courier?.name || null,
-        shipmentDate: complaint.return_shipment.shipment_date,
-        photoUrl: complaint.return_shipment.photo_url || null,
-      }
-    : null,
+      ? {
+          trackingNumber: complaint.return_shipment.tracking_number,
+          courierName: complaint.return_shipment.courier?.name || null,
+          shipmentDate: complaint.return_shipment.shipment_date,
+          photoUrl: complaint.return_shipment.photo_url || null,
+        }
+      : null,
   };
 };
 
@@ -449,6 +452,10 @@ const submitReturnShipment = async ({
   });
 
   await complaintRepo.updateComplaintStatus(complaintId, "return_in_transit");
+  await removeJobIfExists(
+    complaintQueue,
+    `cancel-return-shipment:${complaintId}`
+  );
 
   return returnShipment;
 };

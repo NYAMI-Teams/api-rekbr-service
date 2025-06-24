@@ -3,6 +3,9 @@ import complaintRepo from "../../repositories/complaint.repository.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import digitalStorageService from "../digital-storage.service.js";
 import prisma from "../../prisma/client.js";
+import { scheduleAutoCancelComplaint } from "../../jobs/complaint.scheduler.js";
+import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
+import { complaintQueue } from "../../queues/complaint.queue.js";
 
 const patchSellerResponse = async ({
   status,
@@ -43,12 +46,25 @@ const patchSellerResponse = async ({
   const sellerDecision =
     status === "return_requested" ? "approved" : "rejected";
 
+  // ⏱️ Set deadline jika seller menyetujui retur
+  let deadline = null;
+  if (sellerDecision === "approved") {
+    deadline = new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
+  }
+
   const updatedComplaint = await complaintRepo.sellerResponseUpdate(
     complaintId,
     sellerDecision,
     photoUrl,
-    seller_response_reason
+    seller_response_reason,
+    deadline
   );
+
+  // ⏳ Schedule job cancel jika buyer tidak kirim resi
+  if (sellerDecision === "approved") {
+    const delay = deadline.getTime() - Date.now();
+    await scheduleAutoCancelComplaint(complaintId, delay);
+  }
 
   return updatedComplaint;
 };
@@ -117,6 +133,11 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
       updatedReceivedAt,
     };
   });
+
+  await removeJobIfExists(
+    complaintQueue,
+    `confirm-return-deadline:${complaintId}`
+  );
 
   return { result };
 };
@@ -401,6 +422,8 @@ const getComplaintDetailBySeller = async (complaintId, sellerId) => {
     seller_evidence_urls: complaint.seller_evidence_urls,
     seller_decision: complaint.seller_decision,
     admin_decision: complaint.admin_decision,
+    buyer_deadline_input_shipment: complaint.buyer_deadline_input_shipment,
+    canceled_by_buyer_at: complaint.canceled_by_buyer_at,
     created_at: complaint.created_at,
     updated_at: complaint.updated_at,
     timeline,
@@ -409,6 +432,7 @@ const getComplaintDetailBySeller = async (complaintId, sellerId) => {
       itemName: complaint.transaction.item_name,
       totalAmount: complaint.transaction.total_amount,
       virtualAccount: complaint.transaction.virtual_account_number,
+      status: complaint.transaction.status,
       buyerEmail: complaint.transaction.buyer?.email || null,
       courier: {
         name: complaint.transaction.shipment?.courier?.name || null,
