@@ -29,4 +29,4 @@ jobs:
             git pull origin main
             npm i
             npx prisma generate
-            pm2 restart rekbr-app transaction-worker
+            pm2 restart rekbr-app transaction-worker complaint-worker
