@@ -2,6 +2,7 @@ import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import { transactionQueue } from "../../queues/transaction.queue.js";
+import { scheduleAutoCancelShipment } from "../../jobs/transaction.scheduler.js";
 
 const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   const txn = await transactionRepo.getTransactionDetailByBuyer(
@@ -29,6 +30,9 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
     createdAt: txn.created_at,
     paidAt: txn.paid_at,
     paymentDeadline: txn.payment_deadline,
+    cancelledAt: txn.cancelled_at || null,
+    cancelledBy: txn.cancelled_by_id || null,
+    cancelledReason: txn.cancel_reason || null,
     shipmentDeadline: txn.shipment_deadline,
     shipment: txn.shipment
       ? {
@@ -96,8 +100,22 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
 };
 
 const simulatePayment = async (transactionId, buyerId) => {
-  const paidAt = new Date();
-  const shipmentDeadline = new Date(paidAt.getTime() + 2 * 24 * 60 * 60 * 1000); // +2 hari
+  const txn = await transactionRepo.getTransactionDetailByBuyer(
+    transactionId,
+    buyerId
+  );
+  if (!txn) throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
+
+  if (txn.status !== "pending_payment" || txn.paid_at) {
+    throwError(
+      "Transaksi sudah dibayar atau tidak dalam status menunggu pembayaran",
+      400
+    );
+  }
+
+  const now = new Date();
+  const paidAt = now;
+  const shipmentDeadline = new Date(now.getTime() + 2 * 60 * 1000);
 
   const updated = await transactionRepo.updatePaidTransaction(
     transactionId,
@@ -109,6 +127,14 @@ const simulatePayment = async (transactionId, buyerId) => {
     throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
   await transactionQueue.remove(`cancel:${transactionId}`);
+
+  await scheduleAutoCancelShipment(transactionId, shipmentDeadline);
+  console.log("🕒 Jadwal shipment deadline:", shipmentDeadline.toISOString());
+  console.log("🕒 Now saat schedule dipanggil:", new Date().toISOString());
+  console.log(
+    "harusnya 2 menit dari sekarang adalah",
+    new Date(paidAt.getTime() + 2 * 60 * 1000).toISOString()
+  );
 
   return {
     transactionCode: transactionId,
@@ -142,6 +168,9 @@ const confirmReceived = async (transactionId, buyerId) => {
   if (result.count === 0) {
     throwError("Gagal mengkonfirmasi penerimaan barang", 400);
   }
+
+  // Hapus job auto-complete agar tidak dijalankan jika buyer sudah confirm
+  await transactionQueue.remove(`auto-complete:${transactionId}`);
 
   return {
     success: true,
