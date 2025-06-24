@@ -169,16 +169,6 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
         decision: complaint.admin_decision || null,
       });
     }
-    if (
-      complaint.status === "completed" ||
-      complaint.status === "approved_by_admin" ||
-      complaint.status === "rejected_by_admin"
-    ) {
-      timeline.push({
-        label: "Komplain Selesai",
-        message: "Proses komplain telah selesai.",
-      });
-    }
   } else if (complaint.type === "damaged") {
     // Timeline untuk komplain DAMAGED
     if (complaint.created_at) {

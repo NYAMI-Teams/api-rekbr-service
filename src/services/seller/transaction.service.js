@@ -5,6 +5,7 @@ import fundReleaseRequestRepository from "../../repositories/fund-release-reques
 import digitalStorageService from "../digital-storage.service.js";
 import userService from "../user.service.js";
 import { transactionQueue } from "../../queues/transaction.queue.js";
+import { scheduleAutoCancelTransaction } from "../../jobs/transaction.scheduler.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -32,6 +33,9 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
     paidAt: txn.paid_at,
     paymentDeadline: txn.payment_deadline,
     shipmentDeadline: txn.shipment_deadline,
+    cancelledAt: txn.cancelled_at || null,
+    cancelledBy: txn.cancelled_by_id || null,
+    cancelledReason: txn.cancel_reason || null,
     shipment: txn.shipment
       ? {
           trackingNumber: txn.shipment.tracking_number,
@@ -214,37 +218,6 @@ const generateVirtualAccountNumber = () => {
   return `${prefix}${randomNumber}`;
 };
 
-const scheduleAutoCancelTransaction = async (
-  transactionId,
-  paymentDeadline
-) => {
-  const deadlineTime = new Date(paymentDeadline).getTime();
-  const now = Date.now();
-  const delay = deadlineTime - now;
-
-  if (isNaN(deadlineTime) || delay <= 0) {
-    console.warn(
-      `⚠️ Tidak dapat menjadwalkan auto-cancel: deadline tidak valid atau telah lewat.`
-    );
-    return;
-  }
-
-  await transactionQueue.add(
-    "auto-cancel-payment",
-    { transactionId },
-    {
-      delay,
-      jobId: `cancel:${transactionId}`, // ✅ pakai backtick
-      removeOnComplete: true,
-      removeOnFail: true,
-    }
-  );
-
-  console.log(
-    `📌 Job auto-cancel transaksi ${transactionId} dijadwalkan dalam ${delay} ms`
-  );
-};
-
 const generateTransaction = async ({
   seller_id,
   item_name,
@@ -285,7 +258,7 @@ const generateTransaction = async ({
   const total_amount = item_price + platform_fee + insurance_fee;
 
   //payment deadline also hardocdeed
-  const payment_deadline = new Date(Date.now() + 3 * 60 * 60 * 1000);
+  const payment_deadline = new Date(Date.now() + 2 * 60 * 1000);
   const created_at = new Date(Date.now());
 
   //status is hardcoded to pending_payment
@@ -356,6 +329,7 @@ const inputShipment = async (
   });
 
   await transactionRepo.updateStatusToShipped(transactionId);
+  await transactionQueue.remove(`shipment-cancel:${transactionId}`);
 
   return { success: true };
 };

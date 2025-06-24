@@ -1,6 +1,7 @@
 import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
+import { scheduleAutoCompleteTransaction } from "../../jobs/transaction.scheduler.js";
 
 const getTransactionDetailByAdmin = async (transactionId) => {
   const txn = await transactionRepo.getTransactionDetailByAdmin(transactionId);
@@ -89,18 +90,22 @@ const updateFundReleaseRequest = async (transactionId, status, adminId) => {
 
   // ⏰ Set buyer_confirm_deadline H+2 jika approved
   if (status === "approved") {
-    const resolvedAt = new Date();
-    const buyerConfirmDeadline = new Date(
-      resolvedAt.getTime() + 1 * 24 * 60 * 60 * 1000
-    );
+    const now = new Date();
+    const buyerConfirmDeadline = new Date(now.getTime() + 2 * 60 * 1000);
+
     const res = await transactionRepo.updateTransactionBuyerConfirmDeadline(
       transactionId,
       buyerConfirmDeadline
     );
 
     if (!res) {
-      throwError("Gagal memperbarui transaksi dengan deadline konfirmasi pembeli", 500);
+      throwError(
+        "Gagal memperbarui transaksi dengan deadline konfirmasi pembeli",
+        500
+      );
     }
+
+    await scheduleAutoCompleteTransaction(transactionId, buyerConfirmDeadline);
   }
 };
 
