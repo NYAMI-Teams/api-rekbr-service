@@ -24,14 +24,14 @@ const swaggerOptions = {
     ],
     servers: [
       {
-        url: "http://152.42.249.176:3000", // sesuai base URL server
+        url: "https://api.ambisiproperti.com",
       },
       {
-        url: "http://localhost:3000", // sesuai base URL server
+        url: "http://localhost:3000",
       },
     ],
   },
-  apis: ["./src/**/*.js"], // lokasi file dengan anotasi Swagger (pakai JSDoc-style)
+  apis: ["./src/**/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
