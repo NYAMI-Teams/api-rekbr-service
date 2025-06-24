@@ -21,9 +21,13 @@ const getTransactionListSeller = async (req, res) => {
       : [req.query.status]
     : null;
 
+  const { offset, limit } = req.query;
+
   const data = await sellerTransactionService.getTransactionListBySeller(
     sellerId,
-    statusArray
+    statusArray,
+    parseInt(offset),
+    parseInt(limit)
   );
 
   const message =

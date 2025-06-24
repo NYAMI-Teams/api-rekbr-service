@@ -1,6 +1,4 @@
-// complaint.repository.js
 import prisma from "../prisma/client.js";
-import toCamelCase from "../utils/camelCaseResponse.js";
 
 const createComplaint = async (payload) => {
   return await prisma.complaint.create({ data: payload });
@@ -29,7 +27,7 @@ const findComplaintById = async (complaintId) => {
   });
 };
 
-const getComplaintsByBuyer = async (buyerId) => {
+const getComplaintsByBuyer = async (buyerId, offset, limit) => {
   return await prisma.complaint.findMany({
     where: { buyer_id: buyerId },
     orderBy: { created_at: "desc" },
@@ -46,6 +44,8 @@ const getComplaintsByBuyer = async (buyerId) => {
         },
       },
     },
+    skip: offset || 0,
+    take: limit || 100,
   });
 };
 
@@ -68,7 +68,7 @@ const getComplaintDetail = async (complaintId) => {
   });
 };
 
-const getComplaintsBySeller = async (sellerId) => {
+const getComplaintsBySeller = async (sellerId, offset, limit) => {
   return await prisma.complaint.findMany({
     where: { transaction: { seller_id: sellerId } },
     orderBy: { created_at: "desc" },
@@ -80,6 +80,8 @@ const getComplaintsBySeller = async (sellerId) => {
         },
       },
     },
+    skip: offset || 0,
+    take: limit || 100,
   });
 };
 

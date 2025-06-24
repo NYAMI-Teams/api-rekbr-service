@@ -40,11 +40,15 @@ const getTransactionListBuyer = async (req, res) => {
       : [req.query.status]
     : null;
 
+  const { offset, limit } = req.query;
+
   console.log(statusArray, "ini status array");
 
   const data = await buyerTransactionService.getTransactionListByBuyer(
     buyerId,
-    statusArray
+    statusArray,
+    parseInt(offset),
+    parseInt(limit)
   );
 
   const message =

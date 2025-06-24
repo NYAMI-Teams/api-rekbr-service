@@ -32,8 +32,11 @@ const cancelComplaint = async (req, res) => {
 
 const getComplaintListBuyer = async (req, res) => {
   const buyerId = req.user.id;
+  const { offset, limit } = req.query;
   const complaints = await buyerComplaintService.getComplaintListByBuyer(
-    buyerId
+    buyerId,
+    parseInt(offset),
+    parseInt(limit)
   );
   return resSuccess(res, 200, "Daftar komplain berhasil diambil", complaints);
 };

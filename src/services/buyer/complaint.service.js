@@ -98,8 +98,12 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
   );
 };
 
-const getComplaintListByBuyer = async (buyerId) => {
-  const complaints = await complaintRepo.getComplaintsByBuyer(buyerId);
+const getComplaintListByBuyer = async (buyerId, offset, limit) => {
+  const complaints = await complaintRepo.getComplaintsByBuyer(
+    buyerId,
+    offset,
+    limit
+  );
   return complaints.map((c) => ({
     id: c.id,
     type: c.type,

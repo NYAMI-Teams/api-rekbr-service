@@ -121,8 +121,12 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
   return { result };
 };
 
-const getComplaintListBySeller = async (sellerId) => {
-  const complaints = await complaintRepo.getComplaintsBySeller(sellerId);
+const getComplaintListBySeller = async (sellerId, offset, limit) => {
+  const complaints = await complaintRepo.getComplaintsBySeller(
+    sellerId,
+    offset,
+    limit
+  );
   return complaints.map((c) => ({
     id: c.id,
     type: c.type,
