@@ -79,6 +79,11 @@ const getComplaintsBySeller = async (sellerId, offset, limit) => {
           shipment: { include: { courier: true } },
         },
       },
+      return_shipment: {
+        include: {
+          courier: true,
+        },
+      },
     },
     skip: offset || 0,
     take: limit || 100,
