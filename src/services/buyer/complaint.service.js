@@ -405,6 +405,14 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
         courier: complaint.transaction.shipment?.courier?.name || null,
       },
     },
+    returnShipment: complaint.return_shipment
+    ? {
+        trackingNumber: complaint.return_shipment.tracking_number,
+        courierName: complaint.return_shipment.courier?.name || null,
+        shipmentDate: complaint.return_shipment.shipment_date,
+        photoUrl: complaint.return_shipment.photo_url || null,
+      }
+    : null,
   };
 };
 

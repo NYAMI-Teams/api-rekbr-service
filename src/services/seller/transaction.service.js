@@ -229,6 +229,11 @@ const generateTransaction = async ({
   const buyer = await userService.checkEmail({ email });
   const buyer_id = buyer.id;
 
+  // Validate seller and buyer IDs
+  if (buyer_id === seller_id) {
+    throwError("Transaksi tidak dapat dibuat antara penjual dan pembeli yang sama", 400);
+  }
+
   // plt fee, insurance fee, dan total amount are hardcoded for simplicity
   let platform_fee = 0;
   if (item_price >= 10000 && item_price < 499999) {
