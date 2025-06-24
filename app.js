@@ -13,6 +13,7 @@ import { ExpressAdapter } from "@bull-board/express";
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter.js";
 import { transactionQueue } from "./src/queues/transaction.queue.js";
+import { complaintQueue } from "./src/queues/complaint.queue.js";
 
 const app = express();
 
@@ -37,7 +38,10 @@ const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath("/admin/queues");
 
 createBullBoard({
-  queues: [new BullMQAdapter(transactionQueue)],
+  queues: [
+    new BullMQAdapter(transactionQueue),
+    new BullMQAdapter(complaintQueue),
+  ],
   serverAdapter,
 });
 

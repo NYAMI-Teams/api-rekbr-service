@@ -16,6 +16,7 @@ const updateComplaintStatus = async (complaintId, status) => {
     where: { id: complaintId },
     data: {
       status,
+      canceled_by_buyer_at: status === "canceled_by_buyer" ? new Date() : null,
       resolved_at: new Date(),
     },
   });
@@ -55,7 +56,7 @@ const getComplaintDetail = async (complaintId) => {
     include: {
       transaction: {
         include: {
-          seller: { select: { email: true } },
+          buyer: { select: { email: true } },
           shipment: { include: { courier: true } },
         },
       },
@@ -94,12 +95,14 @@ const sellerResponseUpdate = async (
   complaintId,
   sellerDecision,
   photo,
-  seller_response_reason
+  seller_response_reason,
+  deadline // tambahan
 ) => {
   let status =
     sellerDecision === "approved"
       ? "return_requested"
       : "awaiting_admin_approval";
+
   return await prisma.complaint.update({
     where: { id: complaintId },
     data: {
@@ -108,6 +111,7 @@ const sellerResponseUpdate = async (
       seller_evidence_urls: photo && photo.length > 0 ? photo : [],
       seller_response_reason,
       seller_responded_at: new Date(),
+      buyer_deadline_input_shipment: deadline || null, // simpan deadline
     },
   });
 };

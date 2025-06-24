@@ -174,9 +174,12 @@ model Complaint {
   request_confirmation_admin_id  String?
   admin_approved_confirmation_at DateTime?
   admin_rejected_confirmation_at DateTime?
-  buyer_deadline_input_shipment  DateTime?
   seller_confirm_deadline        DateTime?
   seller_confirmed_return_at     DateTime?
+
+  // Deadline input shipment
+  buyer_deadline_input_shipment  DateTime?
+  canceled_by_buyer_at           DateTime?
 
   // Waktu admin merespons komplain
   admin_decision     String? // "approved" | "rejected"

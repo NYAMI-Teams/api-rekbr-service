@@ -1,6 +1,7 @@
 import throwError from "../../utils/throwError.js";
 import complaintRepo from "../../repositories/complaint.repository.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
+import { scheduleAutoCompleteConfirmation } from "../../jobs/complaint.scheduler.js";
 
 const getAllComplaintList = async (type, status) => {
   const filters = {};
@@ -69,6 +70,12 @@ const responseComplaint = async (id, action, adminId) => {
       action === "approve"
         ? "awaiting_seller_confirmation"
         : "return_in_transit";
+
+    let deadline = null;
+    if (action === "approve") {
+      deadline = new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
+      await scheduleAutoCompleteConfirmation(id, deadline);
+    }
 
     return await complaintRepo.updateComplaint(id, {
       status,

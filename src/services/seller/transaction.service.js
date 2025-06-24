@@ -6,6 +6,7 @@ import digitalStorageService from "../digital-storage.service.js";
 import userService from "../user.service.js";
 import { transactionQueue } from "../../queues/transaction.queue.js";
 import { scheduleAutoCancelTransaction } from "../../jobs/transaction.scheduler.js";
+import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -231,7 +232,10 @@ const generateTransaction = async ({
 
   // Validate seller and buyer IDs
   if (buyer_id === seller_id) {
-    throwError("Transaksi tidak dapat dibuat antara penjual dan pembeli yang sama", 400);
+    throwError(
+      "Transaksi tidak dapat dibuat antara penjual dan pembeli yang sama",
+      400
+    );
   }
 
   // plt fee, insurance fee, dan total amount are hardcoded for simplicity
@@ -329,7 +333,7 @@ const inputShipment = async (
   });
 
   await transactionRepo.updateStatusToShipped(transactionId);
-  await transactionQueue.remove(`shipment-cancel:${transactionId}`);
+  await removeJobIfExists(transactionQueue, `shipment-cancel:${transactionId}`);
 
   return { success: true };
 };

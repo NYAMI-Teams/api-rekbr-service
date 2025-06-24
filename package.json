@@ -4,9 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js",
-    "worker": "node src/workers/transaction.worker.js"
+    "worker:transaction": "node src/workers/transaction.worker.js",
+    "worker:complaint": "node src/workers/complaint.worker.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

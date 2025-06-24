@@ -3,6 +3,7 @@ import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import { transactionQueue } from "../../queues/transaction.queue.js";
 import { scheduleAutoCancelShipment } from "../../jobs/transaction.scheduler.js";
+import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
 
 const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   const txn = await transactionRepo.getTransactionDetailByBuyer(
@@ -126,7 +127,7 @@ const simulatePayment = async (transactionId, buyerId) => {
   if (updated.count === 0)
     throwError("Transaksi tidak ditemukan atau bukan milik Anda", 404);
 
-  await transactionQueue.remove(`cancel:${transactionId}`);
+  await removeJobIfExists(transactionQueue, `cancel:${transactionId}`);
 
   await scheduleAutoCancelShipment(transactionId, shipmentDeadline);
   console.log("🕒 Jadwal shipment deadline:", shipmentDeadline.toISOString());
@@ -170,7 +171,7 @@ const confirmReceived = async (transactionId, buyerId) => {
   }
 
   // Hapus job auto-complete agar tidak dijalankan jika buyer sudah confirm
-  await transactionQueue.remove(`auto-complete:${transactionId}`);
+  await removeJobIfExists(transactionQueue, `auto-complete:${transactionId}`);
 
   return {
     success: true,
