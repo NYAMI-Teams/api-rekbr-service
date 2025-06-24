@@ -82,6 +82,20 @@ export default router;
  *           items:
  *             type: string
  *           example: ["pending_payment", "waiting_shipment"]
+ *       - name: offset
+ *         in: query
+ *         required: false
+ *         description: Offset untuk paginasi (default 0)
+ *         schema:
+ *           type: integer
+ *           example: 0
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: Jumlah data per halaman (default 10)
+ *         schema:
+ *           type: integer
+ *           example: 10
  *     responses:
  *       200:
  *         description: List transaksi buyer berhasil diambil
@@ -237,6 +251,21 @@ export default router;
  *         buyerConfirmedAt:
  *           type: string
  *           format: date-time
+ *         cancelledAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         cancelledBy:
+ *           type: string
+ *           nullable: true
+ *         cancelledReason:
+ *           type: string
+ *           nullable: true
+ *         complaint:
+ *           type: array
+ *           nullable: true
+ *           items:
+ *             $ref: '#/components/schemas/Complaint'
  *         currentTimestamp:
  *           type: string
  *           format: date-time
@@ -294,4 +323,107 @@ export default router;
  *               format: date-time
  *             adminEmail:
  *               type: string
+ *         complaint:
+ *           $ref: '#/components/schemas/Complaint'
+ *           nullable: true
+ *         buyerConfirmDeadline:
+ *           type: string
+ *           format: date-time
+ *         buyerConfirmedAt:
+ *           type: string
+ *           format: date-time
+ *         cancelledAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         cancelledBy:
+ *           type: string
+ *           nullable: true
+ *         cancelledReason:
+ *           type: string
+ *           nullable: true
+ *
+ *     Complaint:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         transactionId:
+ *           type: string
+ *         buyerId:
+ *           type: string
+ *         type:
+ *           type: string
+ *         status:
+ *           type: string
+ *         buyerReason:
+ *           type: string
+ *           nullable: true
+ *         buyerEvidenceUrls:
+ *           type: array
+ *           items:
+ *             type: string
+ *           nullable: true
+ *         sellerResponseReason:
+ *           type: string
+ *           nullable: true
+ *         sellerEvidenceUrls:
+ *           type: array
+ *           items:
+ *             type: string
+ *           nullable: true
+ *         buyerRequestedConfirmationAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         buyerRequestedConfirmationReason:
+ *           type: string
+ *           nullable: true
+ *         buyerRequestedConfirmationEvidenceUrls:
+ *           type: array
+ *           items:
+ *             type: string
+ *           nullable: true
+ *         requestConfirmationStatus:
+ *           type: string
+ *           nullable: true
+ *         requestConfirmationAdminId:
+ *           type: string
+ *           nullable: true
+ *         sellerConfirmDeadline:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         resolvedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         returnShipment:
+ *           type: object
+ *           nullable: true
+ *           properties:
+ *             id:
+ *               type: string
+ *             trackingNumber:
+ *               type: string
+ *             courierName:
+ *               type: string
+ *               nullable: true
+ *             shipmentDate:
+ *               type: string
+ *               format: date-time
+ *               nullable: true
+ *             receivedDate:
+ *               type: string
+ *               format: date-time
+ *               nullable: true
+ *         returnShipmentTrackingNumber:
+ *           type: string
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  */

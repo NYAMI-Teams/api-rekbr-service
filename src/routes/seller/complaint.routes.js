@@ -223,3 +223,210 @@ export default router;
  *                   type: string
  *                   example: "Gagal memperbarui status penerimaan barang"
  */
+
+/**
+ * @swagger
+ * /api/seller/complaints:
+ *   get:
+ *     summary: Mendapatkan daftar komplain milik seller
+ *     tags: [SellerComplaint]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Offset untuk paginasi
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Limit jumlah data
+ *     responses:
+ *       200:
+ *         description: Daftar komplain berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Daftar komplain berhasil diambil"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       buyerDeadlineInputShipment:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                       sellerConfirmDeadline:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                       returnShipment:
+ *                         type: object
+ *                         nullable: true
+ *                         properties:
+ *                           trackingNumber:
+ *                             type: string
+ *                             nullable: true
+ *                           courierName:
+ *                             type: string
+ *                             nullable: true
+ *                       transaction:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           transactionCode:
+ *                             type: string
+ *                           itemName:
+ *                             type: string
+ *                           totalAmount:
+ *                             type: number
+ *                           status:
+ *                             type: string
+ *                           buyerEmail:
+ *                             type: string
+ *                             nullable: true
+ *                           shipment:
+ *                             type: object
+ *                             properties:
+ *                               trackingNumber:
+ *                                 type: string
+ *                                 nullable: true
+ *                               courier:
+ *                                 type: string
+ *                                 nullable: true
+ *       401:
+ *         description: Tidak terautentikasi
+ *       500:
+ *         description: Terjadi kesalahan pada server
+ */
+
+/**
+ * @swagger
+ * /api/seller/complaints/{complaintId}:
+ *   get:
+ *     summary: Mendapatkan detail komplain milik seller
+ *     tags: [SellerComplaint]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: complaintId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID komplain
+ *     responses:
+ *       200:
+ *         description: Detail komplain berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Detail komplain berhasil diambil"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                     type:
+ *                       type: string
+ *                     buyer_reason:
+ *                       type: string
+ *                       nullable: true
+ *                     buyer_evidence_urls:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       nullable: true
+ *                     seller_response_reason:
+ *                       type: string
+ *                       nullable: true
+ *                     seller_evidence_urls:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       nullable: true
+ *                     seller_decision:
+ *                       type: string
+ *                       nullable: true
+ *                     admin_decision:
+ *                       type: string
+ *                       nullable: true
+ *                     buyer_deadline_input_shipment:
+ *                       type: string
+ *                       format: date-time
+ *                       nullable: true
+ *                     canceled_by_buyer_at:
+ *                       type: string
+ *                       format: date-time
+ *                       nullable: true
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                     updated_at:
+ *                       type: string
+ *                       format: date-time
+ *                     timeline:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                     transaction:
+ *                       type: object
+ *                       properties:
+ *                         transactionCode:
+ *                           type: string
+ *                         itemName:
+ *                           type: string
+ *                         totalAmount:
+ *                           type: number
+ *                         virtualAccount:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         buyerEmail:
+ *                           type: string
+ *                           nullable: true
+ *                         courier:
+ *                           type: object
+ *                           properties:
+ *                             name:
+ *                               type: string
+ *                               nullable: true
+ *                         trackingNumber:
+ *                           type: string
+ *                           nullable: true
+ *       401:
+ *         description: Tidak terautentikasi
+ *       404:
+ *         description: Komplain tidak ditemukan
+ *       500:
+ *         description: Terjadi kesalahan pada server
+ */

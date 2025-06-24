@@ -216,16 +216,21 @@ export default router;
  *                       type: boolean
  *                     status:
  *                       type: string
+ *                       nullable: true
  *                     evidenceUrl:
  *                       type: string
+ *                       nullable: true
  *                     requestedAt:
  *                       type: string
  *                       format: date-time
+ *                       nullable: true
  *                     resolvedAt:
  *                       type: string
  *                       format: date-time
+ *                       nullable: true
  *                     adminEmail:
  *                       type: string
+ *                       nullable: true
  *                 buyerConfirmDeadline:
  *                   type: string
  *                   format: date-time
