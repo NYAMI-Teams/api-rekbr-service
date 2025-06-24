@@ -23,8 +23,8 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
               courier: true,
             },
           },
-        }
-      }
+        },
+      },
     },
   });
 };
@@ -52,8 +52,8 @@ const getTransactionDetailBySeller = async (transactionId, sellerId) => {
               courier: true,
             },
           },
-        }
-      }
+        },
+      },
     },
   });
 };
@@ -232,7 +232,12 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
   });
 };
 
-const getTransactionListForSeller = async (sellerId, statusArray) => {
+const getTransactionListForSeller = async (
+  sellerId,
+  statusArray,
+  offset,
+  limit
+) => {
   return await prisma.transaction.findMany({
     where: {
       seller_id: sellerId,
@@ -261,9 +266,11 @@ const getTransactionListForSeller = async (sellerId, statusArray) => {
               courier: true,
             },
           },
-        }
-      }
+        },
+      },
     },
+    skip: offset || 0,
+    take: limit || 100,
   });
 };
 
@@ -326,7 +333,12 @@ const updateTransactionBuyerConfirmDeadline = async (
   });
 };
 
-const getTransactionListForBuyer = async (buyerId, statusArray) => {
+const getTransactionListForBuyer = async (
+  buyerId,
+  statusArray,
+  offset,
+  limit
+) => {
   return await prisma.transaction.findMany({
     where: {
       buyer_id: buyerId,
@@ -355,9 +367,11 @@ const getTransactionListForBuyer = async (buyerId, statusArray) => {
               courier: true,
             },
           },
-        }
-      }
+        },
+      },
     },
+    skip: offset || 0,
+    take: limit || 100,
   });
 };
 

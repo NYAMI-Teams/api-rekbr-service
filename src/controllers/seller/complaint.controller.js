@@ -46,7 +46,12 @@ const patchSellerItemReceive = async (req, res) => {
 
 const getComplaintListBySeller = async (req, res) => {
   const sellerId = req.user.id;
-  const complaints = await complaintService.getComplaintListBySeller(sellerId);
+  const { offset, limit } = req.query;
+  const complaints = await complaintService.getComplaintListBySeller(
+    sellerId,
+    parseInt(offset),
+    parseInt(limit)
+  );
   return resSuccess(res, 200, "Daftar komplain berhasil diambil", complaints);
 };
 

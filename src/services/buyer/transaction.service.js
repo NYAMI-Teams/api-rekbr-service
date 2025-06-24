@@ -52,37 +52,43 @@ const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
           adminEmail: fr.admin?.email || null,
         }
       : { requested: false, status: null, requestedAt: null, resolvedAt: null },
-    Complaint: txn.Complaint.length > 0
-    ? txn.Complaint.map((c) => ({
-        id: c.id,
-        transactionId: c.transaction_id,
-        buyerId: c.buyer_id,
-        type: c.type,
-        status: c.status,
-        buyerReason: c.buyer_reason,
-        buyerEvidenceUrls: c.buyer_evidence_urls,
-        sellerResponseReason: c.seller_response_reason,
-        sellerEvidenceUrls: c.seller_evidence_urls,
-        buyerRequestedConfirmationAt: c.buyer_requested_confirmation_at,
-        buyerRequestedConfirmationReason: c.buyer_requested_confirmation_reason,
-        buyerRequestedConfirmationEvidenceUrls: c.buyer_requested_confirmation_evidence_urls,
-        requestConfirmationStatus: c.request_confirmation_status,
-        requestConfirmationAdminId: c.request_confirmation_admin_id,
-        sellerConfirmDeadline: c.seller_confirm_deadline,
-        resolvedAt: c.resolved_at,
-        returnShipment: c.return_shipment
-        ? {
-          id: c.return_shipment.id,
-          trackingNumber: c.return_shipment.tracking_number,
-          courierName: c.return_shipment.courier?.name || null,
-          shipmentDate: c.return_shipment.shipment_date?.toISOString() || null,
-          receivedDate: c.return_shipment.received_date?.toISOString() || null,
-        } : null,
-        returnShipmentTrackingNumber: c.return_shipment_tracking_number,
-        createdAt: c.created_at,
-        updatedAt: c.updated_at,
-      }))
-    : null,
+    Complaint:
+      txn.Complaint.length > 0
+        ? txn.Complaint.map((c) => ({
+            id: c.id,
+            transactionId: c.transaction_id,
+            buyerId: c.buyer_id,
+            type: c.type,
+            status: c.status,
+            buyerReason: c.buyer_reason,
+            buyerEvidenceUrls: c.buyer_evidence_urls,
+            sellerResponseReason: c.seller_response_reason,
+            sellerEvidenceUrls: c.seller_evidence_urls,
+            buyerRequestedConfirmationAt: c.buyer_requested_confirmation_at,
+            buyerRequestedConfirmationReason:
+              c.buyer_requested_confirmation_reason,
+            buyerRequestedConfirmationEvidenceUrls:
+              c.buyer_requested_confirmation_evidence_urls,
+            requestConfirmationStatus: c.request_confirmation_status,
+            requestConfirmationAdminId: c.request_confirmation_admin_id,
+            sellerConfirmDeadline: c.seller_confirm_deadline,
+            resolvedAt: c.resolved_at,
+            returnShipment: c.return_shipment
+              ? {
+                  id: c.return_shipment.id,
+                  trackingNumber: c.return_shipment.tracking_number,
+                  courierName: c.return_shipment.courier?.name || null,
+                  shipmentDate:
+                    c.return_shipment.shipment_date?.toISOString() || null,
+                  receivedDate:
+                    c.return_shipment.received_date?.toISOString() || null,
+                }
+              : null,
+            returnShipmentTrackingNumber: c.return_shipment_tracking_number,
+            createdAt: c.created_at,
+            updatedAt: c.updated_at,
+          }))
+        : null,
     buyerConfirmDeadline: txn.buyer_confirm_deadline || null,
     buyerConfirmedAt: txn.confirmed_at || null,
     currentTimestamp: new Date().toISOString(),
@@ -143,10 +149,17 @@ const confirmReceived = async (transactionId, buyerId) => {
   };
 };
 
-const getTransactionListByBuyer = async (buyerId, statusArray) => {
+const getTransactionListByBuyer = async (
+  buyerId,
+  statusArray,
+  offset,
+  limit
+) => {
   const txn = await transactionRepo.getTransactionListForBuyer(
     buyerId,
-    statusArray
+    statusArray,
+    offset,
+    limit
   );
   // Return empty array if no transactions (no throw)
   if (!txn || txn.length === 0) {
@@ -160,7 +173,7 @@ const getTransactionListByBuyer = async (buyerId, statusArray) => {
           txn.id
         );
 
-        const latestComplaint = txn.Complaint?.[0] || null;
+      const latestComplaint = txn.Complaint?.[0] || null;
 
       return {
         id: txn.id,
@@ -209,9 +222,13 @@ const getTransactionListByBuyer = async (buyerId, statusArray) => {
               createdAt: latestComplaint.created_at,
               returnShipment: latestComplaint.return_shipment
                 ? {
-                    trackingNumber: latestComplaint.return_shipment.tracking_number || null,
-                    courierName: latestComplaint.return_shipment.courier?.name || null,
-                    shipmentDate: latestComplaint.return_shipment.shipment_date?.toISOString() || null,
+                    trackingNumber:
+                      latestComplaint.return_shipment.tracking_number || null,
+                    courierName:
+                      latestComplaint.return_shipment.courier?.name || null,
+                    shipmentDate:
+                      latestComplaint.return_shipment.shipment_date?.toISOString() ||
+                      null,
                     createdAt: latestComplaint.return_shipment.created_at,
                   }
                 : null,
