@@ -158,10 +158,11 @@ model Complaint {
   buyer_evidence_urls Json?
 
   // Tanggapan dari seller
-  seller_response_reason String?
-  seller_evidence_urls   Json?
-  seller_decision        String? // "approved" | "rejected"
-  seller_responded_at    DateTime?
+  seller_response_deadline DateTime?
+  seller_response_reason   String?
+  seller_evidence_urls     Json?
+  seller_decision          String? // "approved" | "rejected"
+  seller_responded_at      DateTime?
 
   // Permintaan buyer ke admin agar seller konfirmasi barang retur
   buyer_requested_confirmation_at            DateTime?
@@ -178,8 +179,8 @@ model Complaint {
   seller_confirmed_return_at     DateTime?
 
   // Deadline input shipment
-  buyer_deadline_input_shipment  DateTime?
-  canceled_by_buyer_at           DateTime?
+  buyer_deadline_input_shipment DateTime?
+  canceled_by_buyer_at          DateTime?
 
   // Waktu admin merespons komplain
   admin_decision     String? // "approved" | "rejected"
