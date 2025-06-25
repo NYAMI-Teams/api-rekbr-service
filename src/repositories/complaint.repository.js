@@ -57,6 +57,7 @@ const getComplaintDetail = async (complaintId) => {
       transaction: {
         include: {
           buyer: { select: { email: true } },
+          seller: { select: { email: true } }, // add this
           shipment: { include: { courier: true } },
         },
       },
