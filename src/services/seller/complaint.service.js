@@ -157,6 +157,7 @@ const getComplaintListBySeller = async (sellerId, offset, limit) => {
     seller_response_deadline: complaints.seller_response_deadline,
     buyerDeadlineInputShipment: c.buyer_deadline_input_shipment,
     sellerConfirmDeadline: c.seller_confirm_deadline,
+    sellerResponseDeadline: c.seller_response_deadline,
     returnShipment: c.return_shipment
       ? {
           trackingNumber: c.return_shipment.tracking_number,
