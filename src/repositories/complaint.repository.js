@@ -1,9 +1,13 @@
 import prisma from "../prisma/client.js";
 
 const createComplaint = async (payload) => {
-  return await prisma.complaint.create({ data: payload });
+  return await prisma.complaint.create({
+    data: {
+      ...payload,
+      seller_response_deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 hari ke depan
+    },
+  });
 };
-
 const findComplaintByTransaction = async (transactionId) => {
   return await prisma.complaint.findFirst({
     where: { transaction_id: transactionId },

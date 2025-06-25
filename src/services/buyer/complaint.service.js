@@ -111,6 +111,7 @@ const getComplaintListByBuyer = async (buyerId, offset, limit) => {
     type: c.type,
     status: c.status,
     createdAt: c.created_at,
+    seller_response_deadline: complaint.seller_response_deadline,
     buyerDeadlineInputShipment: c.buyer_deadline_input_shipment,
     sellerConfirmDeadline: c.seller_confirm_deadline,
     returnShipment: c.return_shipment
@@ -183,6 +184,18 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
         timestamp: complaint.created_at,
       });
     }
+
+    if (
+      complaint.seller_response_deadline &&
+      new Date() > new Date(complaint.seller_response_deadline)
+    ) {
+      timeline.push({
+        label: "Seller tidak merespon",
+        message: "Proses dilanjutkan ke admin",
+        timestamp: complaint.seller_response_deadline,
+      });
+    }
+
     if (complaint.seller_responded_at) {
       let message = "";
       if (complaint.seller_decision === "approved") {
@@ -371,6 +384,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
     type: complaint.type,
     buyer_reason: complaint.buyer_reason,
     buyer_evidence_urls: complaint.buyer_evidence_urls,
+    seller_response_deadline: complaint.seller_response_deadline,
     seller_response_reason: complaint.seller_response_reason,
     seller_evidence_urls: complaint.seller_evidence_urls,
     seller_decision: complaint.seller_decision,
