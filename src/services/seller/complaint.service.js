@@ -49,7 +49,8 @@ const patchSellerResponse = async ({
   // ⏱️ Set deadline jika seller menyetujui retur
   let deadline = null;
   if (sellerDecision === "approved") {
-    deadline = new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
+    deadline = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 days from now
+    // new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
   }
 
   const updatedComplaint = await complaintRepo.sellerResponseUpdate(

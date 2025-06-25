@@ -41,6 +41,10 @@ const createComplaint = async ({
     throwError("Masih ada komplain aktif pada transaksi ini", 400);
   }
 
+  if (type === 'Barang Rusak') {
+    type = "damaged";
+  }
+
   let uploadedUrls = [];
   if (type !== "lost") {
     if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);
