@@ -72,6 +72,7 @@ const patchSellerResponse = async ({
 
 const patchSellerItemReceive = async (complaintId, status, sellerId) => {
   const existingComplaint = await complaintRepo.getComplaintDetail(complaintId);
+
   if (
     !existingComplaint ||
     existingComplaint.transaction.seller_id !== sellerId
@@ -79,6 +80,7 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
   }
 
+  // Check if complaint already completed or rejected
   if (
     ["completed", "rejected_by_admin", "canceled_by_buyer"].includes(
       existingComplaint.status
@@ -87,9 +89,13 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     throwError("Komplain sudah selesai atau tidak dapat diproses", 400);
   }
 
+  // Safe check for confirmation_status
+  const confirmationStatus = existingComplaint.request_confirmation_status
+    ? existingComplaint.request_confirmation_status.toLowerCase()
+    : "";
+
   if (
-    existingComplaint.request_confirmation_status?.toLowerCase() !==
-      "approved" ||
+    confirmationStatus !== "approved" ||
     existingComplaint.status !== "awaiting_seller_confirmation"
   ) {
     throwError("Komplain belum disetujui admin atau status tidak sesuai", 400);
@@ -100,6 +106,7 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
   }
 
   const transactionId = existingComplaint.transaction_id;
+
   const txnDetail = await transactionRepo.getTransactionDetailBySeller(
     transactionId,
     sellerId
@@ -135,6 +142,7 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     };
   });
 
+  // Clear any remaining queue job
   await removeJobIfExists(
     complaintQueue,
     `confirm-return-deadline:${complaintId}`
