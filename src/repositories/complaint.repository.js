@@ -173,12 +173,10 @@ const getAllComplaintList = async (filters = {}) => {
   return await prisma.complaint.findMany({
     where: filters,
     orderBy: { created_at: "desc" },
-    select: {
-      id: true,
-      type: true,
-      status: true,
-      created_at: true,
-      buyer: { select: { email: true } },
+    include: {
+      buyer: { 
+        select: { email: true } 
+      },
       transaction: {
         select: {
           status: true,
@@ -191,6 +189,15 @@ const getAllComplaintList = async (filters = {}) => {
               courier: { select: { name: true } },
             },
           },
+        },
+      },
+      return_shipment: {
+        select: {
+          tracking_number: true,
+          courier: { select: { name: true } },
+          shipment_date: true,
+          received_date: true,
+          photo_url: true,
         },
       },
     },

@@ -213,6 +213,7 @@ const getTransactionListByBuyer = async (
         sellerEmail: txn.seller?.email || "-",
         virtualAccount: txn.virtual_account_number,
         status: txn.status,
+        createdAt: txn.created_at.toISOString(),
         paymentDeadline: txn.payment_deadline,
         shipmentDeadline: txn.shipment_deadline,
         currentTimestamp: new Date().toISOString(),
