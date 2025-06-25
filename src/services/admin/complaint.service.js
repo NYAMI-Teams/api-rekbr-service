@@ -29,13 +29,15 @@ const responseComplaint = async (id, action, adminId) => {
     throwError("Pengaduan tidak ditemukan", 404);
   }
 
+    // 1. Komplain LOST - response admin
+
   if (complaint.status === "under_investigation") {
     if (!complaint.transaction) {
       throwError("Transaksi untuk pengaduan ini tidak ditemukan", 404);
     }
 
     const status =
-      action === "approve" ? "approved_by_admin" : "rejected_by_admin";
+      action === "approve" ? "completed" : "rejected_by_admin";
 
     // run in Prisma transaction
     return await prisma.$transaction(async (tx) => {
