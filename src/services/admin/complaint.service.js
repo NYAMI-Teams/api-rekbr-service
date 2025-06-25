@@ -99,7 +99,7 @@ const responseComplaint = async (id, action, adminId) => {
     return await prisma.$transaction(async (tx) => {
       if (action === "approve") {
         deadline = new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
-        await scheduleAutoCompleteConfirmation(id, deadline);
+        await scheduleAutoCompleteConfirmation(id, deadline.getTime());
       }
 
       return await complaintRepo.updateComplaint(
