@@ -44,7 +44,7 @@ const createComplaint = async ({
   if (type.toLowerCase() === 'barang rusak') {
     type = "damaged";
   }
-  
+
   let uploadedUrls = [];
   if (type !== "lost") {
     if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);
@@ -191,6 +191,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
 
     if (
       complaint.seller_response_deadline &&
+      !isNaN(new Date(complaint.seller_response_deadline)) &&
       new Date() > new Date(complaint.seller_response_deadline)
     ) {
       timeline.push({
@@ -249,6 +250,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
 
     // Timeline pengembalian barang oleh buyer (input resi)
     if (
+      complaint.return_shipment &&
       complaint.return_shipment.tracking_number &&
       complaint.return_shipment.courier_id
     ) {
@@ -256,7 +258,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
         label: "Pengembalian Barang oleh Buyer",
         message: "Buyer telah menginput resi pengembalian barang.",
         trackingNumber: complaint.return_shipment.tracking_number,
-        courier: complaint.return_shipment.courier.name,
+        courier: complaint.return_shipment.courier?.name || null,
         timestamp: complaint.return_shipment.shipment_date,
       });
     }
@@ -427,13 +429,13 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
       },
     },
     returnShipment: complaint.return_shipment
-      ? {
-          trackingNumber: complaint.return_shipment.tracking_number,
-          courierName: complaint.return_shipment.courier?.name || null,
-          shipmentDate: complaint.return_shipment.shipment_date,
-          photoUrl: complaint.return_shipment.photo_url || null,
-        }
-      : null,
+    ? {
+        trackingNumber: complaint.return_shipment.tracking_number,
+        courierName: complaint.return_shipment.courier?.name || null,
+        shipmentDate: complaint.return_shipment.shipment_date,
+        photoUrl: complaint.return_shipment.photo_url || null,
+      }
+    : null,
   };
 };
 
