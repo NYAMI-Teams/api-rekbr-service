@@ -248,6 +248,7 @@ const getComplaintDetailBySeller = async (complaintId, sellerId) => {
     }
     if (
       complaint.seller_response_deadline &&
+      !isNaN(new Date(complaint.seller_response_deadline)) &&
       new Date() > new Date(complaint.seller_response_deadline)
     ) {
       timeline.push({
