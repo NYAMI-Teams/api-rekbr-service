@@ -173,12 +173,10 @@ const getAllComplaintList = async (filters = {}) => {
   return await prisma.complaint.findMany({
     where: filters,
     orderBy: { created_at: "desc" },
-    select: {
-      id: true,
-      type: true,
-      status: true,
-      created_at: true,
-      buyer: { select: { email: true } },
+    include: {
+      buyer: { 
+        select: { email: true } 
+      },
       transaction: {
         select: {
           status: true,
@@ -193,6 +191,15 @@ const getAllComplaintList = async (filters = {}) => {
           },
         },
       },
+      return_shipment: {
+        select: {
+          tracking_number: true,
+          courier: { select: { name: true } },
+          shipment_date: true,
+          received_date: true,
+          photo_url: true,
+        },
+      },
     },
   });
 };
@@ -201,8 +208,26 @@ const getComplaintById = async (complaintId) => {
   return await prisma.complaint.findUnique({
     where: { id: complaintId },
     include: {
-      transaction: { include: { shipment: true } },
-      return_shipment: true,
+      transaction: {
+        include: {
+          buyer: {
+            select: { email: true },
+          },
+          seller: {
+            select: { email: true },
+          },
+          shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        },
+      },
+      return_shipment: {
+        include: {
+          courier: true,
+        },
+      },
     },
   });
 };
