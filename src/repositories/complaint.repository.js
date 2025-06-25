@@ -201,8 +201,26 @@ const getComplaintById = async (complaintId) => {
   return await prisma.complaint.findUnique({
     where: { id: complaintId },
     include: {
-      transaction: { include: { shipment: true } },
-      return_shipment: true,
+      transaction: {
+        include: {
+          buyer: {
+            select: { email: true },
+          },
+          seller: {
+            select: { email: true },
+          },
+          shipment: {
+            include: {
+              courier: true,
+            },
+          },
+        },
+      },
+      return_shipment: {
+        include: {
+          courier: true,
+        },
+      },
     },
   });
 };
