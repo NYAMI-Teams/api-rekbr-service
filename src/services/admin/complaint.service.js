@@ -29,15 +29,14 @@ const responseComplaint = async (id, action, adminId) => {
     throwError("Pengaduan tidak ditemukan", 404);
   }
 
-    // 1. Komplain LOST - response admin
+  // 1. Komplain LOST - response admin
 
   if (complaint.status === "under_investigation") {
     if (!complaint.transaction) {
       throwError("Transaksi untuk pengaduan ini tidak ditemukan", 404);
     }
 
-    const status =
-      action === "approve" ? "completed" : "rejected_by_admin";
+    const status = action === "approve" ? "completed" : "rejected_by_admin";
 
     // run in Prisma transaction
     return await prisma.$transaction(async (tx) => {
@@ -48,7 +47,10 @@ const responseComplaint = async (id, action, adminId) => {
           tx
         );
       } else {
-        await transactionRepo.updateStatusToShipped(complaint.transaction.id, tx);
+        await transactionRepo.updateStatusToShipped(
+          complaint.transaction.id,
+          tx
+        );
       }
 
       return await complaintRepo.updateComplaint(
@@ -71,7 +73,10 @@ const responseComplaint = async (id, action, adminId) => {
 
     return await prisma.$transaction(async (tx) => {
       if (action === "reject") {
-        await transactionRepo.updateStatusToShipped(complaint.transaction.id, tx);
+        await transactionRepo.updateStatusToShipped(
+          complaint.transaction.id,
+          tx
+        );
       }
 
       return await complaintRepo.updateComplaint(
@@ -80,7 +85,9 @@ const responseComplaint = async (id, action, adminId) => {
           status,
           admin_responded_at: new Date(),
           admin_decision: action === "approve" ? "approved" : "rejected",
-          buyer_deadline_input_shipment: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          buyer_deadline_input_shipment: new Date(
+            Date.now() + 24 * 60 * 60 * 1000
+          ),
         },
         tx
       );
@@ -109,13 +116,11 @@ const responseComplaint = async (id, action, adminId) => {
           request_confirmation_status:
             action === "approve" ? "approved" : "rejected",
           request_confirmation_admin_id: adminId,
-          admin_responded_at: new Date(),
           admin_approved_confirmation_at:
             action === "approve" ? new Date() : undefined,
           admin_rejected_confirmation_at:
             action === "reject" ? new Date() : undefined,
-          seller_confirm_deadline:
-            action === "approve" ? deadline : undefined,
+          seller_confirm_deadline: action === "approve" ? deadline : undefined,
         },
         tx
       );
