@@ -10,6 +10,7 @@ import sellerComplaintRoutes from "./seller/complaint.routes.js";
 import adminComplaintRoutes from "./admin/complaint.routes.js";
 import authentication from "../middlewares/authentication.js";
 import authorization from "../middlewares/authorization.js";
+import pushTokenRoutes from "./pushToken.routes.js";
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.get("/", (req, res) => {
 
 router.use("/bank", bankRoutes);
 router.use("/user", userRoutes);
+router.use("/push-token", pushTokenRoutes);
 router.use("/buyer", buyerTransactionRoutes);
 router.use("/buyer", buyerComplaintRoutes);
 router.use("/seller", sellerTransactionRoutes);

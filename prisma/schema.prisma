@@ -31,6 +31,8 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  push_token String?
+
   bankAccounts           BankAccount[]
   transactions_seller    Transaction[] @relation("SellerTransactions")
   transactions_buyer     Transaction[] @relation("BuyerTransactions")

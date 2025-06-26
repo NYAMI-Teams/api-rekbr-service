@@ -7,6 +7,7 @@ import userService from "../user.service.js";
 import { transactionQueue } from "../../queues/transaction.queue.js";
 import { scheduleAutoCancelTransaction } from "../../jobs/transaction.scheduler.js";
 import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
+import { sendPushNotification } from "../../utils/sendPushNotification.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
@@ -230,7 +231,6 @@ const generateTransaction = async ({
   const buyer = await userService.checkEmail({ email });
   const buyer_id = buyer.id;
 
-  // Validate seller and buyer IDs
   if (buyer_id === seller_id) {
     throwError(
       "Transaksi tidak dapat dibuat antara penjual dan pembeli yang sama",
@@ -238,7 +238,7 @@ const generateTransaction = async ({
     );
   }
 
-  // plt fee, insurance fee, dan total amount are hardcoded for simplicity
+  // Platform fee logic
   let platform_fee = 0;
   if (item_price >= 10000 && item_price < 499999) {
     platform_fee = 5000;
@@ -250,7 +250,7 @@ const generateTransaction = async ({
     throwError("Harga item tidak valid untuk transaksi", 400);
   }
 
-  // Insurance fee calculation
+  // Insurance fee
   const insurance =
     typeof isInsurance === "string"
       ? isInsurance.toLowerCase() === "true"
@@ -258,29 +258,31 @@ const generateTransaction = async ({
 
   const insurance_fee = insurance ? 0.002 * item_price : 0;
 
-  // Total amount calculation
+  // Total amount
   const total_amount = item_price + platform_fee + insurance_fee;
 
-  //payment deadline also hardocdeed
+  // Deadlines
   const payment_deadline = new Date(Date.now() + 2 * 60 * 1000);
   const created_at = new Date(Date.now());
 
-  //status is hardcoded to pending_payment
+  // Status awal
   const status = "pending_payment";
   const virtual_account_number = generateVirtualAccountNumber();
+  const transaction_code = generateTransactionCode();
 
   const existingTransaction = await transactionRepo.findActiveTransaction({
     seller_id,
     buyer_id,
   });
+
   if (existingTransaction) {
     throwError(
-      "Transaksi aktif sudah ada untuk seller dan buyer ini dengan ID ${existingTransaction.transactionCode}",
+      `Transaksi aktif sudah ada untuk seller dan buyer ini dengan kode transaksi ${existingTransaction.transactionCode}`,
       400
     );
   }
-  const transaction_code = generateTransactionCode();
 
+  // Simpan transaksi ke DB
   const newTransaction = await transactionRepo.createTransaction({
     transaction_code,
     seller_id,
@@ -297,7 +299,22 @@ const generateTransaction = async ({
     created_at,
   });
 
+  // Jadwalkan auto-cancel
   await scheduleAutoCancelTransaction(newTransaction.id, payment_deadline);
+
+  // 🔔 Kirim notifikasi ke buyer
+  const buyerPushToken = await pushTokenService.getPushTokenByUserId(buyer_id);
+
+  if (buyerPushToken) {
+    await sendPushNotification(buyerPushToken, {
+      title: "Transaksi Baru Dibuat",
+      body: `Seller membuat transaksi untuk barang: ${item_name}`,
+      data: {
+        transactionId: newTransaction.id,
+        screen: "TransactionDetail",
+      },
+    });
+  }
 
   return newTransaction;
 };
