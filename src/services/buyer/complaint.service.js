@@ -505,14 +505,12 @@ const requestBuyerConfirmation = async ({
     throwError("Komplain belum dalam proses pengembalian", 400);
   }
 
-  let uploadedUrl = null;
-  if (file) {
-    uploadedUrl = await digitalStorageService.uploadToSpaces(
+
+ let  uploadedUrl = await digitalStorageService.uploadToSpaces(
       file.buffer,
       file.originalname,
       file.mimetype
     );
-  }
 
   return await complaintRepo.updateComplaintWithBuyerConfirmRequest(
     complaintId,
