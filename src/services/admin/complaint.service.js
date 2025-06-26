@@ -72,11 +72,17 @@ const responseComplaint = async (id, action, adminId) => {
       action === "approve" ? "return_requested" : "rejected_by_admin";
 
     return await prisma.$transaction(async (tx) => {
+      const deadline = new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
+
       if (action === "reject") {
         await transactionRepo.updateStatusToShipped(
           complaint.transaction.id,
           tx
         );
+      }
+
+      if (action === "approve") {
+        await scheduleAutoCompleteConfirmation(id, deadline.getTime());
       }
 
       return await complaintRepo.updateComplaint(
@@ -85,10 +91,8 @@ const responseComplaint = async (id, action, adminId) => {
           status,
           admin_responded_at: new Date(),
           admin_decision: action === "approve" ? "approved" : "rejected",
-          buyer_deadline_input_shipment: new Date(
-            Date.now() + 2 * 60 * 1000 // 2 minutes
-            // + 24 * 60 * 60 * 1000
-          ),
+          buyer_deadline_input_shipment:
+            action === "approve" ? deadline : undefined,
         },
         tx
       );
