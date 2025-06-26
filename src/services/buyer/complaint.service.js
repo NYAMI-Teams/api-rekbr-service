@@ -41,6 +41,10 @@ const createComplaint = async ({
     throwError("Masih ada komplain aktif pada transaksi ini", 400);
   }
 
+  if (type.toLowerCase() === 'barang rusak') {
+    type = "damaged";
+  }
+
   let uploadedUrls = [];
   if (type !== "lost") {
     if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);
@@ -111,9 +115,10 @@ const getComplaintListByBuyer = async (buyerId, offset, limit) => {
     type: c.type,
     status: c.status,
     createdAt: c.created_at,
-    seller_response_deadline: complaint.seller_response_deadline,
+    seller_response_deadline: complaints.seller_response_deadline,
     buyerDeadlineInputShipment: c.buyer_deadline_input_shipment,
     sellerConfirmDeadline: c.seller_confirm_deadline,
+    sellerResponseDeadline: c.seller_response_deadline,
     returnShipment: c.return_shipment
       ? {
           trackingNumber: c.return_shipment.tracking_number,
@@ -187,6 +192,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
 
     if (
       complaint.seller_response_deadline &&
+      !isNaN(new Date(complaint.seller_response_deadline)) &&
       new Date() > new Date(complaint.seller_response_deadline)
     ) {
       timeline.push({
@@ -245,6 +251,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
 
     // Timeline pengembalian barang oleh buyer (input resi)
     if (
+      complaint.return_shipment &&
       complaint.return_shipment.tracking_number &&
       complaint.return_shipment.courier_id
     ) {
@@ -252,7 +259,7 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
         label: "Pengembalian Barang oleh Buyer",
         message: "Buyer telah menginput resi pengembalian barang.",
         trackingNumber: complaint.return_shipment.tracking_number,
-        courier: complaint.return_shipment.courier.name,
+        courier: complaint.return_shipment.courier?.name || null,
         timestamp: complaint.return_shipment.shipment_date,
       });
     }
@@ -423,13 +430,13 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
       },
     },
     returnShipment: complaint.return_shipment
-      ? {
-          trackingNumber: complaint.return_shipment.tracking_number,
-          courierName: complaint.return_shipment.courier?.name || null,
-          shipmentDate: complaint.return_shipment.shipment_date,
-          photoUrl: complaint.return_shipment.photo_url || null,
-        }
-      : null,
+    ? {
+        trackingNumber: complaint.return_shipment.tracking_number,
+        courierName: complaint.return_shipment.courier?.name || null,
+        shipmentDate: complaint.return_shipment.shipment_date,
+        photoUrl: complaint.return_shipment.photo_url || null,
+      }
+    : null,
   };
 };
 

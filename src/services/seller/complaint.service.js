@@ -49,7 +49,8 @@ const patchSellerResponse = async ({
   // ⏱️ Set deadline jika seller menyetujui retur
   let deadline = null;
   if (sellerDecision === "approved") {
-    deadline = new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
+    deadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // 2 days from now
+    // new Date(Date.now() + 2 * 60 * 1000); // 2 menit dari sekarang
   }
 
   const updatedComplaint = await complaintRepo.sellerResponseUpdate(
@@ -71,6 +72,7 @@ const patchSellerResponse = async ({
 
 const patchSellerItemReceive = async (complaintId, status, sellerId) => {
   const existingComplaint = await complaintRepo.getComplaintDetail(complaintId);
+
   if (
     !existingComplaint ||
     existingComplaint.transaction.seller_id !== sellerId
@@ -78,6 +80,7 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     throwError("Komplain tidak ditemukan atau bukan milik Anda", 404);
   }
 
+  // Check if complaint already completed or rejected
   if (
     ["completed", "rejected_by_admin", "canceled_by_buyer"].includes(
       existingComplaint.status
@@ -86,10 +89,17 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     throwError("Komplain sudah selesai atau tidak dapat diproses", 400);
   }
 
+  // Safe check for confirmation_status
+  const confirmationStatus = existingComplaint.request_confirmation_status
+    ? existingComplaint.request_confirmation_status.toLowerCase()
+    : "";
+
+    console.log("Status:", existingComplaint.status);
+    console.log("Is status valid:", ["awaiting_seller_confirmation", "return_in_transit"].includes(existingComplaint.status));
+    console.log("Confirmation:", confirmationStatus);
+    
   if (
-    existingComplaint.request_confirmation_status?.toLowerCase() !==
-      "approved" ||
-    existingComplaint.status !== "awaiting_seller_confirmation"
+    confirmationStatus !== "approved" && !["awaiting_seller_confirmation", "return_in_transit"].includes(existingComplaint.status)
   ) {
     throwError("Komplain belum disetujui admin atau status tidak sesuai", 400);
   }
@@ -99,6 +109,7 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
   }
 
   const transactionId = existingComplaint.transaction_id;
+
   const txnDetail = await transactionRepo.getTransactionDetailBySeller(
     transactionId,
     sellerId
@@ -134,6 +145,7 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     };
   });
 
+  // Clear any remaining queue job
   await removeJobIfExists(
     complaintQueue,
     `confirm-return-deadline:${complaintId}`
@@ -153,9 +165,10 @@ const getComplaintListBySeller = async (sellerId, offset, limit) => {
     type: c.type,
     status: c.status,
     createdAt: c.created_at,
-    seller_response_deadline: complaint.seller_response_deadline,
+    seller_response_deadline: complaints.seller_response_deadline,
     buyerDeadlineInputShipment: c.buyer_deadline_input_shipment,
     sellerConfirmDeadline: c.seller_confirm_deadline,
+    sellerResponseDeadline: c.seller_response_deadline,
     returnShipment: c.return_shipment
       ? {
           trackingNumber: c.return_shipment.tracking_number,
@@ -238,6 +251,7 @@ const getComplaintDetailBySeller = async (complaintId, sellerId) => {
     }
     if (
       complaint.seller_response_deadline &&
+      !isNaN(new Date(complaint.seller_response_deadline)) &&
       new Date() > new Date(complaint.seller_response_deadline)
     ) {
       timeline.push({
