@@ -8,6 +8,7 @@ import { transactionQueue } from "../../queues/transaction.queue.js";
 import { scheduleAutoCancelTransaction } from "../../jobs/transaction.scheduler.js";
 import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
 import { sendPushNotification } from "../../utils/sendPushNotification.js";
+import pushTokenService from "../pushToken.service.js";
 
 const getTransactionDetailBySeller = async (transactionId, sellerId) => {
   const txn = await transactionRepo.getTransactionDetailBySeller(
