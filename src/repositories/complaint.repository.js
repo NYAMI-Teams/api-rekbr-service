@@ -253,7 +253,7 @@ const updateComplaintWithBuyerConfirmRequest = async (
     data: {
       buyer_requested_confirmation_at: new Date(),
       buyer_requested_confirmation_reason: reason,
-      buyer_requested_confirmation_evidence_urls: [evidenceUrl],
+      buyer_requested_confirmation_evidence_urls: evidenceUrl,
       request_confirmation_status: "pending",
       status: "awaiting_admin_confirmation",
     },
