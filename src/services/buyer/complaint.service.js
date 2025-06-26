@@ -51,7 +51,8 @@ const createComplaint = async ({
   if (complaintCount >= 3) {
     throwError("Maksimal 3 komplain per transaksi", 400);
   }
-
+  console.log("Complaint count for transaction:", complaintCount);
+  
   let uploadedUrls = [];
   if (type !== "lost") {
     if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);
