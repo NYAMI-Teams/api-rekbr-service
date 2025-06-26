@@ -53,7 +53,7 @@ app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 BullBoard: http://localhost:${PORT}/admin/queues`);
   console.log(`📘 Swagger: http://localhost:${PORT}/api-docs`);
