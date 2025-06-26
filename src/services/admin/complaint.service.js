@@ -86,7 +86,8 @@ const responseComplaint = async (id, action, adminId) => {
           admin_responded_at: new Date(),
           admin_decision: action === "approve" ? "approved" : "rejected",
           buyer_deadline_input_shipment: new Date(
-            Date.now() + 24 * 60 * 60 * 1000
+            Date.now() + 2 * 60 * 1000 // 2 minutes
+            // + 24 * 60 * 60 * 1000
           ),
         },
         tx
