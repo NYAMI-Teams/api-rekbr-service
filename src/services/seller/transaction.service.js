@@ -238,7 +238,11 @@ const generateTransaction = async ({
       400
     );
   }
-
+  // Validasi harga item
+  if (item_price < 10000){
+    throwError("Harga item harus minimal Rp 10.000", 400);
+  }
+  
   // Platform fee logic
   let platform_fee = 0;
   if (item_price >= 10000 && item_price < 499999) {
