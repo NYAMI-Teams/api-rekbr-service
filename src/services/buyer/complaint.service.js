@@ -45,6 +45,13 @@ const createComplaint = async ({
     type = "damaged";
   }
 
+  //check number of complaints for this transaction
+  const complaintCount = await complaintRepo.countComplaintsByTransactionId(transactionId);
+
+  if (complaintCount >= 3) {
+    throwError("Maksimal 3 komplain per transaksi", 400);
+  }
+
   let uploadedUrls = [];
   if (type !== "lost") {
     if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);

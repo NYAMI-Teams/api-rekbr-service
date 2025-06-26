@@ -128,6 +128,12 @@ const getComplaintByTransactionId = async (transaction_id) => {
   });
 };
 
+const countComplaintsByTransactionId = async (transactionId) => {
+  return await prisma.complaint.count({
+    where: { transaction_id: transactionId },
+  })
+}
+
 const sellerItemReceiveUpdate = async (complaintId, status, tx) => {
   return await tx.complaint.update({
     where: { id: complaintId },
@@ -279,4 +285,5 @@ export default {
   complaintShipmentReceived,
   updateComplaint,
   getComplaintsBySeller,
+  countComplaintsByTransactionId,
 };
