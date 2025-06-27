@@ -112,14 +112,14 @@ export default router;
  *       - name: offset
  *         in: query
  *         required: false
- *         description: Offset untuk pagination (default: 0)
+ *         description: "Offset untuk pagination (default: 0)"
  *         schema:
  *           type: integer
  *           example: 0
  *       - name: limit
  *         in: query
  *         required: false
- *         description: Jumlah data per halaman (default: 100)
+ *         description: "Jumlah data per halaman (default: 100)"
  *         schema:
  *           type: integer
  *           example: 20
