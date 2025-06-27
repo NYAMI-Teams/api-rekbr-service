@@ -35,7 +35,7 @@ const findComplaintById = async (complaintId) => {
 const getComplaintsByBuyer = async (buyerId, offset, limit) => {
   return await prisma.complaint.findMany({
     where: { buyer_id: buyerId },
-    orderBy: { created_at: "desc" },
+    orderBy: { updated_at: "desc" },
     include: {
       return_shipment: {
         include: {
@@ -77,7 +77,7 @@ const getComplaintDetail = async (complaintId) => {
 const getComplaintsBySeller = async (sellerId, offset, limit) => {
   return await prisma.complaint.findMany({
     where: { transaction: { seller_id: sellerId } },
-    orderBy: { created_at: "desc" },
+    orderBy: { updated_at: "desc" },
     include: {
       transaction: {
         include: {
@@ -183,7 +183,7 @@ const updateReturnShipment = async (complaintId, data) => {
 const getAllComplaintList = async (filters = {}) => {
   return await prisma.complaint.findMany({
     where: filters,
-    orderBy: { created_at: "desc" },
+    orderBy: { updated_at: "desc" },
     include: {
       buyer: { 
         select: { email: true } 
