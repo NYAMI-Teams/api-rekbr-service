@@ -24,7 +24,7 @@ const swaggerOptions = {
     ],
     servers: [
       {
-        url: "https://api.ambisiproperti.com",
+        url: "https://api.rekbr.site",
       },
       {
         url: "http://localhost:3000",

@@ -5,7 +5,7 @@ const generateOtpTemplate = ({ title, description, otpCode }) => {
   <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
     <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
       <div style="background-color: #4F46E5; color: white; padding: 20px; text-align: center;">
-        <h1 style="margin: 0;">Rekbr App</h1>
+        <h1 style="margin: 0;">Rekbr By BNI</h1>
       </div>
       <div style="padding: 30px; color: #333;">
         <h2 style="margin-top: 0;">${title}</h2>
@@ -16,7 +16,7 @@ const generateOtpTemplate = ({ title, description, otpCode }) => {
         <p style="font-size: 14px; color: #666;">Kode ini akan kedaluwarsa dalam 5 menit. Jangan berikan kode ini ke siapa pun.</p>
       </div>
       <div style="background-color: #f9f9f9; padding: 15px; text-align: center; font-size: 12px; color: #aaa;">
-        &copy; ${new Date().getFullYear()} Rekbr App. All rights reserved.
+        &copy; ${new Date().getFullYear()} Rekbr By BNI. All rights reserved.
       </div>
     </div>
   </div>
@@ -38,8 +38,8 @@ const sendOtpEmail = async (to, otpCode, type = "verify") => {
   apiKey.apiKey = process.env.BREVO_API_KEY;
 
   const sender = {
-    email: "noreply@farinojoshua.com", // harus verified di Brevo
-    name: "Rekbr App",
+    email: "otp@rekbr.site",
+    name: "Rekbr By BNI",
   };
 
   const htmlContent = generateOtpTemplate({ title, description, otpCode });
