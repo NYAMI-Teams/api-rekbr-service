@@ -2,6 +2,7 @@ import throwError from "../../utils/throwError.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import { scheduleAutoCompleteTransaction } from "../../jobs/transaction.scheduler.js";
+import { sendPushNotification } from "../../utils/sendPushNotification.js";
 
 const getTransactionDetailByAdmin = async (transactionId) => {
   const txn = await transactionRepo.getTransactionDetailByAdmin(transactionId);
@@ -106,6 +107,21 @@ const updateFundReleaseRequest = async (transactionId, status, adminId) => {
     }
 
     await scheduleAutoCompleteTransaction(transactionId, buyerConfirmDeadline);
+
+    // 🔔 Notifikasi ke buyer bahwa admin menyetujui pencairan dana
+    const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+      txn.transaction.buyer_id
+    );
+    if (buyerPushToken) {
+      sendPushNotification(buyerPushToken, {
+        title: "Konfirmasi Penerimaan Barang",
+        body: `Admin menyetujui pencairan dana untuk transaksi. Harap konfirmasi penerimaan sebelum deadline.`,
+        data: {
+          transactionId: transactionId,
+          screen: "transaction/buyer",
+        },
+      });
+    }
   }
 };
 
