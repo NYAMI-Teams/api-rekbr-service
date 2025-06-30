@@ -6,6 +6,8 @@ import prisma from "../../prisma/client.js";
 import { scheduleAutoCancelComplaint } from "../../jobs/complaint.scheduler.js";
 import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
 import { complaintQueue } from "../../queues/complaint.queue.js";
+import pushTokenService from "../pushToken.service.js";
+import { sendPushNotification } from "../../utils/sendPushNotification.js";
 
 const patchSellerResponse = async ({
   status,
@@ -69,6 +71,23 @@ const patchSellerResponse = async ({
     await scheduleAutoCancelComplaint(complaintId, delay);
   }
 
+  // send push notification to buyer
+  const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+    updatedComplaint.buyer_id
+  );
+  if (buyerPushToken) {
+    sendPushNotification(buyerPushToken, {
+      title: `Respon Komplain dari Seller`,
+      body: `Seller telah ${
+        sellerDecision === "approved" ? "menyetujui" : "menolak"
+      } komplain Anda.`,
+      data: {
+        complaintId: updatedComplaint.id,
+        screen: "complaint/buyer",
+      },
+    });
+  }
+
   return updatedComplaint;
 };
 
@@ -96,12 +115,20 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     ? existingComplaint.request_confirmation_status.toLowerCase()
     : "";
 
-    console.log("Status:", existingComplaint.status);
-    console.log("Is status valid:", ["awaiting_seller_confirmation", "return_in_transit"].includes(existingComplaint.status));
-    console.log("Confirmation:", confirmationStatus);
-    
+  console.log("Status:", existingComplaint.status);
+  console.log(
+    "Is status valid:",
+    ["awaiting_seller_confirmation", "return_in_transit"].includes(
+      existingComplaint.status
+    )
+  );
+  console.log("Confirmation:", confirmationStatus);
+
   if (
-    confirmationStatus !== "approved" && !["awaiting_seller_confirmation", "return_in_transit"].includes(existingComplaint.status)
+    confirmationStatus !== "approved" &&
+    !["awaiting_seller_confirmation", "return_in_transit"].includes(
+      existingComplaint.status
+    )
   ) {
     throwError("Komplain belum disetujui admin atau status tidak sesuai", 400);
   }
@@ -152,6 +179,21 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
     complaintQueue,
     `confirm-return-deadline:${complaintId}`
   );
+
+  // Send push notification to buyer
+  const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+    existingComplaint.buyer_id
+  );
+  if (buyerPushToken) {
+    sendPushNotification(buyerPushToken, {
+      title: `Konfirmasi Penerimaan Barang`,
+      body: `Seller telah mengkonfirmasi penerimaan barang retur untuk komplain Anda.`,
+      data: {
+        complaintId: existingComplaint.id,
+        screen: "complaint/buyer",
+      },
+    });
+  }
 
   return { result };
 };

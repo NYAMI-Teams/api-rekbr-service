@@ -4,6 +4,7 @@ import digitalStorageService from "../../services/digital-storage.service.js";
 import throwError from "../../utils/throwError.js";
 import { complaintQueue } from "../../queues/complaint.queue.js";
 import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
+import { sendPushNotification } from "../../utils/sendPushNotification.js";
 
 const ACTIVE_STATUSES = [
   "waiting_seller_approval",
@@ -41,18 +42,20 @@ const createComplaint = async ({
     throwError("Masih ada komplain aktif pada transaksi ini", 400);
   }
 
-  if (type.toLowerCase() === 'barang rusak') {
+  if (type.toLowerCase() === "barang rusak") {
     type = "damaged";
   }
 
   //check number of complaints for this transaction
-  const complaintCount = await complaintRepo.countComplaintsByTransactionId(transactionId);
+  const complaintCount = await complaintRepo.countComplaintsByTransactionId(
+    transactionId
+  );
 
   if (complaintCount >= 3) {
     throwError("Maksimal 3 komplain per transaksi", 400);
   }
   console.log("Complaint count for transaction:", complaintCount);
-  
+
   let uploadedUrls = [];
   if (type !== "lost") {
     if (!files || files.length === 0) throwError("Bukti wajib diunggah", 400);
@@ -86,6 +89,21 @@ const createComplaint = async ({
     "complain"
   );
 
+  // send notification to seller
+  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+    transaction.seller_id
+  );
+  if (sellerPushToken) {
+    sendPushNotification(sellerPushToken, {
+      title: "Komplain Baru Diajukan",
+      body: `Buyer telah mengajukan komplain untuk transaksi ${transaction.transaction_code}`,
+      data: {
+        complaintId: complaint.id,
+        screen: "complaint/seller",
+      },
+    });
+  }
+
   return complaint;
 };
 
@@ -105,6 +123,21 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
   }
 
   await transactionRepo.updateStatus(complaint.transaction_id, "shipped");
+
+  // send notification to seller
+  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+    complaint.transaction.seller_id
+  );
+  if (sellerPushToken) {
+    sendPushNotification(sellerPushToken, {
+      title: "Komplain Dibatalkan",
+      body: `Buyer telah membatalkan komplain untuk transaksi ${complaint.transaction.transaction_code}`,
+      data: {
+        complaintId: complaint.id,
+        screen: "complaint/seller",
+      },
+    });
+  }
 
   return await complaintRepo.updateComplaintStatus(
     complaintId,
@@ -438,13 +471,13 @@ const getComplaintDetailByBuyer = async (complaintId, buyerId) => {
       },
     },
     returnShipment: complaint.return_shipment
-    ? {
-        trackingNumber: complaint.return_shipment.tracking_number,
-        courierName: complaint.return_shipment.courier?.name || null,
-        shipmentDate: complaint.return_shipment.shipment_date,
-        photoUrl: complaint.return_shipment.photo_url || null,
-      }
-    : null,
+      ? {
+          trackingNumber: complaint.return_shipment.tracking_number,
+          courierName: complaint.return_shipment.courier?.name || null,
+          shipmentDate: complaint.return_shipment.shipment_date,
+          photoUrl: complaint.return_shipment.photo_url || null,
+        }
+      : null,
   };
 };
 
@@ -486,6 +519,21 @@ const submitReturnShipment = async ({
     `cancel-return-shipment:${complaintId}`
   );
 
+  // send notification to seller
+  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+    complaint.transaction.seller_id
+  );
+  if (sellerPushToken) {
+    sendPushNotification(sellerPushToken, {
+      title: "Pengembalian Barang Diajukan",
+      body: `Buyer telah mengajukan pengembalian barang untuk komplain ${complaint.id}`,
+      data: {
+        complaintId: complaint.id,
+        screen: "complaint/seller",
+      },
+    });
+  }
+
   return returnShipment;
 };
 
@@ -505,12 +553,26 @@ const requestBuyerConfirmation = async ({
     throwError("Komplain belum dalam proses pengembalian", 400);
   }
 
+  let uploadedUrl = await digitalStorageService.uploadToSpaces(
+    file.buffer,
+    file.originalname,
+    file.mimetype
+  );
 
- let  uploadedUrl = await digitalStorageService.uploadToSpaces(
-      file.buffer,
-      file.originalname,
-      file.mimetype
-    );
+  // send notification to seller
+  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+    complaint.transaction.seller_id
+  );
+  if (sellerPushToken) {
+    sendPushNotification(sellerPushToken, {
+      title: "Permintaan Konfirmasi Pengiriman",
+      body: `Buyer telah meminta konfirmasi pengiriman untuk komplain ${complaint.id}`,
+      data: {
+        complaintId: complaint.id,
+        screen: "complaint/seller",
+      },
+    });
+  }
 
   return await complaintRepo.updateComplaintWithBuyerConfirmRequest(
     complaintId,

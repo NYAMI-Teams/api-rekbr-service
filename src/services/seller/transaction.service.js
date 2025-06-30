@@ -239,10 +239,10 @@ const generateTransaction = async ({
     );
   }
   // Validasi harga item
-  if (item_price < 10000){
+  if (item_price < 10000) {
     throwError("Harga item harus minimal Rp 10.000", 400);
   }
-  
+
   // Platform fee logic
   let platform_fee = 0;
   if (item_price >= 10000 && item_price < 499999) {
@@ -311,12 +311,12 @@ const generateTransaction = async ({
   const buyerPushToken = await pushTokenService.getPushTokenByUserId(buyer_id);
 
   if (buyerPushToken) {
-    await sendPushNotification(buyerPushToken, {
+    sendPushNotification(buyerPushToken, {
       title: "Transaksi Baru Dibuat",
       body: `Seller membuat transaksi untuk barang: ${item_name}`,
       data: {
         transactionId: newTransaction.id,
-        screen: "TransactionDetail",
+        screen: "transaction/buyer",
       },
     });
   }
@@ -357,6 +357,21 @@ const inputShipment = async (
   await transactionRepo.updateStatusToShipped(transactionId);
   await removeJobIfExists(transactionQueue, `shipment-cancel:${transactionId}`);
 
+  // send push notification to buyer
+  const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+    transaction.buyer_id
+  );
+  if (buyerPushToken) {
+    sendPushNotification(buyerPushToken, {
+      title: "Barang Telah Dikirim",
+      body: `Seller telah mengirim barang dengan nomor resi: ${trackingNumber}`,
+      data: {
+        transactionId: transaction.id,
+        screen: "transaction/buyer",
+      },
+    });
+  }
+
   return { success: true };
 };
 
@@ -371,6 +386,25 @@ const cancelTransactionBySeller = async (transactionId, sellerId) => {
       "Transaksi tidak dapat dibatalkan. Mungkin sudah dikirim atau bukan milik Anda.",
       400
     );
+  }
+
+  // send push notification to buyer
+  const transaction = await transactionRepo.getTransactionDetailBySeller(
+    transactionId,
+    sellerId
+  );
+  const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+    transaction.buyer_id
+  );
+  if (buyerPushToken) {
+    sendPushNotification(buyerPushToken, {
+      title: "Transaksi Dibatalkan",
+      body: `Seller telah membatalkan transaksi dengan kode: ${transaction.transaction_code}`,
+      data: {
+        transactionId: transaction.id,
+        screen: "transaction/buyer",
+      },
+    });
   }
 
   return { success: true };
@@ -421,6 +455,21 @@ const confirmationShipmentRequest = async ({
   };
 
   console.log(payload);
+
+  // send push notification to buyer
+  const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+    txn.buyer_id
+  );
+  if (buyerPushToken) {
+    sendPushNotification(buyerPushToken, {
+      title: "Permintaan Konfirmasi Pengiriman",
+      body: `Seller telah meminta konfirmasi pengiriman untuk transaksi ${txn.transaction_code}`,
+      data: {
+        transactionId: txn.id,
+        screen: "transaction/buyer",
+      },
+    });
+  }
 
   await fundReleaseRequestRepository.createFundReleaseRequest(payload);
 };
