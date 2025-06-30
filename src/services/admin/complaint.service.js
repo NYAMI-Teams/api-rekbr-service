@@ -3,6 +3,9 @@ import complaintRepo from "../../repositories/complaint.repository.js";
 import transactionRepo from "../../repositories/transaction.repository.js";
 import { scheduleAutoCompleteConfirmation } from "../../jobs/complaint.scheduler.js";
 import prisma from "../../prisma/client.js";
+import pushTokenService from "../pushToken.service.js";
+import { sendPushNotification } from "../../utils/sendPushNotification.js";
+import { scheduleAutoCancelShipment } from "../../jobs/transaction.scheduler.js";
 
 const getAllComplaintList = async (type, status) => {
   const filters = {};
@@ -53,6 +56,23 @@ const responseComplaint = async (id, action, adminId) => {
         );
       }
 
+      const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+        complaint.buyer_id
+      );
+      if (buyerPushToken) {
+        sendPushNotification(buyerPushToken, {
+          title:
+            action === "approve" ? "Komplain Disetujui" : "Komplain Ditolak",
+          body:
+            action === "approve"
+              ? `Admin menyetujui komplain barang hilang. Dana akan dikembalikan.`
+              : `Admin menolak komplain barang hilang. Transaksi dilanjutkan.`,
+          data: {
+            screen: "complaint/buyer",
+          },
+        });
+      }
+
       return await complaintRepo.updateComplaint(
         id,
         {
@@ -72,7 +92,7 @@ const responseComplaint = async (id, action, adminId) => {
       action === "approve" ? "return_requested" : "rejected_by_admin";
 
     return await prisma.$transaction(async (tx) => {
-      const deadline = new Date(Date.now() + 10 * 60 * 1000); // 2 menit dari sekarang
+      const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000); // buyer input shipment deadline 1 hari dari sekarang
 
       if (action === "reject") {
         await transactionRepo.updateStatusToShipped(
@@ -82,7 +102,24 @@ const responseComplaint = async (id, action, adminId) => {
       }
 
       if (action === "approve") {
-        await scheduleAutoCompleteConfirmation(id, deadline.getTime());
+        await scheduleAutoCancelShipment();
+      }
+
+      const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+        complaint.buyer_id
+      );
+      if (buyerPushToken) {
+        sendPushNotification(buyerPushToken, {
+          title:
+            action === "approve" ? "Komplain Disetujui" : "Komplain Ditolak",
+          body:
+            action === "approve"
+              ? `Admin menyetujui komplain barang rusak. Silakan kirim barang retur.`
+              : `Admin menolak komplain. Dana tetap diteruskan ke seller.`,
+          data: {
+            screen: "complaint/buyer",
+          },
+        });
       }
 
       return await complaintRepo.updateComplaint(
@@ -110,8 +147,36 @@ const responseComplaint = async (id, action, adminId) => {
 
     return await prisma.$transaction(async (tx) => {
       if (action === "approve") {
-        deadline = new Date(Date.now() + 10 * 60 * 1000); // 2 menit dari sekarang
+        deadline = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // waktu untuk seller konfirmasi barang sudah sampai 2 hari dari sekarang
         await scheduleAutoCompleteConfirmation(id, deadline.getTime());
+      }
+
+      if (action === "approve") {
+        const sellerPushToken = await pushTokenService.getPushTokenByUserId(
+          complaint.transaction.seller_id
+        );
+        if (sellerPushToken) {
+          sendPushNotification(sellerPushToken, {
+            title: "Permintaan Konfirmasi Retur",
+            body: `Admin menyetujui permintaan buyer. Mohon konfirmasi barang retur.`,
+            data: {
+              screen: "complaint/seller",
+            },
+          });
+        }
+      } else {
+        const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+          complaint.buyer_id
+        );
+        if (buyerPushToken) {
+          sendPushNotification(buyerPushToken, {
+            title: "Permintaan Konfirmasi Ditolak",
+            body: `Admin menolak permintaan konfirmasi retur untuk komplain ${complaint.id}.`,
+            data: {
+              screen: "complaint/buyer",
+            },
+          });
+        }
       }
 
       return await complaintRepo.updateComplaint(

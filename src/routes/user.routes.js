@@ -57,10 +57,10 @@ router.post(
 );
 
 router.post(
-  "/verify-reset-otp",
-  userValidator.verifyResetOtpValidation,
+  "/verify-otp-reset-password",
+  userValidator.verifyOtpResetPasswordValidation,
   validateRequest,
-  asyncHandler(userController.verifyResetOtp)
+  asyncHandler(userController.verifyOtpResetPassword)
 );
 router.post(
   "/reset-password",

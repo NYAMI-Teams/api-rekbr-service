@@ -234,7 +234,7 @@ const generateTransaction = async ({
 
   if (buyer_id === seller_id) {
     throwError(
-      "Transaksi tidak dapat dibuat antara penjual dan pembeli yang sama",
+      "Transaksi tidak bisa dibuat antara seller dan dirinya sendiri",
       400
     );
   }
@@ -267,7 +267,7 @@ const generateTransaction = async ({
   const total_amount = item_price + platform_fee + insurance_fee;
 
   // Deadlines
-  const payment_deadline = new Date(Date.now() + 10 * 60 * 1000);
+  const payment_deadline = new Date(Date.now() + 3 * 60 * 60 * 1000); // 3 hours
   const created_at = new Date(Date.now());
 
   // Status awal
