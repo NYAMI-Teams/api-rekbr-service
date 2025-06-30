@@ -61,7 +61,7 @@ const getComplaintDetail = async (complaintId) => {
       transaction: {
         include: {
           buyer: { select: { email: true } },
-          seller: { select: { email: true } }, // add this
+          seller: { select: { email: true } },
           shipment: { include: { courier: true } },
         },
       },
@@ -131,8 +131,8 @@ const getComplaintByTransactionId = async (transaction_id) => {
 const countComplaintsByTransactionId = async (transactionId) => {
   return await prisma.complaint.count({
     where: { transaction_id: transactionId },
-  })
-}
+  });
+};
 
 const sellerItemReceiveUpdate = async (complaintId, status, tx) => {
   return await tx.complaint.update({
@@ -185,8 +185,8 @@ const getAllComplaintList = async (filters = {}) => {
     where: filters,
     orderBy: { updated_at: "desc" },
     include: {
-      buyer: { 
-        select: { email: true } 
+      buyer: {
+        select: { email: true },
       },
       transaction: {
         select: {

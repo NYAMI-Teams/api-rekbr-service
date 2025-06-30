@@ -65,26 +65,38 @@ const register = async ({ email, password }) => {
   requestVerifyEmail(email);
 };
 
-const login = async ({ email, password }) => {
+const login = async ({ email, password }, req) => {
   const user = await userRepository.findUserByEmail(email);
+
   if (!user) {
+    if (req?.loginLimiterKey) {
+      await redisClient.incr(req.loginLimiterKey);
+      await redisClient.expire(req.loginLimiterKey, 15 * 60); // 15 menit
+    }
     throwError("email atau password salah", 400);
   }
 
   const isPasswordValid = bcrypt.compareSync(password, user.password);
   if (!isPasswordValid) {
+    if (req?.loginLimiterKey) {
+      await redisClient.incr(req.loginLimiterKey);
+      await redisClient.expire(req.loginLimiterKey, 15 * 60);
+    }
     throwError("email atau password salah", 400);
   }
+
+  if (req?.loginLimiterKey) {
+    await redisClient.del(req.loginLimiterKey);
+  }
+
   const accessToken = await generateAccessToken(user);
   const refreshToken = await generateRefreshToken(user);
 
-  const result = {
+  return {
     accessToken,
     refreshToken,
     isAdmin: user.isAdmin,
   };
-
-  return result;
 };
 
 const resendVerifyEmail = async ({ email }) => {
