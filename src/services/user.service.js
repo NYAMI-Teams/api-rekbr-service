@@ -222,7 +222,6 @@ export default {
   checkEmail,
   changePassword,
   forgotPassword,
-  resendOtpResetPassword,
   verifyOtpResetPassword,
   resetPassword,
 };
