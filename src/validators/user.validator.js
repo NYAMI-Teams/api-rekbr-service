@@ -61,7 +61,7 @@ const forgotPasswordValidation = [
   body("email").isEmail().withMessage("Email tidak valid"),
 ];
 
-const verifyResetOtpValidation = [
+const verifyOtpResetPasswordValidation = [
   body("email").isEmail().withMessage("Email tidak valid"),
   body("otpCode")
     .isLength({ min: 6, max: 6 })
@@ -82,6 +82,6 @@ export default {
   verifyEmailValidation,
   changePasswordValidation,
   forgotPasswordValidation,
-  verifyResetOtpValidation,
+  verifyOtpResetPasswordValidation,
   resetPasswordValidation,
 };

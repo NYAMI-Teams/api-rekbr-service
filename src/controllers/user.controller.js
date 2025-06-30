@@ -54,9 +54,9 @@ const forgotPassword = async (req, res) => {
   return resSuccess(res, 200, "OTP reset password berhasil dikirim ke email");
 };
 
-const verifyResetOtp = async (req, res) => {
+const verifyOtpResetPassword = async (req, res) => {
   const { email, otpCode } = req.body;
-  await userService.verifyResetOtp(email, otpCode);
+  await userService.verifyOtpResetPassword(email, otpCode);
   return resSuccess(res, 200, "OTP berhasil diverifikasi");
 };
 
@@ -76,6 +76,6 @@ export default {
   getEmail,
   changePassword,
   forgotPassword,
-  verifyResetOtp,
+  verifyOtpResetPassword,
   resetPassword,
 };

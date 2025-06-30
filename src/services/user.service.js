@@ -188,7 +188,7 @@ const forgotPassword = async (email) => {
   await sendOtpEmail(email, otpCode, "reset");
 };
 
-const verifyResetOtp = async (email, otpCode) => {
+const verifyOtpResetPassword = async (email, otpCode) => {
   const storedOtp = await redisClient.get("resetPassword:" + email);
   if (!storedOtp || storedOtp !== otpCode) {
     throwError("Kode OTP tidak valid atau sudah kadaluarsa", 400);
@@ -222,6 +222,7 @@ export default {
   checkEmail,
   changePassword,
   forgotPassword,
-  verifyResetOtp,
+  resendOtpResetPassword,
+  verifyOtpResetPassword,
   resetPassword,
 };
