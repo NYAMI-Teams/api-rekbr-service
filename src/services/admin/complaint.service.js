@@ -102,7 +102,7 @@ const responseComplaint = async (id, action, adminId) => {
       }
 
       if (action === "approve") {
-        await scheduleAutoCancelShipment();
+        // await scheduleAutoCancelShipment();
       }
 
       const buyerPushToken = await pushTokenService.getPushTokenByUserId(
