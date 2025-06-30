@@ -4,6 +4,7 @@ import fundReleaseRequestRepository from "../../repositories/fund-release-reques
 import { transactionQueue } from "../../queues/transaction.queue.js";
 import { scheduleAutoCancelShipment } from "../../jobs/transaction.scheduler.js";
 import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
+import { sendPushNotification } from "../../utils/sendPushNotification.js";
 
 const getTransactionDetailByBuyer = async (transactionId, buyerId) => {
   const txn = await transactionRepo.getTransactionDetailByBuyer(
@@ -137,6 +138,21 @@ const simulatePayment = async (transactionId, buyerId) => {
     new Date(paidAt.getTime() + 2 * 60 * 1000).toISOString()
   );
 
+  // send notification to seller
+  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
+    txn.seller_id
+  );
+  if (sellerPushToken) {
+    sendPushNotification(sellerPushToken, {
+      title: `Pembayaran Diterima - ${txn.transaction_code}`,
+      body: `Pembayaran untuk transaksi ${txn.transaction_code} telah diterima. Silakan kirim barang sebelum batas waktu pengiriman.`,
+      data: {
+        transactionId: txn.id,
+        screen: "transaction/seller",
+      },
+    });
+  }
+
   return {
     transactionCode: transactionId,
     status: "waiting_shipment",
@@ -172,6 +188,21 @@ const confirmReceived = async (transactionId, buyerId) => {
 
   // Hapus job auto-complete agar tidak dijalankan jika buyer sudah confirm
   await removeJobIfExists(transactionQueue, `auto-complete:${transactionId}`);
+
+  // send notification to seller
+  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
+    txn.seller_id
+  );
+  if (sellerPushToken) {
+    sendPushNotification(sellerPushToken, {
+      title: `Barang Diterima - ${txn.transaction_code}`,
+      body: `Pembeli telah mengkonfirmasi penerimaan barang untuk transaksi ${txn.transaction_code}.`,
+      data: {
+        transactionId: txn.id,
+        screen: "transaction/seller",
+      },
+    });
+  }
 
   return {
     success: true,
