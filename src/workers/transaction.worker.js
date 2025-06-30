@@ -23,7 +23,7 @@ const worker = new Worker(
           data: {
             status: "canceled",
             cancelled_at: new Date(),
-            cancel_reason: "Canceled karena tidak dibayar tepat waktu",
+            cancel_reason: "Canceled karena buyer tidak bayar tepat waktu",
           },
         });
         console.log(
@@ -47,6 +47,8 @@ const worker = new Worker(
           data: {
             status: "refunded",
             refunded_at: new Date(),
+            refund_amount:
+              txn.total_amount - txn.platform_fee - txn.insurance_fee,
             refund_reason: "Canceled karena tidak dikirim tepat waktu",
           },
         });

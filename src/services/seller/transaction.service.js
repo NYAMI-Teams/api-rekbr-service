@@ -249,7 +249,7 @@ const generateTransaction = async ({
     platform_fee = 5000;
   } else if (item_price >= 500000 && item_price < 4999999) {
     platform_fee = item_price * 0.01;
-  } else if (item_price >= 5000000) {
+  } else if (item_price >= 5000000 && item_price < 10000000) {
     platform_fee = item_price * 0.008;
   } else {
     throwError("Harga item tidak valid untuk transaksi", 400);
@@ -455,21 +455,6 @@ const confirmationShipmentRequest = async ({
   };
 
   console.log(payload);
-
-  // send push notification to buyer
-  const buyerPushToken = await pushTokenService.getPushTokenByUserId(
-    txn.buyer_id
-  );
-  if (buyerPushToken) {
-    sendPushNotification(buyerPushToken, {
-      title: "Permintaan Konfirmasi Pengiriman",
-      body: `Seller telah meminta konfirmasi pengiriman untuk transaksi ${txn.transaction_code}`,
-      data: {
-        transactionId: txn.id,
-        screen: "transaction/buyer",
-      },
-    });
-  }
 
   await fundReleaseRequestRepository.createFundReleaseRequest(payload);
 };

@@ -31,7 +31,7 @@ const createComplaint = async ({
 
   if (transaction.status !== "shipped") {
     throwError(
-      "Hanya transaksi dengan status 'shipped' yang dapat dikomplain",
+      "Hanya transaksi dengan status Dalam Pengiriman (shipped) yang dapat dikomplain",
       400
     );
   }
@@ -140,7 +140,7 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
   if (sellerPushToken) {
     sendPushNotification(sellerPushToken, {
       title: "Komplain Dibatalkan",
-      body: `Buyer telah membatalkan komplain untuk transaksi ${complaint.transaction.transaction_code}`,
+      body: `Buyer telah membatalkan komplain untuk transaksi ${transaction.transaction_code}`,
       data: {
         complaintId: complaint.id,
         screen: "complaint/seller",
@@ -534,8 +534,8 @@ const submitReturnShipment = async ({
   );
   if (sellerPushToken) {
     sendPushNotification(sellerPushToken, {
-      title: "Pengembalian Barang Diajukan",
-      body: `Buyer telah mengajukan pengembalian barang untuk komplain ${complaint.id}`,
+      title: "Resi Pengembalian sudah Dikirim",
+      body: `Buyer telah mengirimkan resi pengembalian barang untuk komplain ${complaint.transaction.transaction_code}`,
       data: {
         complaintId: complaint.id,
         screen: "complaint/seller",
@@ -567,21 +567,6 @@ const requestBuyerConfirmation = async ({
     file.originalname,
     file.mimetype
   );
-
-  // send notification to seller
-  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
-    complaint.transaction.seller_id
-  );
-  if (sellerPushToken) {
-    sendPushNotification(sellerPushToken, {
-      title: "Permintaan Konfirmasi Pengiriman",
-      body: `Buyer telah meminta konfirmasi pengiriman untuk komplain ${complaint.id}`,
-      data: {
-        complaintId: complaint.id,
-        screen: "complaint/seller",
-      },
-    });
-  }
 
   return await complaintRepo.updateComplaintWithBuyerConfirmRequest(
     complaintId,
