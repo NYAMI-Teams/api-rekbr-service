@@ -125,9 +125,17 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
 
   await transactionRepo.updateStatus(complaint.transaction_id, "shipped");
 
+  // get seller id from transaction
+  const transaction = await transactionRepo.findTransactionById(
+    complaint.transaction_id
+  );
+  if (!transaction) {
+    throwError("Transaksi tidak ditemukan", 404);
+  }
+
   // send notification to seller
   const sellerPushToken = await pushTokenService.getPushTokenByUserId(
-    complaint.transaction.seller_id
+    transaction.seller_id
   );
   if (sellerPushToken) {
     sendPushNotification(sellerPushToken, {
