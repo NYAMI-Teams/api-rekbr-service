@@ -1,18 +1,17 @@
-import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import s3 from '../utils/s3Client.js';
-import { sanitizeFileName } from '../utils/utils.js';
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import s3 from "../utils/s3Client.js";
+import { sanitizeFileName } from "../utils/utils.js";
 
 const uploadToSpaces = async (fileBuffer, fileName, mimeType) => {
-
-  // const name = sanitizeFileName(fileName)+ `-${Date.now()}`;
-  const name = sanitizeFileName(fileName);
+  const name = sanitizeFileName(fileName) + `-${Date.now()}`;
+  // const name = sanitizeFileName(fileName);
 
   const params = {
     Bucket: process.env.SPACES_BUCKET,
     Key: name,
     Body: fileBuffer,
     ContentType: mimeType,
-    ACL: 'public-read',
+    ACL: "public-read",
   };
 
   const command = new PutObjectCommand(params);
@@ -20,7 +19,6 @@ const uploadToSpaces = async (fileBuffer, fileName, mimeType) => {
 
   return `https://${process.env.SPACES_BUCKET}.${process.env.SPACES_REGION}.digitaloceanspaces.com/${name}`;
 };
-
 
 const deleteFromSpaces = async (fileKey) => {
   const command = new DeleteObjectCommand({
