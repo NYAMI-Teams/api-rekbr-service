@@ -5,6 +5,7 @@ import throwError from "../../utils/throwError.js";
 import { complaintQueue } from "../../queues/complaint.queue.js";
 import { removeJobIfExists } from "../../utils/bullmq/removeJobIfExists.js";
 import { sendPushNotification } from "../../utils/sendPushNotification.js";
+import pushTokenService from "../pushToken.service.js";
 
 const ACTIVE_STATUSES = [
   "waiting_seller_approval",
@@ -90,7 +91,7 @@ const createComplaint = async ({
   );
 
   // send notification to seller
-  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
     transaction.seller_id
   );
   if (sellerPushToken) {
@@ -125,7 +126,7 @@ const cancelComplaint = async ({ complaintId, buyerId }) => {
   await transactionRepo.updateStatus(complaint.transaction_id, "shipped");
 
   // send notification to seller
-  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
     complaint.transaction.seller_id
   );
   if (sellerPushToken) {
@@ -520,7 +521,7 @@ const submitReturnShipment = async ({
   );
 
   // send notification to seller
-  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
     complaint.transaction.seller_id
   );
   if (sellerPushToken) {
@@ -560,7 +561,7 @@ const requestBuyerConfirmation = async ({
   );
 
   // send notification to seller
-  const sellerPushToken = await transactionRepo.getPushTokenByUserId(
+  const sellerPushToken = await pushTokenService.getPushTokenByUserId(
     complaint.transaction.seller_id
   );
   if (sellerPushToken) {
