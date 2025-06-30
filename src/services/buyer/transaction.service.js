@@ -118,7 +118,7 @@ const simulatePayment = async (transactionId, buyerId) => {
 
   const now = new Date();
   const paidAt = now;
-  const shipmentDeadline = new Date(now.getTime() + 2 * 60 * 1000);
+  const shipmentDeadline = new Date(now.getTime() + 10 * 60 * 1000);
 
   const updated = await transactionRepo.updatePaidTransaction(
     transactionId,
@@ -136,7 +136,7 @@ const simulatePayment = async (transactionId, buyerId) => {
   console.log("🕒 Now saat schedule dipanggil:", new Date().toISOString());
   console.log(
     "harusnya 2 menit dari sekarang adalah",
-    new Date(paidAt.getTime() + 2 * 60 * 1000).toISOString()
+    new Date(paidAt.getTime() + 10 * 60 * 1000).toISOString()
   );
 
   // send notification to seller
