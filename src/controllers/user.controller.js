@@ -11,7 +11,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const result = await userService.login(req.body);
+  const result = await userService.login(req.body, req);
   return resSuccess(res, 200, "Login berhasil", result);
 };
 

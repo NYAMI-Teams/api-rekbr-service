@@ -7,13 +7,8 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./src/docs/swagger.js";
 import router from "./src/routes/index.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
-
-// BullMQ & BullBoard
-import { ExpressAdapter } from "@bull-board/express";
-import { createBullBoard } from "@bull-board/api";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter.js";
-import { transactionQueue } from "./src/queues/transaction.queue.js";
-import { complaintQueue } from "./src/queues/complaint.queue.js";
+import apiRateLimiter from "./src/middlewares/rateLimiter.js";
+import bullBoardAdapter from "./src/libs/bullBoard.js";
 
 const app = express();
 
@@ -33,19 +28,11 @@ app.use(morgan("dev"));
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// BullBoard setup
-const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath("/admin/queues");
+// Bull Board for monitoring queues
+app.use("/admin/queues", bullBoardAdapter.getRouter());
 
-createBullBoard({
-  queues: [
-    new BullMQAdapter(transactionQueue),
-    new BullMQAdapter(complaintQueue),
-  ],
-  serverAdapter,
-});
-
-app.use("/admin/queues", serverAdapter.getRouter());
+// Rate Limiter
+app.use("/api", apiRateLimiter);
 
 // Routing & error handler
 app.use("/api", router);

@@ -4,6 +4,7 @@ import asyncHandler from "../middlewares/asyncHandler.js";
 import userValidator from "../validators/user.validator.js";
 import validateRequest from "../middlewares/validateRequest.js";
 import authentication from "../middlewares/authentication.js";
+import loginLimiter from "../middlewares/loginLimiter.js";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.post(
 );
 router.post(
   "/login",
+  loginLimiter,
   userValidator.loginUserValidation,
   validateRequest,
   asyncHandler(userController.login)
