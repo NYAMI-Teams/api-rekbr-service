@@ -45,9 +45,9 @@ const worker = new Worker(
         await prisma.transaction.update({
           where: { id: transactionId },
           data: {
-            status: "canceled",
-            cancelled_at: new Date(),
-            cancel_reason: "Canceled karena seller tidak kirim tepat waktu",
+            status: "refunded",
+            refunded_at: new Date(),
+            refund_reason: "Canceled karena tidak dikirim tepat waktu",
           },
         });
 

@@ -92,7 +92,9 @@ const updateFundReleaseRequest = async (transactionId, status, adminId) => {
   // ⏰ Set buyer_confirm_deadline H+2 jika approved
   if (status === "approved") {
     const now = new Date();
-    const buyerConfirmDeadline = new Date(now.getTime() + 10 * 60 * 1000);
+    const buyerConfirmDeadline = new Date(
+      now.getTime() + 1 * 24 * 60 * 60 * 1000
+    ); // waktu untuk buyer konfirmasi penerimaan barang 1 hari dari sekarang
 
     const res = await transactionRepo.updateTransactionBuyerConfirmDeadline(
       transactionId,
