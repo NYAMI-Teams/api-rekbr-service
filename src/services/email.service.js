@@ -5,7 +5,7 @@ const generateOtpTemplate = ({ title, description, otpCode }) => {
   <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
     <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
       <div style="background-color: #4F46E5; color: white; padding: 20px; text-align: center;">
-        <h1 style="margin: 0;">Rekbr By BNI</h1>
+        <h1 style="margin: 0; color: #ffffff">Rekbr By BNI</h1>
       </div>
       <div style="padding: 30px; color: #333;">
         <h2 style="margin-top: 0;">${title}</h2>
