@@ -11,6 +11,7 @@ import adminComplaintRoutes from "./admin/complaint.routes.js";
 import authentication from "../middlewares/authentication.js";
 import authorization from "../middlewares/authorization.js";
 import pushTokenRoutes from "./pushToken.routes.js";
+import downloadRoutes from "./download.routes.js";
 
 const router = Router();
 
@@ -35,5 +36,7 @@ router.use(
   authorization,
   adminComplaintRoutes
 );
+
+router.use("/download", downloadRoutes);
 
 export default router;
