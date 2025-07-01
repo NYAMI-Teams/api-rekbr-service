@@ -10,6 +10,7 @@ const videoMimeTypes = [
   "video/wmv",
   "video/flv",
   "video/webm",
+  "video/quicktime",
 ];
 
 const fileFilter = (req, file, cb) => {
