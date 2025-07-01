@@ -1,22 +1,36 @@
 import multer from "multer";
 
 const imageMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
-const videoMimeTypes = ["video/mp4", "video/avi", "video/mkv","video/mp4", "video/mov", "video/wmv", "video/flv", "video/webm"];
+const videoMimeTypes = [
+  "video/mp4",
+  "video/avi",
+  "video/mkv",
+  "video/mp4",
+  "video/mov",
+  "video/wmv",
+  "video/flv",
+  "video/webm",
+];
 
 const fileFilter = (req, file, cb) => {
-  if (imageMimeTypes.includes(file.mimetype) || videoMimeTypes.includes(file.mimetype)) {
+  if (
+    imageMimeTypes.includes(file.mimetype) ||
+    videoMimeTypes.includes(file.mimetype)
+  ) {
     cb(null, true);
   } else {
     cb(
-      new Error("Hanya file gambar (jpg, jpeg, png, webp) atau video (mp4, avi, mkv) yang diperbolehkan"),
+      new Error(
+        "Hanya file gambar (jpg, jpeg, png, webp) atau video (mp4, avi, mkv) yang diperbolehkan"
+      ),
       false
     );
   }
 };
 
 const storage = multer.memoryStorage();
-const limits = { fileSize: 2 * 1024 * 1024 }; //limit for images
-const baseUpload = multer({ storage, limits, fileFilter });
+// const limits = { fileSize: 10 * 1024 * 1024 }; //limit for images
+const baseUpload = multer({ storage, fileFilter });
 
 const uploadImage = {
   single:
