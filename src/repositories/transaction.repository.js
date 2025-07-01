@@ -88,24 +88,17 @@ const getAllTransactionsForAdmin = async ({
   const whereClause = {};
 
   if (status) {
-    if (Array.isArray(status)) {
-      whereClause.status = { in: status };
-    } else {
-      whereClause.status = status;
-    }
-  }
-
-  let createdToDate = null;
-  if (createdTo) {
-    const toDate = new Date(createdTo);
-    toDate.setHours(23, 59, 59, 999);
-    createdToDate = toDate;
+    whereClause.status = Array.isArray(status) ? { in: status } : status;
   }
 
   if (createdFrom || createdTo) {
+    const createdToDate = createdTo
+      ? new Date(new Date(createdTo).setHours(23, 59, 59, 999))
+      : undefined;
+
     whereClause.created_at = {
       ...(createdFrom && { gte: new Date(createdFrom) }),
-      ...(createdTo && { lte: createdToDate }),
+      ...(createdToDate && { lte: createdToDate }),
     };
   }
 
@@ -118,7 +111,8 @@ const getAllTransactionsForAdmin = async ({
     ];
   }
 
-  const [transactions, totalCount, fundReleases] = await Promise.all([
+  // Ambil semua transaksi (tanpa pagination) dan fund releases
+  const [rawTransactions, fundReleases] = await Promise.all([
     prisma.transaction.findMany({
       where: whereClause,
       include: {
@@ -126,43 +120,46 @@ const getAllTransactionsForAdmin = async ({
         seller: { select: { email: true } },
       },
       orderBy: { created_at: "desc" },
-      skip,
-      take,
     }),
-    prisma.transaction.count({ where: whereClause }),
     prisma.fundReleaseRequest.findMany(),
   ]);
 
+  // Buat map fundRelease per transaksi
   const frMap = {};
   fundReleases.forEach((fr) => {
     frMap[fr.transaction_id] = fr;
   });
 
-  const filteredTransactions = transactions
-    .filter((txn) => {
-      if (!fundReleaseStatus) return true;
-      const fr = frMap[txn.id];
-      if (fundReleaseStatus === "none") return !fr;
-      return fr?.status === fundReleaseStatus;
-    })
-    .map((txn) => {
-      const fr = frMap[txn.id];
-      return {
-        id: txn.id,
-        transactionCode: txn.transaction_code,
-        itemName: txn.item_name,
-        itemPrice: txn.item_price,
-        totalAmount: txn.total_amount,
-        buyerEmail: txn.buyer?.email || null,
-        sellerEmail: txn.seller?.email || null,
-        status: txn.status,
-        createdAt: txn.created_at,
-        fundReleaseStatus: fr?.status || null,
-      };
-    });
+  // Filter manual berdasarkan fundReleaseStatus
+  const filtered = rawTransactions.filter((txn) => {
+    const fr = frMap[txn.id];
+    if (!fundReleaseStatus) return true;
+    if (fundReleaseStatus === "none") return !fr;
+    return fr?.status === fundReleaseStatus;
+  });
+
+  const totalCount = filtered.length;
+
+  const paginated = filtered.slice(skip, skip + take);
+
+  const mapped = paginated.map((txn) => {
+    const fr = frMap[txn.id];
+    return {
+      id: txn.id,
+      transactionCode: txn.transaction_code,
+      itemName: txn.item_name,
+      itemPrice: txn.item_price,
+      totalAmount: txn.total_amount,
+      buyerEmail: txn.buyer?.email || null,
+      sellerEmail: txn.seller?.email || null,
+      status: txn.status,
+      createdAt: txn.created_at,
+      fundReleaseStatus: fr?.status || null,
+    };
+  });
 
   return {
-    transactions: filteredTransactions,
+    transactions: mapped,
     totalCount,
   };
 };

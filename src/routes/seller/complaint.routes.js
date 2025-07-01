@@ -11,7 +11,7 @@ const router = Router();
 router.patch(
   "/complaints/:complaintId/respond",
   authentication,
-  uploadImage.array("photo", 5, 10),
+  uploadImage.array("photo", 5, 100),
   asyncHandler(complaintController.patchSellerResponse)
 );
 
