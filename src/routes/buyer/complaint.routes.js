@@ -9,7 +9,7 @@ const router = Router();
 router.post(
   "/transactions/:transactionId/complaint",
   authentication,
-  uploadImage.array("evidence", 5, 10),
+  uploadImage.array("evidence", 5, 100),
   asyncHandler(complaintController.createComplaint)
 );
 
