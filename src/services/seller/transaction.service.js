@@ -249,7 +249,7 @@ const generateTransaction = async ({
     platform_fee = 5000;
   } else if (item_price >= 500000 && item_price < 4999999) {
     platform_fee = item_price * 0.01;
-  } else if (item_price >= 5000000 && item_price < 10000000) {
+  } else if (item_price >= 5000000 && item_price <= 10000000) {
     platform_fee = item_price * 0.008;
   } else {
     throwError("Harga item tidak valid untuk transaksi", 400);
