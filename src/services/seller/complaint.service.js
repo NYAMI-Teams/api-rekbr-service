@@ -123,9 +123,11 @@ const patchSellerItemReceive = async (complaintId, status, sellerId) => {
 
   if (
     confirmationStatus !== "approved" &&
-    !["awaiting_seller_confirmation", "return_in_transit"].includes(
-      existingComplaint.status
-    )
+    ![
+      "awaiting_seller_confirmation",
+      "return_in_transit",
+      "awaiting_admin_approval",
+    ].includes(existingComplaint.status)
   ) {
     throwError("Komplain belum disetujui admin atau status tidak sesuai", 400);
   }
