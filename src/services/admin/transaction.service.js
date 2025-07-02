@@ -3,6 +3,7 @@ import transactionRepo from "../../repositories/transaction.repository.js";
 import fundReleaseRequestRepository from "../../repositories/fund-release-request.repository.js";
 import { scheduleAutoCompleteTransaction } from "../../jobs/transaction.scheduler.js";
 import { sendPushNotification } from "../../utils/sendPushNotification.js";
+import pushTokenService from "../pushToken.service.js";
 
 const getTransactionDetailByAdmin = async (transactionId) => {
   const txn = await transactionRepo.getTransactionDetailByAdmin(transactionId);
