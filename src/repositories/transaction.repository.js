@@ -386,7 +386,6 @@ const updateStatusAndClearConfirmDeadline = async (
     where: { id: transactionId },
     data: {
       status: newStatus,
-      buyer_confirm_deadline: null,
     },
   });
 };
