@@ -22,7 +22,13 @@ morganBody(app, {
   noColors: false,
   prettify: true,
   stream: process.stdout,
-  filterParameters: ["password", "accessToken", "refreshToken"],
+  filterParameters: [
+    "password",
+    "accessToken",
+    "refreshToken",
+    "token",
+    "pushToken",
+  ],
 });
 
 // Swagger
