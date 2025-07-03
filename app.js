@@ -22,6 +22,7 @@ morganBody(app, {
   noColors: false,
   prettify: true,
   stream: process.stdout,
+  redactBody: ["password"],
 });
 app.use(morgan("dev"));
 
