@@ -3,7 +3,7 @@ import s3 from "../utils/s3Client.js";
 import { sanitizeFileName } from "../utils/utils.js";
 
 const uploadToSpaces = async (fileBuffer, fileName, mimeType) => {
-  const name = sanitizeFileName(fileName) + `-${Date.now()}`;
+  const name = `${Date.now()}-` + sanitizeFileName(fileName);
   // const name = sanitizeFileName(fileName);
 
   const params = {
