@@ -22,9 +22,8 @@ morganBody(app, {
   noColors: false,
   prettify: true,
   stream: process.stdout,
-  redactBody: ["password"],
+  filterParameters: ["password", "accessToken", "refreshToken"],
 });
-app.use(morgan("dev"));
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
