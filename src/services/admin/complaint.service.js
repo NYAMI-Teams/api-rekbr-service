@@ -147,7 +147,7 @@ const responseComplaint = async (id, action, adminId) => {
 
     return await prisma.$transaction(async (tx) => {
       if (action === "approve") {
-        deadline = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // waktu untuk seller konfirmasi barang sudah sampai 2 hari dari sekarang
+        deadline = new Date(Date.now() + 2 * 60 * 1000); // waktu untuk seller konfirmasi barang sudah sampai 2 hari dari sekarang
         await scheduleAutoCompleteConfirmation(id, deadline.getTime());
       }
 

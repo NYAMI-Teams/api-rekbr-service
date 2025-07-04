@@ -15,6 +15,13 @@ const login = async (req, res) => {
   return resSuccess(res, 200, "Login berhasil", result);
 };
 
+const logout = async (req, res) => {
+  const userId = req.user?.id;
+  const tokenId = req.user?.tokenId;
+  await userService.logout(userId, tokenId);
+  resSuccess(res, 200, "Logout berhasil");
+};
+
 const resendVerifyEmail = async (req, res) => {
   await userService.resendVerifyEmail(req.body);
   return resSuccess(res, 200, "Berhasil resend verify email");
@@ -69,6 +76,7 @@ const resetPassword = async (req, res) => {
 export default {
   register,
   login,
+  logout,
   resendVerifyEmail,
   verifyEmail,
   verifyKyc,

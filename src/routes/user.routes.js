@@ -21,6 +21,7 @@ router.post(
   validateRequest,
   asyncHandler(userController.login)
 );
+router.post("/logout", authentication, asyncHandler(userController.logout));
 router.post(
   "/resend-verify-email",
   userValidator.resendVerifyEmailValidation,

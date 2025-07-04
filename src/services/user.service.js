@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import redisClient from "./redisClient.js";
 import userRepository from "../repositories/user.repository.js";
+import pushTokenRepository from "../repositories/pushToken.repository.js";
 import throwError from "../utils/throwError.js";
 import { sendOtpEmail } from "./email.service.js";
 
@@ -14,10 +15,9 @@ const generateAccessToken = async (user) => {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
   });
 
-  await redisClient.set(`access_token:${userId}`, tokenId, {
+  await redisClient.set(`access_token:${userId}-${tokenId}`, tokenId, {
     EX: 30 * 24 * 60 * 60,
   }); // 30 hari
-  const storedTokenId = await redisClient.get(`access_token:${userId}`);
 
   return token;
 };
@@ -97,6 +97,13 @@ const login = async ({ email, password }, req) => {
     refreshToken,
     isAdmin: user.isAdmin,
   };
+};
+
+const logout = async (userId, tokenId) => {
+  await redisClient.del(`access_token:${userId}-${tokenId}`);
+  await redisClient.del(userId.toString());
+
+  await pushTokenRepository.updatePushToken(userId, null);
 };
 
 const resendVerifyEmail = async ({ email }) => {
@@ -227,6 +234,7 @@ const resetPassword = async (email, newPassword) => {
 export default {
   register,
   login,
+  logout,
   resendVerifyEmail,
   verifyEmail,
   getProfile,
