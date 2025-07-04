@@ -12,10 +12,12 @@ const authentication = async (req, res, next) => {
 
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
     const { id, tokenId, isAdmin } = decoded;
-    // const storedTokenId = await redisClient.get(`access_token:${id}`);
-    // if (!storedTokenId || storedTokenId !== tokenId) {
-    //     throwError("Access denied: Invalid or expired token", 401);
-    // }
+    const storedTokenId = await redisClient.get(
+      `access_token:${id}-${tokenId}`
+    );
+    if (!storedTokenId || storedTokenId !== tokenId) {
+      throwError("Access denied: Invalid or expired token", 401);
+    }
 
     const user = await userRepository.findUserById(id);
     if (!user) {
