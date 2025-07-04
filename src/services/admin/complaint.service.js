@@ -5,7 +5,7 @@ import { scheduleAutoCompleteConfirmation } from "../../jobs/complaint.scheduler
 import prisma from "../../prisma/client.js";
 import pushTokenService from "../pushToken.service.js";
 import { sendPushNotification } from "../../utils/sendPushNotification.js";
-import { scheduleAutoCancelShipment } from "../../jobs/transaction.scheduler.js";
+import { scheduleAutoCancelComplaint } from "../../jobs/complaint.scheduler.js";
 
 const getAllComplaintList = async (type, status) => {
   const filters = {};
@@ -102,7 +102,7 @@ const responseComplaint = async (id, action, adminId) => {
       }
 
       if (action === "approve") {
-        // await scheduleAutoCancelShipment();
+        await scheduleAutoCancelComplaint(id, deadline.getTime() - Date.now());
       }
 
       const buyerPushToken = await pushTokenService.getPushTokenByUserId(
@@ -147,8 +147,13 @@ const responseComplaint = async (id, action, adminId) => {
 
     return await prisma.$transaction(async (tx) => {
       if (action === "approve") {
-        deadline = new Date(Date.now() + 2 * 60 * 1000); // waktu untuk seller konfirmasi barang sudah sampai 2 hari dari sekarang
-        await scheduleAutoCompleteConfirmation(id, deadline.getTime());
+        const now = new Date();
+        deadline = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // waktu untuk seller konfirmasi barang sudah sampai 2 hari dari sekarang
+
+        await scheduleAutoCompleteConfirmation(
+          id,
+          deadline.getTime() - now.getTime()
+        );
       }
 
       if (action === "approve") {
@@ -161,6 +166,19 @@ const responseComplaint = async (id, action, adminId) => {
             body: `Admin menyetujui permintaan buyer. Mohon konfirmasi barang retur.`,
             data: {
               screen: "complaint/seller",
+            },
+          });
+        }
+
+        const buyerPushToken = await pushTokenService.getPushTokenByUserId(
+          complaint.buyer_id
+        );
+        if (buyerPushToken) {
+          sendPushNotification(buyerPushToken, {
+            title: "Permintaan Konfirmasi Disetujui",
+            body: `Admin menyetujui permintaan konfirmasi retur untuk komplain ${complaint.id}.`,
+            data: {
+              screen: "complaint/buyer",
             },
           });
         }
