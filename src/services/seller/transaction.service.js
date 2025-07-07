@@ -264,7 +264,8 @@ const generateTransaction = async ({
   const insurance_fee = insurance ? 0.002 * item_price : 0;
 
   // Total amount
-  const total_amount = item_price + platform_fee + insurance_fee;
+  const total_amount =
+    parseInt(item_price) + parseInt(platform_fee) + parseInt(insurance_fee);
 
   // Deadlines
   const payment_deadline = new Date(Date.now() + 3 * 60 * 60 * 1000); // 3 hours
