@@ -245,9 +245,9 @@ const generateTransaction = async ({
 
   // Platform fee logic
   let platform_fee = 0;
-  if (item_price >= 10000 && item_price < 499999) {
+  if (item_price >= 10000 && item_price <= 499999) {
     platform_fee = 5000;
-  } else if (item_price >= 500000 && item_price < 4999999) {
+  } else if (item_price >= 500000 && item_price <= 4999999) {
     platform_fee = item_price * 0.01;
   } else if (item_price >= 5000000 && item_price <= 10000000) {
     platform_fee = item_price * 0.008;
