@@ -73,6 +73,23 @@ const responseComplaint = async (id, action, adminId) => {
         });
       }
 
+      const sellerPushToken = await pushTokenService.getPushTokenByUserId(
+        complaint.transaction.seller_id
+      );
+      if (sellerPushToken) {
+        sendPushNotification(sellerPushToken, {
+          title:
+            action === "approve" ? "Komplain Disetujui" : "Komplain Ditolak",
+          body:
+            action === "approve"
+              ? `Komplain barang hilang disetujui. Dana akan dikembalikan ke pembeli.`
+              : `Komplain barang hilang ditolak. Transaksi dilanjutkan.`,
+          data: {
+            screen: "complaint/seller",
+          },
+        });
+      }
+
       return await complaintRepo.updateComplaint(
         id,
         {
